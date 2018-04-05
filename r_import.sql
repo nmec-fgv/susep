@@ -74,3 +74,4 @@ CREATE TABLE r_auto_:xxx (
 \copy r_auto_16b from 'C:\\Users\\Angel\\Susep\\Data\\16B\\R_AUTO_2016B-010.csv' delimiter ';' csv header null 'NULL';
 --\copy r_auto_12a from 'C:\\Users\\Angel\\Susep\\Data\\12A\\R_AUTO_2012A-011.csv' delimiter ';' csv header null 'NULL';
 --\copy r_auto_12b from 'C:\\Users\\Angel\\Susep\\Data\\12B\\R_AUTO_2012B-012.csv' delimiter ';' csv header null 'NULL';
+--eof
