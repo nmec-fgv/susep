@@ -9,7 +9,7 @@ cur = conn.cursor()
 
 
 def gen_rs_tables(year):
-    """ Creates rs_mmmaa tables."""
+    """Generates dictionary containing code for creation of rs_mmmaa tables."""
 
     months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     sql_code = r'''
@@ -70,7 +70,7 @@ def gen_rs_tables(year):
 
 
 def rs_tables(year, sem=False):
-    """Fills in values of rs_mmmaa tables from rs_data_xxx tables."""
+    """Generates dictionary containing codes that fill values in rs_mmmaa tables from rs_data_xxx tables."""
 
     if sem == False:
         months = [('jan', '01'), ('fev', '02'), ('mar', '03'), ('abr', '04'), ('mai', '05'), ('jun', '06'), ('jul', '07'), ('ago', '08'), ('set', '09'), ('out', '10'), ('nov', '11'), ('dez', '12')]
@@ -101,22 +101,22 @@ def rs_tables(year, sem=False):
         if sem == False:
             tables = ('12b', '13a', '13b', '14a', '14b', '15a', '15b', '16a', '16b')
         else:
-            tables = ('12a')
+            tables = ('12a',)
     elif year == '11':
         if sem == False:
             tables = ('11b', '12a', '12b', '13a', '13b', '14a', '14b', '15a', '15b', '16a', '16b')
         else:
-            tables = ('11a')
+            tables = ('11a',)
     elif year == '10':
         if sem == False:
             tables = ('10b', '11a', '11b', '12a', '12b', '13a', '13b', '14a', '14b', '15a', '15b', '16a')
         else:
-            tables = ('10a')
+            tables = ('10a',)
     elif year == '09':
         if sem == False:
             tables = ('09b', '10a', '10b', '11a', '11b', '12a', '12b', '13a', '13b', '14a', '14b', '15a')
         else:
-            tables = ('09a')
+            tables = ('09a',)
     elif year == '08':
         if sem == False:
             tables = ('08b', '09a', '09b', '10a', '10b', '11a', '11b', '12a', '12b', '13a', '13b', '14a')
