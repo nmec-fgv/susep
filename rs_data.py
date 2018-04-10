@@ -1,8 +1,15 @@
-/* Create data table joining pervious tables */
+########################################################
+## Código para inserção de valores nas tabelas rs_data##
+########################################################
 
-\timing
-\set xxx 16b
+import psycopg2
 
+conn = psycopg2.connect("dbname=susep user=ricardob")
+cur = conn.cursor()
+
+tables = ('08B', '09A', '09B', '10A', '10B', '11A', '11B', '12A', '12B', '13A', '13B', '14A', '14B', '15A', '15B', '16A', '16B')
+
+sql_code = r'''
 DROP TABLE IF EXISTS rs_data_:xxx;
 
 CREATE TABLE rs_data_:xxx
@@ -52,3 +59,15 @@ AS SELECT
     s_auto2_:xxx.sinistro,
     r_endosso2_:xxx.endosso
 FROM r_apolice_:xxx LEFT OUTER JOIN s_auto2_:xxx ON r_apolice_:xxx.cod_apo = s_auto2_:xxx.cod_apo AND r_apolice_:xxx.cod_modelo = s_auto2_:xxx.cod_modelo LEFT OUTER JOIN r_endosso2_:xxx ON r_apolice_:xxx.cod_apo = r_endosso2_:xxx.cod_apo AND r_apolice_:xxx.cod_modelo = r_endosso2_:xxx.cod_modelo;
+'''
+
+sql={}
+for tab in tables:
+    sql['tab'] = sql_code
+    sql['tab'] = sql['tab'].replace(':xxx', tab)
+    cur.execute(sql['tab'])
+    print('Tabela rs_data_' + tab + ' carregada com sucesso')
+
+conn.commit()
+cur.close()
+conn.close()
