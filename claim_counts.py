@@ -28,6 +28,8 @@ def count_exposure(data):
     count = {}
     count_outros = {}
     tot_exp = {}
+    k =[]
+    d = []
     for i in range(max_count+1):
         count[str(i)] = 0
         count_outros[str(i)] = 0
@@ -37,7 +39,9 @@ def count_exposure(data):
         if x[2] == None and x[3] == None:
             count['0'] += 1
             count_outros['0'] += 1
-            tot_exp['0'] += (x[1] - x[0]).days
+            tot_exp['0'] += (x[1]-x[0]).days
+            k.append(0)
+            d.append((x[1]-x[0]).days)
         elif x[2] == None and x[3] != None:
             count['0'] += 1
             count_outros['0'] += 1
@@ -45,7 +49,9 @@ def count_exposure(data):
             for i in x[3].values():
                 if i['f1'] in {'2', '3'}:
                     fim_vig = datetime.strptime(i['f2'], '%Y-%m-%d').date()
-            tot_exp['0'] += (fim_vig - x[0]).days
+            tot_exp['0'] += (fim_vig-x[0]).days
+            k.append(0)
+            d.append((fim_vig-x[0]).days)
         elif x[2] != None and x[3] == None:
             sin_count = 0
             sin_count_outros = 0
@@ -56,7 +62,9 @@ def count_exposure(data):
                     sin_count_outros += 1
             count[str(sin_count)] += 1
             count_outros[str(sin_count_outros)] += 1
-            tot_exp[str(sin_count)] += (x[1] - x[0]).days
+            tot_exp[str(sin_count)] += (x[1]-x[0]).days
+            k.append(str(sin_count))
+            d.append((x[1]-x[0]).days) 
         else:
             sin_count = 0
             sin_count_outros = 0
@@ -71,12 +79,14 @@ def count_exposure(data):
                     fim_vig = datetime.strptime(i['f2'], '%Y-%m-%d').date()
             count[str(sin_count)] += 1
             count_outros[str(sin_count_outros)] += 1
-            tot_exp[str(sin_count)] += (fim_vig - x[0]).days
+            tot_exp[str(sin_count)] += (fim_vig-x[0]).days
+            k.append(str(sin_count))
+            d.append((fim_vig-x[0]).days)
 
     for i in range(max_count+1):
         tot_exp[str(i)] = tot_exp[str(i)] / 365.2425
 
-    return (count, count_outros, tot_exp)
+    return (count, count_outros, tot_exp, k, d)
 
 
 if __name__ == "__main__":
@@ -89,10 +99,10 @@ if __name__ == "__main__":
             data = load_pkl(filename)
             results[mmm+aa] = count_exposure(data)
 
-        try:
-            os.remove('/home/ricardob/Susep/Data/claim_counts.pkl')
-        except OSError:
-            pass
+    try:
+        os.remove('/home/ricardob/Susep/Data/claim_counts.pkl')
+    except OSError:
+        pass
 
-        with open('/home/ricardob/Susep/Data/claim_counts.pkl', 'wb') as file:
-            pickle.dump(results, file)
+    with open('/home/ricardob/Susep/Data/claim_counts.pkl', 'wb') as file:
+        pickle.dump(results, file)
