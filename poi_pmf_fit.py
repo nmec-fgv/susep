@@ -42,7 +42,10 @@ def func_Poi_month(mmmaa):
         ll_crossprod += cc_dict[mmmaa][3][i] * cc_dict[mmmaa][4][i]
         ll_lnkfactorial += log(factorial(cc_dict[mmmaa][3][i]))
     
-    loglikelihood = -lambda_Poi * lambda_denominator + log(lambda_Poi) * lambda_numerator + ll_crossprod - ll_lnkfactorial
+    if lambda_Poi != 0:
+        loglikelihood = -lambda_Poi * lambda_denominator + log(lambda_Poi) * lambda_numerator + ll_crossprod - ll_lnkfactorial
+    else:
+        loglikelihood = 0
 
     return (lambda_Poi, n, CI, loglikelihood)
 
@@ -86,7 +89,10 @@ def func_Poi_quarter(tri, aa):
     else:
         CI = (0, 0)
     
-    loglikelihood = -lambda_Poi * lambda_denominator + log(lambda_Poi) * lambda_numerator + ll_crossprod - ll_lnkfactorial
+    if lambda_Poi != 0:
+        loglikelihood = -lambda_Poi * lambda_denominator + log(lambda_Poi) * lambda_numerator + ll_crossprod - ll_lnkfactorial
+    else:
+        loglikelihood = 0
 
     return (lambda_Poi, n, CI, loglikelihood)
 
