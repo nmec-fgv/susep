@@ -7,77 +7,25 @@ import pickle
 from math import log, factorial
 
 
-filename = 'claim_counts.pkl'
-try:
-    os.path.exists('/home/ricardob/Susep/Data/' + filename)
-    with open('/home/ricardob/Susep/Data/' + filename, 'rb') as file:
-        cc_dict = pickle.load(file)
-except:
-    print('File ' + filename + ' not found')
-
-
-def func_Poi_month(mmmaa):
-    '''Estimation and inference of Poisson pmf lambda parameter, monthly data'''
-
-    lambda_numerator = 0
-    for i, value in enumerate(cc_dict[mmmaa][0].values()):
-        if i > 0:
-            lambda_numerator += i * value
-    
-    lambda_denominator = sum(cc_dict[mmmaa][2].values())
-    if lambda_denominator > 0:
-        lambda_Poi = lambda_numerator / lambda_denominator
-    else:
-        lambda_Poi = 0
-    
-    n = sum(cc_dict[mmmaa][0].values())
-    if n > 0:
-        CI = (lambda_Poi - 1.96 * (lambda_Poi/n)**0.5, lambda_Poi + 1.96 * (lambda_Poi/n)**0.5)
-    else:
-        CI = (0, 0)
-    
-    ll_crossprod = 0
-    ll_lnkfactorial = 0
-    for i in range(len(cc_dict[mmmaa][3])):
-        ll_crossprod += cc_dict[mmmaa][3][i] * cc_dict[mmmaa][4][i]
-        ll_lnkfactorial += log(factorial(cc_dict[mmmaa][3][i]))
-    
-    if lambda_Poi != 0:
-        loglikelihood = -lambda_Poi * lambda_denominator + log(lambda_Poi) * lambda_numerator + ll_crossprod - ll_lnkfactorial
-    else:
-        loglikelihood = 0
-
-    return (lambda_Poi, n, CI, loglikelihood)
-
-
-def func_Poi_quarter(tri, aa):
-    '''Estimation and inference of Poisson pmf lambda parameter, quarterly data'''
+def func_Poisson():
+    '''Estimation and inference of Poisson pmf lambda parameter'''
 
     lambda_numerator = 0
     lambda_denominator = 0
-    if tri == '1T':
-        months = ('jan', 'fev', 'mar')
-    elif tri == '2T':
-        months = ('abr', 'mai', 'jun')
-    elif tri == '3T':
-        months = ('jul', 'ago', 'set')
-    elif tri == '4T':
-        months = ('out', 'nov', 'dez')
-    
     n = 0
     ll_crossprod = 0
     ll_lnkfactorial = 0
-    for mmm in months:
-        for i, value in enumerate(cc_dict[mmm+aa][0].values()):
+    for item in cc_data:
+        for i, value in enumerate(item[0].values()):
             if i > 0:
                 lambda_numerator += i * value
         
-        lambda_denominator += sum(cc_dict[mmm+aa][2].values())
-        n += sum(cc_dict[mmm+aa][0].values())
+        lambda_denominator += sum(item[2].values())
+        n += sum(item[0].values())
     
-        for i in range(len(cc_dict[mmm+aa][3])):
-            ll_crossprod += cc_dict[mmm+aa][3][i] * cc_dict[mmm+aa][4][i]
-            ll_lnkfactorial += log(factorial(cc_dict[mmm+aa][3][i]))
+        for i in range(len(item[3])):
+            ll_crossprod += item[3][i] * item[4][i]
+            ll_lnkfactorial += log(factorial(item[3][i]))
 
     if lambda_denominator > 0:
         lambda_Poi = lambda_numerator / lambda_denominator
@@ -106,22 +54,78 @@ if __name__ == '__main__':
     Poi_month = {}
     for aa in years:
         for mmm in months:
-            Poi_month[mmm+aa] = func_Poi_month(mmm+aa)
+            cc_data = []
+            filename = 'cc_car_' + mmm + aa + '.pkl'
+            try:
+                os.path.exists('/home/ricardob/Susep/Data/' + filename)
+                with open('/home/ricardob/Susep/Data/' + filename, 'rb') as file:
+                    cc_data.append(pickle.load(file))
+            except:
+                print('File ' + filename + ' not found')
+
+            Poi_month[mmm+aa] = func_Poisson()
     
     Poi_quarter = {}
     for aa in years:
         for tri in quarters:
-            Poi_quarter[tri+aa] = func_Poi_quarter(tri, aa)
+            if tri == '1T':
+                months_qtr = ('jan', 'fev', 'mar')
+            elif tri == '2T':
+                months_qtr = ('abr', 'mai', 'jun')
+            elif tri == '3T':
+                months_qtr = ('jul', 'ago', 'set')
+            elif tri == '4T':
+                months_qtr = ('out', 'nov', 'dez')
 
-    estimators_MixPoi = {}
-    estimators_MixPoi['Poi_month'] = Poi_month 
-    estimators_MixPoi['Poi_quarter'] = Poi_quarter
+            cc_data = []
+            for mmm in months_qtr:
+                filename = 'cc_car_' + mmm + aa + '.pkl'
+                try:
+                    os.path.exists('/home/ricardob/Susep/Data/' + filename)
+                    with open('/home/ricardob/Susep/Data/' + filename, 'rb') as file:
+                        cc_data.append(pickle.load(file))
+                except:
+                    print('File ' + filename + ' not found')
+            Poi_quarter[tri+aa] = func_Poisson()
+    
+    Poi_year = {}
+    for aa in years:
+        cc_data = []
+        for mmm in months:
+            filename = 'cc_car_' + mmm + aa + '.pkl'
+            try:
+                os.path.exists('/home/ricardob/Susep/Data/' + filename)
+                with open('/home/ricardob/Susep/Data/' + filename, 'rb') as file:
+                    cc_data.append(pickle.load(file))
+            except:
+                print('File ' + filename + ' not found')
+        
+        Poi_year[aa] = func_Poisson()
 
+    Poi_global = {}
+    cc_data = []
+    for aa in years:
+        for mmm in months:
+            filename = 'cc_car_' + mmm + aa + '.pkl'
+            try:
+                os.path.exists('/home/ricardob/Susep/Data/' + filename)
+                with open('/home/ricardob/Susep/Data/' + filename, 'rb') as file:
+                    cc_data.append(pickle.load(file))
+            except:
+                print('File ' + filename + ' not found')
+        
+    Poi_global['global'] = func_Poisson()
+
+    est_poi = {}
+    est_poi['Poisson_month'] = Poi_month 
+    est_poi['Poisson_quarter'] = Poi_quarter
+    est_poi['Poisson_year'] = Poi_year
+    est_poi['Poisson global'] = Poi_global
 
     try:
-        os.remove('/home/ricardob/Susep/Data/estimators_MixPoi.pkl')
+        os.remove('/home/ricardob/Susep/Data/est_poisson.pkl')
     except OSError:
         pass
 
-    with open('/home/ricardob/Susep/Data/estimators_MixPoi.pkl', 'wb') as file:
-        pickle.dump(estimators_MixPoi, file)
+    with open('/home/ricardob/Susep/Data/est_poisson.pkl', 'wb') as file:
+        pickle.dump(est_poi, file)

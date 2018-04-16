@@ -63,7 +63,7 @@ def count_exposure(data):
             count[str(sin_count)] += 1
             count_outros[str(sin_count_outros)] += 1
             tot_exp[str(sin_count)] += (x[1]-x[0]).days
-            k.append(str(sin_count))
+            k.append(sin_count)
             d.append((x[1]-x[0]).days) 
         else:
             sin_count = 0
@@ -80,7 +80,7 @@ def count_exposure(data):
             count[str(sin_count)] += 1
             count_outros[str(sin_count_outros)] += 1
             tot_exp[str(sin_count)] += (fim_vig-x[0]).days
-            k.append(str(sin_count))
+            k.append(sin_count)
             d.append((fim_vig-x[0]).days)
 
     for i in range(max_count+1):
@@ -92,17 +92,18 @@ def count_exposure(data):
 if __name__ == "__main__":
     months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     years = ('06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16')
-    results = {}
     for mmm in months:
         for aa in years:
-            filename = 'freq_dat_' + mmm + aa + '.pkl'
+            filename = 'freq_dat_' + mmm + aa + '_car.pkl'
             data = load_pkl(filename)
-            results[mmm+aa] = count_exposure(data)
+            results = count_exposure(data)
 
-    try:
-        os.remove('/home/ricardob/Susep/Data/claim_counts.pkl')
-    except OSError:
-        pass
+            try:
+                os.remove('/home/ricardob/Susep/Data/cc_car_' + mmm + aa + '.pkl')
+            except OSError:
+                pass
+        
+            with open('/home/ricardob/Susep/Data/cc_car_' + mmm + aa + '.pkl', 'wb') as file:
+                pickle.dump(results, file)
 
-    with open('/home/ricardob/Susep/Data/claim_counts.pkl', 'wb') as file:
-        pickle.dump(results, file)
+            print('File cc_car_' + mmm + aa + '.pkl saved') 
