@@ -88,7 +88,7 @@ def initguess_a():
 
 if __name__ == '__main__':
     
-    years = ('06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16')
+    years = ('07', '08', '09', '10', '11', '12', '13', '14')
     years2 = ('08', '09', '10', '11')
     months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     quarters = ('1T', '2T', '3T', '4T')
@@ -183,7 +183,7 @@ if __name__ == '__main__':
             
     k = np.array(cc_data[0][3])
     d = np.array(cc_data[0][4])
-    for i in range(1, len(years)*len(months)):
+    for i in range(1, len(years2)*len(months)):
         k = np.append(k, np.array(cc_data[i][3]))
         d = np.append(d, np.array(cc_data[i][4]))
     lambda_ig = initguess_lambda()
