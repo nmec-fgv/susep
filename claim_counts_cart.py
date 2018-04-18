@@ -117,16 +117,16 @@ if __name__ == "__main__":
     years = ('06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16')
     for mmm in months:
         for aa in years:
-            filename = 'freq_dat_' + mmm + aa + '_car.pkl'
+            filename = 'freq_dat_' + mmm + aa + '_cart.pkl'
             data = load_pkl(filename)
             results = count_exposure(data)
 
             try:
-                os.remove('Data/cc_car_' + mmm + aa + '.pkl')
+                os.remove('Data/cc_cart_' + mmm + aa + '.pkl')
             except OSError:
                 pass
         
-            with open('Data/cc_car_' + mmm + aa + '.pkl', 'wb') as file:
+            with open('Data/cc_cart_' + mmm + aa + '.pkl', 'wb') as file:
                 pickle.dump(results, file)
 
-            print('File cc_car_' + mmm + aa + '.pkl saved') 
+            print('File cc_cart_' + mmm + aa + '.pkl saved') 

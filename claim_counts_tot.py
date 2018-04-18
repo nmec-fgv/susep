@@ -5,20 +5,21 @@
 import os
 import pickle
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 
 def load_pkl(filename):
     try:
-        os.path.exists('/home/ricardob/Susep/Data/' + filename)
-        with open('/home/ricardob/Susep/Data/' + filename, 'rb') as file:
+        os.path.exists('Data/' + filename)
+        with open('Data/' + filename, 'rb') as file:
             data = pickle.load(file)
     except:
         print('File ' + filename + ' not found')
     return data
 
-
 def count_exposure(data):
-    '''Returns count of sinisters, count of others and total exposure for sinisters for a given month/year.'''
+    '''Returns count of sinisters, count of others and total exposure for sinisters for a given month/year'''
+
     max_count = 0
     for x in data:
         if x[2] != None:
@@ -39,19 +40,31 @@ def count_exposure(data):
         if x[2] == None and x[3] == None:
             count['0'] += 1
             count_outros['0'] += 1
-            tot_exp['0'] += (x[1]-x[0]).days
             k.append(0)
-            d.append((x[1]-x[0]).days)
+            delta_years = 0
+            delta_years += relativedelta(x[1], x[0]).years
+            delta_years += relativedelta(x[1], x[0]).months / 12
+            delta_years += relativedelta(x[1], x[0]).days / 365.2425
+            tot_exp['0'] += delta_years
+            d.append(delta_years)
         elif x[2] == None and x[3] != None:
             count['0'] += 1
             count_outros['0'] += 1
             fim_vig = x[1]
             for i in x[3].values():
                 if i['f1'] in {'2', '3'}:
-                    fim_vig = datetime.strptime(i['f2'], '%Y-%m-%d').date()
-            tot_exp['0'] += (fim_vig-x[0]).days
+                    if (datetime.strptime(i['f2'], '%Y-%m-%d').date()-x[0]).days < 0:
+                        fim_vig = x[0]
+                    else:
+                        fim_vig = datetime.strptime(i['f2'], '%Y-%m-%d').date()
+
             k.append(0)
-            d.append((fim_vig-x[0]).days)
+            delta_years = 0
+            delta_years += relativedelta(fim_vig, x[0]).years
+            delta_years += relativedelta(fim_vig, x[0]).months / 12
+            delta_years += relativedelta(fim_vig, x[0]).days / 365.2425
+            tot_exp['0'] += delta_years
+            d.append(delta_years)
         elif x[2] != None and x[3] == None:
             sin_count = 0
             sin_count_outros = 0
@@ -60,11 +73,16 @@ def count_exposure(data):
                     sin_count += 1
                 elif i in {7, 8, 9}:
                     sin_count_outros += 1
+
             count[str(sin_count)] += 1
             count_outros[str(sin_count_outros)] += 1
-            tot_exp[str(sin_count)] += (x[1]-x[0]).days
             k.append(sin_count)
-            d.append((x[1]-x[0]).days) 
+            delta_years = 0
+            delta_years += relativedelta(x[1], x[0]).years
+            delta_years += relativedelta(x[1], x[0]).months / 12
+            delta_years += relativedelta(x[1], x[0]).days / 365.2425
+            tot_exp[str(sin_count)] += delta_years
+            d.append(delta_years)
         else:
             sin_count = 0
             sin_count_outros = 0
@@ -76,15 +94,20 @@ def count_exposure(data):
                     sin_count_outros += 1
             for i in x[3].values():
                 if i['f1'] in {'2', '3'}:
-                    fim_vig = datetime.strptime(i['f2'], '%Y-%m-%d').date()
+                    if (datetime.strptime(i['f2'], '%Y-%m-%d').date()-x[0]).days < 0:
+                        fim_vig = x[0]
+                    else:
+                        fim_vig = datetime.strptime(i['f2'], '%Y-%m-%d').date()
+            
             count[str(sin_count)] += 1
             count_outros[str(sin_count_outros)] += 1
-            tot_exp[str(sin_count)] += (fim_vig-x[0]).days
             k.append(sin_count)
-            d.append((fim_vig-x[0]).days)
-
-    for i in range(max_count+1):
-        tot_exp[str(i)] = tot_exp[str(i)] / 365.2425
+            delta_years = 0
+            delta_years += relativedelta(fim_vig, x[0]).years
+            delta_years += relativedelta(fim_vig, x[0]).months / 12
+            delta_years += relativedelta(fim_vig, x[0]).days / 365.2425
+            tot_exp[str(sin_count)] += delta_years
+            d.append(delta_years)
 
     return (count, count_outros, tot_exp, k, d)
 
@@ -92,17 +115,18 @@ def count_exposure(data):
 if __name__ == "__main__":
     months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     years = ('06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16')
-    results = {}
     for mmm in months:
         for aa in years:
-            filename = 'freq_dat_' + mmm + aa + '.pkl'
+            filename = 'freq_dat_' + mmm + aa + '_tot.pkl'
             data = load_pkl(filename)
-            results[mmm+aa] = count_exposure(data)
+            results = count_exposure(data)
 
-    try:
-        os.remove('/home/ricardob/Susep/Data/claim_counts.pkl')
-    except OSError:
-        pass
+            try:
+                os.remove('Data/cc_tot_' + mmm + aa + '.pkl')
+            except OSError:
+                pass
+        
+            with open('Data/cc_tot_' + mmm + aa + '.pkl', 'wb') as file:
+                pickle.dump(results, file)
 
-    with open('/home/ricardob/Susep/Data/claim_counts.pkl', 'wb') as file:
-        pickle.dump(results, file)
+            print('File cc_tot_' + mmm + aa + '.pkl saved') 

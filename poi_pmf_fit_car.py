@@ -57,7 +57,7 @@ if __name__ == '__main__':
     for aa in years:
         for mmm in months:
             cc_data = []
-            filename = 'cc_tot_' + mmm + aa + '.pkl'
+            filename = 'cc_car_' + mmm + aa + '.pkl'
             try:
                 os.path.exists('Data/' + filename)
                 with open('Data/' + filename, 'rb') as file:
@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
             cc_data = []
             for mmm in months_qtr:
-                filename = 'cc_tot_' + mmm + aa + '.pkl'
+                filename = 'cc_car_' + mmm + aa + '.pkl'
                 try:
                     os.path.exists('Data/' + filename)
                     with open('Data/' + filename, 'rb') as file:
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     for aa in years:
         cc_data = []
         for mmm in months:
-            filename = 'cc_tot_' + mmm + aa + '.pkl'
+            filename = 'cc_car_' + mmm + aa + '.pkl'
             try:
                 os.path.exists('Data/' + filename)
                 with open('Data/' + filename, 'rb') as file:
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     cc_data = []
     for aa in years2:
         for mmm in months:
-            filename = 'cc_tot_' + mmm + aa + '.pkl'
+            filename = 'cc_car_' + mmm + aa + '.pkl'
             try:
                 os.path.exists('Data/' + filename)
                 with open('Data/' + filename, 'rb') as file:
@@ -123,11 +123,10 @@ if __name__ == '__main__':
     est_poi['Poisson_quarter'] = Poi_quarter
     est_poi['Poisson_year'] = Poi_year
     est_poi['Poisson global'] = Poi_global
-
     try:
-        os.remove('Data/est_poisson_tot.pkl')
+        os.remove('Data/est_poisson_car.pkl')
     except OSError:
         pass
 
-    with open('Data/est_poisson_tot.pkl', 'wb') as file:
+    with open('Data/est_poisson_car.pkl', 'wb') as file:
         pickle.dump(est_poi, file)

@@ -24,7 +24,8 @@ def func_Poisson():
         n += sum(item[0].values())
     
         for i in range(len(item[3])):
-            ll_crossprod += item[3][i] * item[4][i]
+            if item[4][i] > 0:
+                ll_crossprod += item[3][i] * log(item[4][i])
             ll_lnkfactorial += log(factorial(item[3][i]))
 
     if lambda_denominator > 0:
@@ -48,6 +49,7 @@ def func_Poisson():
 if __name__ == '__main__':
 
     years = ('06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16')
+    years2 = ('08', '09', '10', '11')
     months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     quarters = ('1T', '2T', '3T', '4T')
 
@@ -55,10 +57,10 @@ if __name__ == '__main__':
     for aa in years:
         for mmm in months:
             cc_data = []
-            filename = 'cc_car_' + mmm + aa + '.pkl'
+            filename = 'cc_cart_' + mmm + aa + '.pkl'
             try:
-                os.path.exists('/home/ricardob/Susep/Data/' + filename)
-                with open('/home/ricardob/Susep/Data/' + filename, 'rb') as file:
+                os.path.exists('Data/' + filename)
+                with open('Data/' + filename, 'rb') as file:
                     cc_data.append(pickle.load(file))
             except:
                 print('File ' + filename + ' not found')
@@ -79,10 +81,10 @@ if __name__ == '__main__':
 
             cc_data = []
             for mmm in months_qtr:
-                filename = 'cc_car_' + mmm + aa + '.pkl'
+                filename = 'cc_cart_' + mmm + aa + '.pkl'
                 try:
-                    os.path.exists('/home/ricardob/Susep/Data/' + filename)
-                    with open('/home/ricardob/Susep/Data/' + filename, 'rb') as file:
+                    os.path.exists('Data/' + filename)
+                    with open('Data/' + filename, 'rb') as file:
                         cc_data.append(pickle.load(file))
                 except:
                     print('File ' + filename + ' not found')
@@ -92,10 +94,10 @@ if __name__ == '__main__':
     for aa in years:
         cc_data = []
         for mmm in months:
-            filename = 'cc_car_' + mmm + aa + '.pkl'
+            filename = 'cc_cart_' + mmm + aa + '.pkl'
             try:
-                os.path.exists('/home/ricardob/Susep/Data/' + filename)
-                with open('/home/ricardob/Susep/Data/' + filename, 'rb') as file:
+                os.path.exists('Data/' + filename)
+                with open('Data/' + filename, 'rb') as file:
                     cc_data.append(pickle.load(file))
             except:
                 print('File ' + filename + ' not found')
@@ -104,12 +106,12 @@ if __name__ == '__main__':
 
     Poi_global = {}
     cc_data = []
-    for aa in years:
+    for aa in years2:
         for mmm in months:
-            filename = 'cc_car_' + mmm + aa + '.pkl'
+            filename = 'cc_cart_' + mmm + aa + '.pkl'
             try:
-                os.path.exists('/home/ricardob/Susep/Data/' + filename)
-                with open('/home/ricardob/Susep/Data/' + filename, 'rb') as file:
+                os.path.exists('Data/' + filename)
+                with open('Data/' + filename, 'rb') as file:
                     cc_data.append(pickle.load(file))
             except:
                 print('File ' + filename + ' not found')
@@ -123,9 +125,9 @@ if __name__ == '__main__':
     est_poi['Poisson global'] = Poi_global
 
     try:
-        os.remove('/home/ricardob/Susep/Data/est_poisson.pkl')
+        os.remove('Data/est_poisson_cart.pkl')
     except OSError:
         pass
 
-    with open('/home/ricardob/Susep/Data/est_poisson.pkl', 'wb') as file:
+    with open('Data/est_poisson_cart.pkl', 'wb') as file:
         pickle.dump(est_poi, file)

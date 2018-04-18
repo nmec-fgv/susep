@@ -12,7 +12,7 @@ cur = conn.cursor()
 years = ('06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16')
 months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
 
-sql_code = '''SELECT inicio_vig, fim_vig, sinistro, endosso FROM rs_:mmm:aa WHERE cod_tarif = ' 10' OR cod_tarif = ' 11';'''
+sql_code = '''SELECT inicio_vig, fim_vig, sinistro, endosso FROM rs_:mmm:aa WHERE cod_tarif in (' 10', ' 11', '14A', '14B', '14C', ' 15', ' 16', ' 17', ' 18', ' 19', ' 20', ' 21', ' 22', ' 23');'''
 
 for aa in years:
     for mmm in months:
@@ -22,7 +22,7 @@ for aa in years:
         cur.execute(sql_code2)
         data = cur.fetchall()
 
-        filename = 'freq_dat_' + mmm + aa + '_car.pkl'
+        filename = 'freq_dat_' + mmm + aa + '_cart.pkl'
         try:
             os.remove('Data/' + filename)
         except OSError:

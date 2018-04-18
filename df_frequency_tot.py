@@ -21,14 +21,14 @@ for aa in years:
         print(sql_code2)
         cur.execute(sql_code2)
         data = cur.fetchall()
-        filename = 'freq_dat_' + mmm + aa + '.pkl'
+        filename = 'freq_dat_' + mmm + aa + '_tot.pkl'
 
         try:
-            os.remove('/home/ricardob/Susep/Data/' + filename)
+            os.remove('Data/' + filename)
         except OSError:
             pass
 
-        with open('/home/ricardob/Susep/Data/' + filename, 'wb') as file:
+        with open('Data/' + filename, 'wb') as file:
             pickle.dump(data, file)
 
 conn.commit()
