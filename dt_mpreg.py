@@ -22,49 +22,218 @@ def data_transf(data):
     Transformation of database records for regression purposes
     
     Data encoding:
-    res[0] -> dummy dif(ano modelo, ano apolice) = 1
-    res[1] -> dummy dif(ano modelo, ano apolice) = 2
-    res[2] -> dummy dif(ano modelo, ano apolice) = 3
-    res[3] -> dummy dif(ano modelo, ano apolice) = 4
-    res[4] -> dummy dif(ano modelo, ano apolice) = 5
-    res[5] -> dummy dif(ano modelo, ano apolice) in [6,10]
-    res[6] -> dummy dif(ano modelo, ano apolice) in [11,20]
-    res[7] -> dummy dif(ano modelo, ano apolice) > 20
-
-    res[k] -> k variable - claims count
-    res[d] -> d variable - exposure in years
+    base class: ano_modelo=0, passeio nac, regiao met sp, sexo masc 
+    res[item][0] -> dummy dif(ano modelo, ano apolice) = 1
+    res[item][1] -> dummy dif(ano modelo, ano apolice) = 2
+    res[item][2] -> dummy dif(ano modelo, ano apolice) = 3
+    res[item][3] -> dummy dif(ano modelo, ano apolice) = 4
+    res[item][4] -> dummy dif(ano modelo, ano apolice) = 5
+    res[item][5] -> dummy dif(ano modelo, ano apolice) in [6,10]
+    res[item][6] -> dummy dif(ano modelo, ano apolice) in [11,20]
+    res[item][7] -> dummy dif(ano modelo, ano apolice) > 20
+    res[item][8] -> dummy cod_tarif = 11
+    res[item][9] -> dummy cod_tarif = 14A
+    res[item][10] -> dummy cod_tarif = 14B
+    res[item][11] -> dummy cod_tarif = 14C
+    res[item][12] -> dummy cod_tarif = 15
+    res[item][13] -> dummy cod_tarif = 16
+    res[item][14] -> dummy cod_tarif = 17
+    res[item][15] -> dummy cod_tarif = 18
+    res[item][16] -> dummy cod_tarif = 19
+    res[item][17] -> dummy cod_tarif = 20
+    res[item][18] -> dummy cod_tarif = 21
+    res[item][19] -> dummy cod_tarif = 22
+    res[item][20] -> dummy cod_tarif = 23
+    res[item][21] -> dummy regiao = 01
+    res[item][22] -> dummy regiao = 02
+    res[item][23] -> dummy regiao = 03
+    res[item][24] -> dummy regiao = 04
+    res[item][25] -> dummy regiao = 05
+    res[item][26] -> dummy regiao = 06
+    res[item][27] -> dummy regiao = 07
+    res[item][28] -> dummy regiao = 08
+    res[item][29] -> dummy regiao = 09
+    res[item][30] -> dummy regiao = 10
+    res[item][31] -> dummy regiao = 12
+    res[item][32] -> dummy regiao = 13
+    res[item][33] -> dummy regiao = 14
+    res[item][34] -> dummy regiao = 15
+    res[item][35] -> dummy regiao = 16
+    res[item][36] -> dummy regiao = 17
+    res[item][37] -> dummy regiao = 18
+    res[item][38] -> dummy regiao = 19
+    res[item][39] -> dummy regiao = 20
+    res[item][40] -> dummy regiao = 21
+    res[item][41] -> dummy regiao = 22
+    res[item][42] -> dummy regiao = 23
+    res[item][43] -> dummy regiao = 24
+    res[item][44] -> dummy regiao = 25
+    res[item][45] -> dummy regiao = 26
+    res[item][46] -> dummy regiao = 27
+    res[item][47] -> dummy regiao = 28
+    res[item][48] -> dummy regiao = 29
+    res[item][49] -> dummy regiao = 30
+    res[item][50] -> dummy regiao = 31
+    res[item][51] -> dummy regiao = 32
+    res[item][52] -> dummy regiao = 33
+    res[item][53] -> dummy regiao = 34
+    res[item][54] -> dummy regiao = 35
+    res[item][55] -> dummy regiao = 36
+    res[item][56] -> dummy regiao = 37
+    res[item][57] -> dummy regiao = 38
+    res[item][58] -> dummy regiao = 39
+    res[item][59] -> dummy regiao = 40
+    res[item][60] -> dummy regiao = 41
+    res[item][61] -> dummy sexo = F
+    res[item][62] -> continuous idade
+    res[item][63] -> k variable - claims count
+    res[item][64] -> d variable - exposure in years
     '''
 
-    res = [0] * d # change d to list range
-    for x in data:
-        if x[1] >= 2000 + int(aa) 
+    res = []
+    for item, x in enumerate(data):
+        res.append([0] * 65)
+        if x[1] >= 2000 + int(aa):
             pass
         elif (2000 + int(aa) - x[1]) == 1:
-            res[0] = 1
+            res[item][0] = 1
         elif (2000 + int(aa) - x[1]) == 2:
-            res[1] = 1
+            res[item][1] = 1
         elif (2000 + int(aa) - x[1]) == 3:
-            res[2] = 1
+            res[item][2] = 1
         elif (2000 + int(aa) - x[1]) == 4:
-            res[3] = 1
+            res[item][3] = 1
         elif (2000 + int(aa) - x[1]) == 5:
-            res[4] = 1
+            res[item][4] = 1
         elif (2000 + int(aa) - x[1]) >= 6 and (2000 + int(aa) - x[1]) <= 10:
-            res[5] = 1
+            res[item][5] = 1
         elif (2000 + int(aa) - x[1]) >= 11 and (2000 + int(aa) - x[1]) <= 20:
-            res[6] = 1
+            res[item][6] = 1
         elif (2000 + int(aa) - x[1]) > 20:
-            res[7] = 1
+            res[item][7] = 1
 
+        if x[2] == ' 11':
+            res[item][8] = 1
+        if x[2] == '14A':
+            res[item][9] = 1
+        if x[2] == '14B':
+            res[item][10] = 1
+        if x[2] == '14C':
+            res[item][11] = 1
+        if x[2] == ' 15':
+            res[item][12] = 1
+        if x[2] == ' 16':
+            res[item][13] = 1
+        if x[2] == ' 17':
+            res[item][14] = 1
+        if x[2] == ' 18':
+            res[item][15] = 1
+        if x[2] == ' 19':
+            res[item][16] = 1
+        if x[2] == ' 20':
+            res[item][17] = 1
+        if x[2] == ' 21':
+            res[item][18] = 1
+        if x[2] == ' 22':
+            res[item][19] = 1
+        if x[2] == ' 23':
+            res[item][20] = 1
 
+        if x[3] == '01':
+            res[item][21] = 1
+        if x[3] == '02':
+            res[item][22] = 1
+        if x[3] == '03':
+            res[item][23] = 1
+        if x[3] == '04':
+            res[item][24] = 1
+        if x[3] == '05':
+            res[item][25] = 1
+        if x[3] == '06':
+            res[item][26] = 1
+        if x[3] == '07':
+            res[item][27] = 1
+        if x[3] == '08':
+            res[item][28] = 1
+        if x[3] == '09':
+            res[item][29] = 1
+        if x[3] == '10':
+            res[item][30] = 1
+        if x[3] == '12':
+            res[item][31] = 1
+        if x[3] == '13':
+            res[item][32] = 1
+        if x[3] == '14':
+            res[item][33] = 1
+        if x[3] == '15':
+            res[item][34] = 1
+        if x[3] == '16':
+            res[item][35] = 1
+        if x[3] == '17':
+            res[item][36] = 1
+        if x[3] == '18':
+            res[item][37] = 1
+        if x[3] == '19':
+            res[item][38] = 1
+        if x[3] == '20':
+            res[item][39] = 1
+        if x[3] == '21':
+            res[item][40] = 1
+        if x[3] == '22':
+            res[item][41] = 1
+        if x[3] == '23':
+            res[item][42] = 1
+        if x[3] == '24':
+            res[item][43] = 1
+        if x[3] == '25':
+            res[item][44] = 1
+        if x[3] == '26':
+            res[item][45] = 1
+        if x[3] == '27':
+            res[item][46] = 1
+        if x[3] == '28':
+            res[item][47] = 1
+        if x[3] == '29':
+            res[item][48] = 1
+        if x[3] == '30':
+            res[item][49] = 1
+        if x[3] == '31':
+            res[item][50] = 1
+        if x[3] == '32':
+            res[item][51] = 1
+        if x[3] == '33':
+            res[item][52] = 1
+        if x[3] == '34':
+            res[item][53] = 1
+        if x[3] == '35':
+            res[item][54] = 1
+        if x[3] == '36':
+            res[item][55] = 1
+        if x[3] == '37':
+            res[item][56] = 1
+        if x[3] == '38':
+            res[item][57] = 1
+        if x[3] == '39':
+            res[item][58] = 1
+        if x[3] == '40':
+            res[item][59] = 1
+        if x[3] == '41':
+            res[item][60] = 1
+
+        if x[6] == 'F':
+            res[item][61] = 1
+
+        res[item][62] += relativedelta(x[4], x[7]).years
+        res[item][62] += relativedelta(x[4], x[7]).months / 12
+        res[item][62] += relativedelta(x[4], x[7]).days / 365.2425
 
         if x[8] == None and x[9] == None:
-            k.append(0)
+            res[item][63] = 0
             delta_years = 0
             delta_years += relativedelta(x[5], x[4]).years
             delta_years += relativedelta(x[5], x[4]).months / 12
             delta_years += relativedelta(x[5], x[4]).days / 365.2425
-            d.append(delta_years)
+            res[item][64] = delta_years
         elif x[8] == None and x[9] != None:
             fim_vig = x[5]
             for i in x[9].values():
@@ -74,12 +243,12 @@ def data_transf(data):
                     else:
                         fim_vig = datetime.strptime(i['f2'], '%Y-%m-%d').date()
 
-            k.append(0)
+            res[item][63] = 0
             delta_years = 0
             delta_years += relativedelta(fim_vig, x[4]).years
             delta_years += relativedelta(fim_vig, x[4]).months / 12
             delta_years += relativedelta(fim_vig, x[4]).days / 365.2425
-            d.append(delta_years)
+            res[item][64] = delta_years
         elif x[8] != None and x[9] == None:
             sin_count = 0
             sin_count_outros = 0
@@ -89,12 +258,12 @@ def data_transf(data):
                 elif i in {7, 8, 9}:
                     sin_count_outros += 1
 
-            k.append(sin_count)
+            res[item][63] = sin_count
             delta_years = 0
             delta_years += relativedelta(x[5], x[4]).years
             delta_years += relativedelta(x[5], x[4]).months / 12
             delta_years += relativedelta(x[5], x[4]).days / 365.2425
-            d.append(delta_years)
+            res[item][64] = delta_years
         else:
             sin_count = 0
             sin_count_outros = 0
@@ -111,14 +280,14 @@ def data_transf(data):
                     else:
                         fim_vig = datetime.strptime(i['f2'], '%Y-%m-%d').date()
             
-            k.append(sin_count)
+            res[item][63] = sin_count
             delta_years = 0
             delta_years += relativedelta(fim_vig, x[4]).years
             delta_years += relativedelta(fim_vig, x[4]).months / 12
             delta_years += relativedelta(fim_vig, x[4]).days / 365.2425
-            d.append(delta_years)
+            res[item][64] = delta_years
 
-    return (res)
+    return res
 
 
 if __name__ == "__main__":
