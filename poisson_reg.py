@@ -17,4 +17,13 @@ try:
 except:
     print('File ' + filename + ' not found')
 
+endog = np.array([])
+exog = np.array([])
+exposure = np.array([])
+for i in data:
+    endog = np.append(endog, i[-2])
+    exog = np.append(exog, [1] + i[:-2])
+    exposure = np.append(exposure, -1)
 
+results = Poisson(endog, exog, exposure=exposure)
+results.fit()
