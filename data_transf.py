@@ -1,6 +1,6 @@
-#######################################################
-## Data transformation for mixed poisson regressions ##
-#######################################################
+#########################################
+## Data transformation for regressions ##
+#########################################
 
 import os
 import pickle
@@ -22,7 +22,7 @@ def data_transf(data):
     Transformation of database records for regression purposes
     
     Data encoding:
-    base class: ano_modelo=0, passeio nac, regiao met sp, sexo masc 
+    base class: ano_modelo=0, passeio nac, regiao met sp, sexo masc, contrato V.M.R., classe bonus=0, tipo franquia = 2 
     res[item][0] -> dummy dif(ano modelo, ano apolice) = 1
     res[item][1] -> dummy dif(ano modelo, ano apolice) = 2
     res[item][2] -> dummy dif(ano modelo, ano apolice) = 3
@@ -88,11 +88,35 @@ def data_transf(data):
     res[item][62] -> continuous idade
     res[item][63] -> k variable - claims count
     res[item][64] -> d variable - exposure in years
+    res[item][65] -> dummy codigo_contrato = 2 (valor definido)
+    res[item][66] -> dummy classe bonus = 1
+    res[item][67] -> dummy classe bonus = 2
+    res[item][68] -> dummy classe bonus = 3
+    res[item][69] -> dummy classe bonus = 4
+    res[item][70] -> dummy classe bonus = 5
+    res[item][71] -> dummy classe bonus = 6
+    res[item][72] -> dummy classe bonus = 7
+    res[item][73] -> dummy classe bonus = 8
+    res[item][74] -> dummy classe bonus = 9
+    res[item][75] -> dummy tipo franquia = 1 (reduzida)
+    res[item][76] -> dummy tipo franquia = 3 (majorada)
+    res[item][77] -> dummy tipo franquia = 4 (dedutível)
+    res[item][78] -> dummy tipo franquia = 9 (s/ franquia)
+    res[item][79] -> continuous valor franquia
+    res[item][80] -> continuous is_casco
+    res[item][81] -> continuous is_rcdmat
+    res[item][82] -> continuous is_rcdc
+    res[item][83] -> continuous is_rcdmor
+    res[item][84] -> continuous is_app_ma
+    res[item][85] -> continuous is_app_ipa
+    res[item][86] -> continuous is_app_dmh
+    res[item][87] -> lista, valores indenizados
     '''
 
     res = []
     for item, x in enumerate(data):
-        res.append([0] * 65)
+        res.append([0] * 88)
+        res[item][87] = []
         if x[1] >= 2000 + int(aa):
             pass
         elif (2000 + int(aa) - x[1]) == 1:
@@ -251,12 +275,18 @@ def data_transf(data):
             res[item][64] = delta_years
         elif x[8] != None and x[9] == None:
             sin_count = 0
-            sin_count_outros = 0
-            for i in x[8]:
-                if i in {'1', '2', '3', '4', '5', '6'}:
-                    sin_count += 1
-                elif i in {7, 8, 9}:
-                    sin_count_outros += 1
+            aux_dict = {}
+            for j, k in zip(x[8].keys(), x[8].values()):
+                if j in {'1', '2', '3', '4', '5', '6'}:
+                    if k['f1'] > 0:
+                        if k['f2'] not in aux_dict.keys():
+                            aux_dict[k['f2']] = k['f1']
+                            sin_count += 1
+                        else:
+                            aux_dict[k['f2']] += k['f1']
+
+            for i in aux_dict.values():
+                res[item][87].append(i)
 
             res[item][63] = sin_count
             delta_years = 0
@@ -266,13 +296,20 @@ def data_transf(data):
             res[item][64] = delta_years
         else:
             sin_count = 0
-            sin_count_outros = 0
+            aux_dict = {}
             fim_vig = x[5]
-            for i in x[8]:
-                if i in {'1', '2', '3', '4', '5', '6'}:
-                    sin_count += 1
-                elif i in {7, 8, 9}:
-                    sin_count_outros += 1
+            for j, k in zip(x[8].keys(), x[8].values()):
+                if j in {'1', '2', '3', '4', '5', '6'}:
+                    if k['f1'] > 0:
+                        if k['f2'] not in aux_dict.keys():
+                            aux_dict[k['f2']] = k['f1']
+                            sin_count += 1
+                        else:
+                            aux_dict[k['f2']] += k['f1']
+
+            for i in aux_dict.values():
+                res[item][87].append(i)
+
             for i in x[9].values():
                 if i['f1'] in {'2', '3'}:
                     if (datetime.strptime(i['f2'], '%Y-%m-%d').date()-x[4]).days < 0:
@@ -287,6 +324,47 @@ def data_transf(data):
             delta_years += relativedelta(fim_vig, x[4]).days / 365.2425
             res[item][64] = delta_years
 
+        if x[0] == '2':
+            res[item][65] = 1
+
+        if x[10] == '1':
+            res[item][66] = 1
+        if x[10] == '2':
+            res[item][67] = 1
+        if x[10] == '3':
+            res[item][68] = 1
+        if x[10] == '4':
+            res[item][69] = 1
+        if x[10] == '5':
+            res[item][70] = 1
+        if x[10] == '6':
+            res[item][71] = 1
+        if x[10] == '7':
+            res[item][72] = 1
+        if x[10] == '8':
+            res[item][73] = 1
+        if x[10] == '9':
+            res[item][74] = 1
+
+        if x[11] == '1':
+            res[item][75] = 1
+        if x[11] == '3':
+            res[item][76] = 1
+        if x[11] == '4':
+            res[item][77] = 1
+        if x[11] == '9':
+            res[item][78] = 1
+
+        res[item][79] = x[12]
+
+        res[item][80] = x[13]
+        res[item][81] = x[14]
+        res[item][82] = x[15]
+        res[item][83] = x[16]
+        res[item][84] = x[17]
+        res[item][85] = x[18]
+        res[item][86] = x[19]
+
     return res
 
 
@@ -295,16 +373,16 @@ if __name__ == "__main__":
     years = ('08', '09', '10', '11')
     for mmm in months:
         for aa in years:
-            filename = 'data_mpreg_' + mmm + aa + '_raw.pkl'
+            filename = 'data_' + mmm + aa + '_raw.pkl'
             data = load_pkl(filename)
             results = data_transf(data)
 
             try:
-                os.remove('Data/data_mpreg_' + mmm + aa + '.pkl')
+                os.remove('Data/data_' + mmm + aa + '.pkl')
             except OSError:
                 pass
         
-            with open('Data/data_mpreg_' + mmm + aa + '.pkl', 'wb') as file:
+            with open('Data/data_' + mmm + aa + '.pkl', 'wb') as file:
                 pickle.dump(results, file)
 
-            print('File data_mpreg_' + mmm + aa + '.pkl saved') 
+            print('File data_' + mmm + aa + '.pkl saved') 
