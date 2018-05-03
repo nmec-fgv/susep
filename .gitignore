@@ -1,2 +1,5 @@
 Data/
 *~
+Data_old/
+Python_old/
+__pycache__/
