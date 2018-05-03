@@ -39,11 +39,11 @@ class Data:
         years = ('08', '09', '10', '11')
 
         if period[:3] not in periods and period[3:] not in years:
-            raise Exception('period invalid or outside permissable range')
+            raise Exception('period invalid or outside permissible range')
 
         for item in threshold.values():
             if isinstance(item, (int, float)) == False:
-                raise Exception('threshold invalid, provide permissable dictionary object')
+                raise Exception('threshold invalid, provide permissible dictionary object')
 
         if period[:3] in periods[:12]:
             (mmm, aa) = (period[:3], period[3:])
@@ -76,7 +76,7 @@ class Data:
                 data['y_rcd'] += aux[str(i)]['y_rcd']
                 data['y_app'] += aux[str(i)]['y_app']
                 data['y_out'] += aux[str(i)]['y_out']
-                X_list.append(aux[str(i)]['X']
+                X_list.append(aux[str(i)]['X'])
             data['X'] = np.stack(X_list, axis=0)
 
         def endog_array(y, y_threshold):
@@ -155,7 +155,7 @@ class Poisson_regress:
             res = (aux_vec[:, np.newaxis] *  X_exog).sum(axis=0)
             return res
 
-        x0 = np.zeros(len(X_exog))
+        x0 = np.zeros(len(X_exog[0]))
         x0[0] = 1
         x0[1] = np.log(sum(y)/len(y))
         prec_param = 1e-4
@@ -163,10 +163,13 @@ class Poisson_regress:
         for i in range(len(X_exog[0])-1):
             bounds += ((None, None),)
         
-        poisson_mle = minimize(LL_Poisson, x0, method='TNC', jac=grad_LL_Poisson, bounds=bounds, options={'disp': True})
-        if poisson_mle.success == 0
-            poisson_mle = minimize(LL_Poisson, x0, method='L-BFGS-B', jac=grad_LL_Poisson, bounds=bounds, options={'disp': True})
+        res = minimize(log_likelihood, x0, method='TNC', jac=gradient, bounds=bounds, options={'disp': True})
+        if res.success == 0:
+            res = minimize(log_likelihood, x0, method='L-BFGS-B', jac=gradient, bounds=bounds, options={'disp': True})
+            if res.success == 0:
+                res = minimize(log_likelihood, x0, method='SLSQP', jac=gradient, bounds=bounds, options={'disp': True})
 
+        self.fit = res
 
     def var_MLH(x):
         '''Variance for Poisson MLE using Hessian'''
@@ -189,18 +192,6 @@ class Poisson_regress:
 
 if __name__ == '__main__':
       
-    threshold = dict([('y_cas', 0), ('y_rcd', 0), ('y_app', 0), ('y_out', 0)])
-    jan08 = Data('jan08', threshold)
-    poi_cas_jan08 = Poisson_regress(jan08.data, ('cas', 'count')) # use shelve to archive
-
-
-#            print('Poisson MLE estimates: ', poisson_mle.x)
-#            try:
-#                os.remove('Data/PoiMLE_cas-count_' + mmm + aa + '.pkl')
-#            except OSError:
-#                pass
-#                    
-#            with open('Data/PoiMLE_cas-count_' + mmm + aa + '.pkl', 'wb') as file:
-#                pickle.dump(poisson_mle, file)
-#            
-#            print('File PoiMLE_cas-count_' + mmm + aa + '.pkl saved') 
+    threshold = dict([('cas', 0), ('rcd', 0), ('app', 0), ('out', 0)])
+    jul11 = Data('jul11', threshold)
+    poi_cas_jul11 = Poisson_regress(jul11.data, ('cas', 'count')) # use shelve to archive
