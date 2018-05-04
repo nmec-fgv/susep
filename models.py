@@ -49,9 +49,11 @@ class Data:
             (mmm, aa) = (period[:3], period[3:])
             filename = 'data_' + mmm + aa + '.pkl'
             data = file_load(filename)
+            data['X'] = data['X'].tolist()
 
         elif period[:3] in periods[12:]:
             aux = {}
+            aa = period[3:]
             if period[0] == '1':
                 for i, mmm in enumerate(periods[:3]):
                     filename = 'data_' + mmm + aa + '.pkl'
@@ -70,61 +72,76 @@ class Data:
                     aux[str(i)] = file_load(filename)
 
             data = {}
-            X_list = []
+            data['y_cas'] = []
+            data['y_rcd'] = []
+            data['y_app'] = []
+            data['y_out'] = []
+            data['X'] = []
             for i in range(3):
                 data['y_cas'] += aux[str(i)]['y_cas']
                 data['y_rcd'] += aux[str(i)]['y_rcd']
                 data['y_app'] += aux[str(i)]['y_app']
                 data['y_out'] += aux[str(i)]['y_out']
-                X_list.append(aux[str(i)]['X'])
-            data['X'] = np.stack(X_list, axis=0)
+                for item in aux[str(i)]['X']:
+                    data['X'].append(item)
 
-        def endog_array(y, y_threshold):
+        def convert_arr(X, y, y_threshold):
             '''
             Internal auxiliary function.
-            Takes y list argument and computes arrays of counts and claims.
+            Takes X, y list argument and computes arrays for counts and claims.
             '''
 
             if y_threshold == 0:
-                y_count = np.empty([len(y)])
-                y_claim = np.empty([len(y)])
+                y_count = []
+                y_claim = []
+                X_claim = []
                 for i, item in enumerate(y):
-                    y_count[i] = len(item)
+                    y_count.append(len(item))
                     if len(item) > 0:
-                        y_claim[i] = sum(item) / len(item)
+                        for j in range(len(item)):
+                            y_claim.append(item[j])
+                            X_claim.append(X[i])
                     else:
-                        y_claim[i] = 0
-                
-                return dict([('count', y_count), ('claim', y_claim)])
+                        y_claim.append(0)
+                        X_claim.append(X[i])
+
+                return dict([('X_count', X), ('X_claim', X_claim), ('y_count', y_count), ('y_claim', y_claim)])
         
             else:
-                y_count_mc = np.empty([len(y)])
-                y_count_ec = np.empty([len(y)])
-                y_claim_mc = np.empty([len(y)])
-                y_claim_ec = np.empty([len(y)])
+                y_count_mc = []
+                y_count_ec = []
+                y_claim_mc = []
+                y_claim_ec = []
+                X_claim_mc = []
+                X_claim_ec = []
                 for i, item in enumerate(y):
-                    y_count_mc[i] = sum(x < y_threshold for x in item)
-                    y_count_ec[i] = sum(x >= y_threshold for x in item)
+                    y_count_mc.append(sum(x < y_threshold for x in item))
+                    y_count_ec.append(sum(x >= y_threshold for x in item))
                     if len([x for x in item if x < y_threshold]) > 0:
-                        y_claim_mc[i] = sum([x for x in item if x < y_threshold])/ len([x for x in item if x < y_threshold])
+                        for j in range(len([x for x in item if x < y_threshold])):
+                            y_claim_mc.append([x for x in item if x < y_threshold][j])
+                            X_claim_mc.append(X[i])
                     else:
-                        y_claim_mc[i] = 0
+                        y_claim_mc.append(0)
+                        X_claim_mc.append(X[i])
+                    
                     if len([x for x in item if x >= y_threshold]) > 0:
-                        y_claim_ec[i] = sum([x for x in item if x >= y_threshold])/ len([x for x in item if x >= y_threshold])
+                        for j in range(len([x for x in item if x >= y_threshold])):
+                            y_claim_ec.append([x for x in item if x >= y_threshold][j])
+                            X_claim_ec.append(X[i])
                     else:
-                        y_claim_ec[i] = 0
-        
-                return dict([('count_mc', y_count_mc), ('count_ec', y_count_ec), ('claim_mc', y_claim_mc), ('claim_ec', y_claim_ec)])
+                        y_claim_ec.append(0)
+                        X_claim_ec.append(X[i])
+                    
+                return dict([('X_count_mc', X), ('X_count_ec', X), ('X_claim_mc', X_claim_mc), ('X_claim_ec', X_claim_ec), ('y_count_mc', y_count_mc), ('y_count_ec', y_count_ec), ('y_claim_mc', y_claim_mc), ('y_claim_ec', y_claim_ec)])
     
-        X_exog = data['X']
-        X_exog[:, [64]] = X_exog[:, [64]] / 100
-        X_exog[:, 79:83] = X_exog[:, 79:83] / 10000
-        y = {}
-        y['cas'] = endog_array(data['y_cas'], threshold['cas'])
-        y['rcd'] = endog_array(data['y_rcd'], threshold['rcd'])
-        y['app'] = endog_array(data['y_app'], threshold['app'])
-        y['out'] = endog_array(data['y_out'], threshold['out'])
-        self.data = dict([('X_exog', X_exog), ('y', y)])
+        aux = {}
+        aux['cas'] = convert_arr(data['X'], data['y_cas'], threshold['cas'])
+        aux['rcd'] = convert_arr(data['X'], data['y_rcd'], threshold['rcd'])
+        aux['app'] = convert_arr(data['X'], data['y_app'], threshold['app'])
+        aux['out'] = convert_arr(data['X'], data['y_out'], threshold['out'])
+
+        self.data = dict([('cas', aux['cas']), ('rcd', aux['rcd']), ('app', aux['app']), ('out', aux['out'])])
 
 
 class Poisson_regress:
@@ -192,6 +209,15 @@ class Poisson_regress:
 
 if __name__ == '__main__':
       
-    threshold = dict([('cas', 0), ('rcd', 0), ('app', 0), ('out', 0)])
-    jul11 = Data('jul11', threshold)
-    poi_cas_jul11 = Poisson_regress(jul11.data, ('cas', 'count')) # use shelve to archive
+    threshold = dict([('cas', 50000), ('rcd', 50000), ('app', 50000), ('out', 50000)])
+    dat1tr10 = Data('1tr10', threshold)
+#    poi_cas_1tr10 = Poisson_regress(dat1tr10.data, ('cas', 'count')) # use shelve to archive
+
+
+#                X_count = np.asarray(X)
+#                X_claim = np.asarray(X_claim)
+#                for x in (X_count, X_claim):
+#                    x[:, [64]] = x[:, [64]] / 100
+#                    x[:, 79:83] = x[:, 79:83] / 100000
+#                y_count = np.asarray(y_count)
+#                y_claim = np.asarray(y_claim)
