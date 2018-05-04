@@ -105,20 +105,22 @@ def data_transf(data):
     res[item][78] -> dummy tipo franquia = 9 (s/ franquia)
     res[item][79] -> continuous valor franquia
     res[item][80] -> continuous is_casco
-    res[item][81] -> continuous is_rcdmat
-    res[item][82] -> continuous is_rcdc
-    res[item][83] -> continuous is_rcdmor
-    res[item][84] -> continuous is_app_ma
-    res[item][85] -> continuous is_app_ipa
-    res[item][86] -> continuous is_app_dmh
-    res[item][87] -> lista, valores indenizados
+    res[item][81] -> continuous is_rcdmat + is_rcdc + is_rcdmor
+    res[item][82] -> continuous is_app_ma + is_app_ipa + is_app_dmh
+    res[item][83] -> lista, valores indenizados casco
+    res[item][84] -> lista, valores indenizados rcd
+    res[item][85] -> lista, valores indenizados app
+    res[item][86] -> lista, valores indenizados outros
     '''
 
     res = []
     for item, x in enumerate(data0):
-        res.append([0] * 88)
+        res.append([0] * 87)
         res[item][1] = 1
-        res[item][87] = []
+        res[item][83] = []
+        res[item][84] = []
+        res[item][85] = []
+        res[item][86] = []
         if x[1] >= 2000 + int(aa):
             pass
         elif (2000 + int(aa) - x[1]) == 1:
@@ -274,17 +276,44 @@ def data_transf(data):
             delta_years += relativedelta(fim_vig, x[4]).days / 365.2425
             res[item][0] = delta_years
         elif x[8] != None and x[9] == None:
-            aux_dict = {}
+            aux_dict_cas = {}
+            aux_dict_rcd = {}
+            aux_dict_app = {}
+            aux_dict_out = {}
             for j, k in zip(x[8].keys(), x[8].values()):
-                if j in {'1', '2', '3', '4', '5', '6'}:
+                if j in {'1'}:
                     if k['f1'] > 0:
-                        if k['f2'] not in aux_dict.keys():
-                            aux_dict[k['f2']] = k['f1']
+                        if k['f2'] not in aux_dict_cas.keys():
+                            aux_dict_cas[k['f2']] = k['f1']
                         else:
-                            aux_dict[k['f2']] += k['f1']
+                            aux_dict_cas[k['f2']] += k['f1']
+                elif j in {'2', '3', '4'}:
+                    if k['f1'] > 0:
+                        if k['f2'] not in aux_dict_rcd.keys():
+                            aux_dict_rcd[k['f2']] = k['f1']
+                        else:
+                            aux_dict_rcd[k['f2']] += k['f1']
+                elif j in {'5', '6', '7'}:
+                    if k['f1'] > 0:
+                        if k['f2'] not in aux_dict_app.keys():
+                            aux_dict_app[k['f2']] = k['f1']
+                        else:
+                            aux_dict_app[k['f2']] += k['f1']
+                elif j in {'8'}:
+                    if k['f1'] > 0:
+                        if k['f2'] not in aux_dict_out.keys():
+                            aux_dict_out[k['f2']] = k['f1']
+                        else:
+                            aux_dict_out[k['f2']] += k['f1']
 
-            for i in aux_dict.values():
-                res[item][87].append(i)
+            for i in aux_dict_cas.values():
+                res[item][83].append(i)
+            for i in aux_dict_rcd.values():
+                res[item][84].append(i)
+            for i in aux_dict_app.values():
+                res[item][85].append(i)
+            for i in aux_dict_out.values():
+                res[item][86].append(i)
 
             delta_years = 0
             delta_years += relativedelta(x[5], x[4]).years
@@ -292,18 +321,45 @@ def data_transf(data):
             delta_years += relativedelta(x[5], x[4]).days / 365.2425
             res[item][0] = delta_years
         else:
-            aux_dict = {}
+            aux_dict_cas = {}
+            aux_dict_rcd = {}
+            aux_dict_app = {}
+            aux_dict_out = {}
             fim_vig = x[5]
             for j, k in zip(x[8].keys(), x[8].values()):
-                if j in {'1', '2', '3', '4', '5', '6'}:
+                if j in {'1'}:
                     if k['f1'] > 0:
-                        if k['f2'] not in aux_dict.keys():
-                            aux_dict[k['f2']] = k['f1']
+                        if k['f2'] not in aux_dict_cas.keys():
+                            aux_dict_cas[k['f2']] = k['f1']
                         else:
-                            aux_dict[k['f2']] += k['f1']
+                            aux_dict_cas[k['f2']] += k['f1']
+                elif j in {'2', '3', '4'}:
+                    if k['f1'] > 0:
+                        if k['f2'] not in aux_dict_rcd.keys():
+                            aux_dict_rcd[k['f2']] = k['f1']
+                        else:
+                            aux_dict_rcd[k['f2']] += k['f1']
+                elif j in {'5', '6', '7'}:
+                    if k['f1'] > 0:
+                        if k['f2'] not in aux_dict_app.keys():
+                            aux_dict_app[k['f2']] = k['f1']
+                        else:
+                            aux_dict_app[k['f2']] += k['f1']
+                elif j in {'8'}:
+                    if k['f1'] > 0:
+                        if k['f2'] not in aux_dict_out.keys():
+                            aux_dict_out[k['f2']] = k['f1']
+                        else:
+                            aux_dict_out[k['f2']] += k['f1']
 
-            for i in aux_dict.values():
-                res[item][87].append(i)
+            for i in aux_dict_cas.values():
+                res[item][83].append(i)
+            for i in aux_dict_rcd.values():
+                res[item][84].append(i)
+            for i in aux_dict_app.values():
+                res[item][85].append(i)
+            for i in aux_dict_out.values():
+                res[item][86].append(i)
 
             for i in x[9].values():
                 if i['f1'] in {'2', '3'}:
@@ -352,12 +408,8 @@ def data_transf(data):
         res[item][79] = x[12]
 
         res[item][80] = x[13]
-        res[item][81] = x[14]
-        res[item][82] = x[15]
-        res[item][83] = x[16]
-        res[item][84] = x[17]
-        res[item][85] = x[18]
-        res[item][86] = x[19]
+        res[item][81] = x[14] + x[15] + x[16]
+        res[item][82] = x[17] + x[18] + x[19]
 
     return res
 
@@ -371,27 +423,20 @@ if __name__ == '__main__':
             data0 = load_pkl(filename)
             data = data_transf(data0)
             data = [item for item in data if item[0] > 1e-2]
-            y_threshold = 80000
-            y_count_mc = np.empty([len(data)])
-            y_count_ec = np.empty([len(data)])
-            y_claim_mc = np.empty([len(data)])
-            y_claim_ec = np.empty([len(data)])
-            X = np.empty([len(data), len(data[0])-1])
+            y_cas = []
+            y_rcd = []
+            y_app = []
+            y_out = []
+            X = np.empty([len(data), len(data[0])-4])
             for i, item in enumerate(data):
-                y_count_mc[i] = sum(x < y_threshold for x in item[-1])
-                y_count_ec[i] = sum(x >= y_threshold for x in item[-1])
-                if len([x for x in item[-1] if x < y_threshold]) > 0:
-                    y_claim_mc[i] = sum([x for x in item[-1] if x < y_threshold])/ len([x for x in item[-1] if x < y_threshold])
-                else:
-                    y_claim_mc[i] = 0
-                if len([x for x in item[-1] if x >= y_threshold]) > 0:
-                    y_claim_ec[i] = sum([x for x in item[-1] if x >= y_threshold])/ len([x for x in item[-1] if x >= y_threshold])
-                else:
-                    y_claim_ec[i] = 0
-                X[i] = item[:-1]
+                y_cas.append(item[-4])
+                y_rcd.append(item[-3])
+                y_app.append(item[-2])
+                y_out.append(item[-1])
+                X[i] = item[:-4]
             
             X = np.hstack((np.log(X[:,[0]]), X[:,1:]))
-            results = dict([('y_count_mc', y_count_mc), ('y_count_ec', y_count_ec), ('y_claim_mc', y_claim_mc), ('y_claim_ec', y_claim_ec), ('X', X)])
+            results = dict([('y_cas', y_cas), ('y_rcd', y_rcd), ('y_app', y_app), ('y_out', y_out), ('X', X)])
 
             try:
                 os.remove('Data/data_' + mmm + aa + '.pkl')

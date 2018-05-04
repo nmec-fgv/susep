@@ -6,6 +6,7 @@ import os
 import pickle
 import numpy as np
 import shelve
+import pdb
 
 
 def file_load(filename):
@@ -143,10 +144,20 @@ class Data:
 
 
 if __name__ == '__main__':
-    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
-    years = ('08', '09', '10', '11')
+#    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
+#    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
+    periods = ('1tr',)
+#    years = ('08', '09', '10', '11')
+    years = ('09',)
     threshold = dict([('cas', 0), ('rcd', 0), ('app', 0), ('out', 0)])
-    db = shelve.open('Data/db_thres0')
+    db_aux = {}
     for period in periods:
         for aa in years:
-            db[period+aa] = Data(period+aa, threshold)
+            db_aux[period+aa] = Data(period+aa, threshold)
+            print('Data for period ' + period + aa + ' stored in dict')
+
+#    db_file = 'db_thres0_qtrly09'
+#    db = shelve.open('Data/' + db_file)
+#    for key, item in zip(db_aux.keys(), db_aux.values()):
+#        db[key] = item
+#    db.close()
