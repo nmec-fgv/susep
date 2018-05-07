@@ -1,4 +1,3 @@
-## test
 #########################################
 ## Data transformation for regressions ##
 #########################################
@@ -12,8 +11,8 @@ from dateutil.relativedelta import relativedelta
 
 def load_pkl(filename):
     try:
-        os.path.exists('Data/' + filename)
-        with open('Data/' + filename, 'rb') as file:
+        os.path.exists('/home/pgsqldata/Susep/' + filename)
+        with open('/home/pgsqldata/Susep/' + filename, 'rb') as file:
             data = pickle.load(file)
     except:
         print('File ' + filename + ' not found')
@@ -416,7 +415,8 @@ def data_transf(data):
 
 
 if __name__ == '__main__':
-    months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
+#    months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
+    months = ('jul', 'ago', 'set', 'out', 'nov', 'dez')
     years = ('08', '09', '10', '11')
     for mmm in months:
         for aa in years:
@@ -440,11 +440,11 @@ if __name__ == '__main__':
             results = dict([('y_cas', y_cas), ('y_rcd', y_rcd), ('y_app', y_app), ('y_out', y_out), ('X', X)])
 
             try:
-                os.remove('Data/data_' + mmm + aa + '.pkl')
+                os.remove('/home/pgsqldata/Susep/data_' + mmm + aa + '.pkl')
             except OSError:
                 pass
         
-            with open('Data/data_' + mmm + aa + '.pkl', 'wb') as file:
+            with open('/home/pgsqldata/Susep/data_' + mmm + aa + '.pkl', 'wb') as file:
                 pickle.dump(results, file)
 
             print('File data_' + mmm + aa + '.pkl saved') 

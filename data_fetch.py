@@ -22,11 +22,11 @@ for aa in years:
         data = cur.fetchall()
         filename = 'data_' + mmm + aa + '_raw.pkl'
         try:
-            os.remove('Data/' + filename)
+            os.remove('/home/pgsqldata/Susep/' + filename)
         except OSError:
             pass
 
-        with open('Data/' + filename, 'wb') as file:
+        with open('/home/pgsqldata/Susep/' + filename, 'wb') as file:
             pickle.dump(data, file)
 
         print('File data_' + mmm + aa + '_raw.pkl saved')

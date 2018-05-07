@@ -6,54 +6,51 @@
 import os
 import pickle
 import numpy as np
+import shelve
 from scipy.special import factorial
 from scipy.optimize import minimize
 
 
 def file_load(filename):
     try:
-        os.path.exists('Data/' + filename)
-        with open('Data/' + filename, 'rb') as file:
-            res = pickle.load(file)
+        os.path.exists('/home/pgsqldata/Susep/' + filename)
+        with open('/home/pgsqldata/Susep/' + filename, 'rb') as file:
+            x = pickle.load(file)
     except:
         print('File ' + filename + ' not found')
 
-    return res
+    return x
 
 
 class Data:
     '''
     Data preparation for subsequent modeling.
-    Loads data from files 'Data/data_mmmaa.pkl' according to period request.
-    Returns attribute .data, a dictionary containing 'X_exog', 'y_cas', 'y_rcd', 'y_app' and 'y_out', where y_* is divided in 'y_count' and 'y_claim'.
+    Loads data from files 'data_mmmaa.pkl' according to period request.
+    Returns X_exog', and 'y' according to data type requested ({'cas', 'rcd', 'app', 'out'} X {'claim', 'count'}).
     
     Parameters:
     ----------
-    period, takes 'mmm + aa' string value or '#tr + aa'
+    period, takes 'mmm' string value or '#tr'
     threshold, dict containing keys 'cas', 'rcd', 'app', 'out', which must be provided and set to zero if no threshold is intended.
     '''
 
-    def __init__(self, period, threshold):
+    def __init__(self, period, aa, dtype):
         
         periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
         years = ('08', '09', '10', '11')
 
-        if period[:3] not in periods and period[3:] not in years:
+        if period not in periods and aa not in years:
             raise Exception('period invalid or outside permissible range')
 
-        for item in threshold.values():
-            if isinstance(item, (int, float)) == False:
-                raise Exception('threshold invalid, provide permissible dictionary object')
-
-        if period[:3] in periods[:12]:
-            (mmm, aa) = (period[:3], period[3:])
+        if period in periods[:12]:
+            mmm = period
             filename = 'data_' + mmm + aa + '.pkl'
             data = file_load(filename)
             data['X'] = data['X'].tolist()
+            data['y'] = data['y_'+dtype[0]]
 
-        elif period[:3] in periods[12:]:
+        elif period in periods[12:]:
             aux = {}
-            aa = period[3:]
             if period[0] == '1':
                 for i, mmm in enumerate(periods[:3]):
                     filename = 'data_' + mmm + aa + '.pkl'
@@ -72,79 +69,62 @@ class Data:
                     aux[str(i)] = file_load(filename)
 
             data = {}
-            data['y_cas'] = []
-            data['y_rcd'] = []
-            data['y_app'] = []
-            data['y_out'] = []
+            data['y'] = []
             data['X'] = []
             for i in range(3):
-                data['y_cas'] += aux[str(i)]['y_cas']
-                data['y_rcd'] += aux[str(i)]['y_rcd']
-                data['y_app'] += aux[str(i)]['y_app']
-                data['y_out'] += aux[str(i)]['y_out']
+                data['y'] += aux[str(i)]['y_'+dtype[0]]
                 for item in aux[str(i)]['X']:
                     data['X'].append(item)
 
-        def convert_arr(X, y, y_threshold):
-            '''
-            Internal auxiliary function.
-            Takes X, y list argument and computes arrays for counts and claims.
-            '''
+        if dtype[1] == 'count':
+            def convert_arr(X_in, y_in):
+                '''
+                Internal auxiliary function.
+                Takes X, y list argument and computes arrays for counts.
+                '''
+    
+                y = []
+                X = X_in
+                for i, item in enumerate(y_in):
+                    y.append(len(item))
 
-            if y_threshold == 0:
-                y_count = []
-                y_claim = []
-                X_claim = []
-                for i, item in enumerate(y):
-                    y_count.append(len(item))
+                return (X, y)
+
+        elif dtype[1] == 'claim':
+            def convert_arr(X_in, y_in):
+                '''
+                Internal auxiliary function.
+                Takes X, y list argument and computes arrays for claims.
+                '''
+    
+                y = []
+                X = []
+                for i, item in enumerate(y_in):
                     if len(item) > 0:
                         for j in range(len(item)):
-                            y_claim.append(item[j])
-                            X_claim.append(X[i])
+                            y.append(item[j])
+                            X.append(X_in[i])
                     else:
-                        y_claim.append(0)
-                        X_claim.append(X[i])
+                        y.append(0)
+                        X.append(X_in[i])
 
-                return dict([('X_count', X), ('X_claim', X_claim), ('y_count', y_count), ('y_claim', y_claim)])
-        
-            else:
-                y_count_mc = []
-                y_count_ec = []
-                y_claim_mc = []
-                y_claim_ec = []
-                X_claim_mc = []
-                X_claim_ec = []
-                for i, item in enumerate(y):
-                    y_count_mc.append(sum(x < y_threshold for x in item))
-                    y_count_ec.append(sum(x >= y_threshold for x in item))
-                    if len([x for x in item if x < y_threshold]) > 0:
-                        for j in range(len([x for x in item if x < y_threshold])):
-                            y_claim_mc.append([x for x in item if x < y_threshold][j])
-                            X_claim_mc.append(X[i])
-                    else:
-                        y_claim_mc.append(0)
-                        X_claim_mc.append(X[i])
-                    
-                    if len([x for x in item if x >= y_threshold]) > 0:
-                        for j in range(len([x for x in item if x >= y_threshold])):
-                            y_claim_ec.append([x for x in item if x >= y_threshold][j])
-                            X_claim_ec.append(X[i])
-                    else:
-                        y_claim_ec.append(0)
-                        X_claim_ec.append(X[i])
-                    
-                return dict([('X_count_mc', X), ('X_count_ec', X), ('X_claim_mc', X_claim_mc), ('X_claim_ec', X_claim_ec), ('y_count_mc', y_count_mc), ('y_count_ec', y_count_ec), ('y_claim_mc', y_claim_mc), ('y_claim_ec', y_claim_ec)])
+                return (X, y)
+
+        (X, y) = convert_arr(data['X'], data['y'])
+        y = np.asarray(y)
+        X = np.asarray(X)
+        X[:, [64]] = X[:, [64]] / 100
+        X[:, 79:83] = X[:, 79:83] / 100000
+        self.X = X
+        self.y = y
     
-        aux = {}
-        aux['cas'] = convert_arr(data['X'], data['y_cas'], threshold['cas'])
-        aux['rcd'] = convert_arr(data['X'], data['y_rcd'], threshold['rcd'])
-        aux['app'] = convert_arr(data['X'], data['y_app'], threshold['app'])
-        aux['out'] = convert_arr(data['X'], data['y_out'], threshold['out'])
+    def threshold(self, threshold):
+        pass
 
-        self.data = dict([('cas', aux['cas']), ('rcd', aux['rcd']), ('app', aux['app']), ('out', aux['out'])])
+    def desc_stats(self):
+        pass
 
-
-class Poisson_regress:
+class Poisson(Data):
     '''
     Provides estimation of Poisson regression model, MLE and PMLE coincide.
 
@@ -154,10 +134,12 @@ class Poisson_regress:
     ytype, 2-tuple with values in {'cas', 'rcd', 'app', 'out'} X {'count', 'count_mc', 'count_ec'}    
     '''
 
-    def __init__(self, data, ytype):
-
-        X_exog = data['X_exog']
-        y = data['y'][ytype[0]][ytype[1]]
+    def __init__(self, period, aa, dtype, threshold=None):
+        super().__init__(period, aa, dtype)
+        
+        if threshold == None:
+            X_exog = self.X
+            y = self.y
 
         def log_likelihood(x):
             '''Log-likelihood of Poisson regression model'''
@@ -188,6 +170,7 @@ class Poisson_regress:
 
         self.fit = res
 
+
     def var_MLH(x):
         '''Variance for Poisson MLE using Hessian'''
     
@@ -206,18 +189,13 @@ class Poisson_regress:
             return np.linalg.inv(sum_res)
 
 
-
 if __name__ == '__main__':
-      
-    threshold = dict([('cas', 50000), ('rcd', 50000), ('app', 50000), ('out', 50000)])
-    dat1tr10 = Data('1tr10', threshold)
-#    poi_cas_1tr10 = Poisson_regress(dat1tr10.data, ('cas', 'count')) # use shelve to archive
-
-
-#                X_count = np.asarray(X)
-#                X_claim = np.asarray(X_claim)
-#                for x in (X_count, X_claim):
-#                    x[:, [64]] = x[:, [64]] / 100
-#                    x[:, 79:83] = x[:, 79:83] / 100000
-#                y_count = np.asarray(y_count)
-#                y_claim = np.asarray(y_claim)
+#    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
+#    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
+    periods = ('1tr',)
+#    years = ('08', '09', '10', '11')
+    years = ('08',)
+    for period in periods:
+        for aa in years:
+            dtype = ('rcd', 'count')
+            x = Poisson(period, aa, dtype)
