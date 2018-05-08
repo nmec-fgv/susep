@@ -1,6 +1,6 @@
-##############################################################################
-## Regression models of counts and claims data for auto insurance cost eval ##
-##############################################################################
+#########################################################################
+## Regression models of counts and claims data for auto insurance cost ##
+#########################################################################
 
 
 import os
@@ -24,7 +24,7 @@ def file_load(filename):
 
 class Data:
     '''
-    Data preparation for subsequent modeling.
+    Data preparation for subsequently running model.
     Loads data from files 'data_mmmaa.pkl' according to period request.
     Returns X_exog', and 'y' according to data type requested ({'cas', 'rcd', 'app', 'out'} X {'claim', 'count'}).
     
@@ -113,16 +113,128 @@ class Data:
         (X, y) = convert_arr(data['X'], data['y'])
         y = np.asarray(y)
         X = np.asarray(X)
-        X[:, [64]] = X[:, [64]] / 100
-        X[:, 79:83] = X[:, 79:83] / 100000
+        X[:,[64]] = X[:,[64]] / 100
+        X[:,79:83] = X[:,79:83] / 100000
         self.X = X
         self.y = y
+        self.dtype = dtype
     
     def threshold(self, threshold):
         pass
 
     def desc_stats(self):
-        pass
+        res = {}
+        res['nobs'] = len(self.y)
+        if self.dtype[1] == 'count':
+            (elem, freq) = np.unique(self.y, return_counts=True)
+            for i in zip(elem, freq):
+                res['count='+str(i[0])] = i[1] / res['nobs']
+                
+        if self.dtype[1] == 'claim':
+            res['claims'] = ((self.y[self.y>0].mean(), self.y[self.y>0].std()), (np.amin(self.y[self.y>0]), np.amax(self.y[self.y>0])))
+
+        res['X'] = {}
+        # Continuous variables
+        res['X']['exposure'] = ((np.exp(self.X[:, [0]]).mean(), np.exp(self.X[:, [0]]).std()), (np.amin(np.exp(self.X[:, [0]])), np.amax(np.exp(self.X[:, [0]]))))
+        res['X']['idade'] = ((self.X[:,[64]].mean(), self.X[:,[64]].std()), (np.amin(self.X[:,[64]]), np.amax(self.X[:,[64]])))
+        res['X']['val_franq'] = ((self.X[:,[79]].mean(), self.X[:,[79]].std()), (np.amin(self.X[:,[79]]), np.amax(self.X[:,[79]])))
+        res['X']['is_cas'] = ((self.X[:,[80]].mean(), self.X[:,[80]].std()), (np.amin(self.X[:,[80]]), np.amax(self.X[:,[80]])))
+        res['X']['is_rcd'] = ((self.X[:,[81]].mean(), self.X[:,[81]].std()), (np.amin(self.X[:,[81]]), np.amax(self.X[:,[81]])))
+        res['X']['is_app'] = ((self.X[:,[82]].mean(), self.X[:,[82]].std()), (np.amin(self.X[:,[82]]), np.amax(self.X[:,[82]])))
+        # Discrete variables
+        res['X']['ano_modelo'] = {}
+        res['X']['ano_modelo']['0'] = len(self.X[:,2:10][np.where(~self.X[:,2:10].any(axis=1))[0]]) / res['nobs']
+        res['X']['ano_modelo']['1'] = (self.X[:,[2]]==1).sum() / res['nobs']
+        res['X']['ano_modelo']['2'] = (self.X[:,[3]]==1).sum() / res['nobs']
+        res['X']['ano_modelo']['3'] = (self.X[:,[4]]==1).sum() / res['nobs']
+        res['X']['ano_modelo']['4'] = (self.X[:,[5]]==1).sum() / res['nobs']
+        res['X']['ano_modelo']['5'] = (self.X[:,[6]]==1).sum() / res['nobs']
+        res['X']['ano_modelo']['6-10'] = (self.X[:,[7]]==1).sum() / res['nobs']
+        res['X']['ano_modelo']['11-20'] = (self.X[:,[8]]==1).sum() / res['nobs']
+        res['X']['ano_modelo']['>20'] = (self.X[:,[9]]==1).sum() / res['nobs']
+        res['X']['cod_tarif'] = {}
+        res['X']['cod_tarif']['10'] = len(self.X[:,10:23][np.where(~self.X[:,10:23].any(axis=1))[0]]) / res['nobs']
+        res['X']['cod_tarif']['11'] = (self.X[:,[10]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['14A'] = (self.X[:,[11]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['14B'] = (self.X[:,[12]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['14C'] = (self.X[:,[13]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['15'] = (self.X[:,[14]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['16'] = (self.X[:,[15]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['17'] = (self.X[:,[16]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['18'] = (self.X[:,[17]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['19'] = (self.X[:,[18]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['20'] = (self.X[:,[19]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['21'] = (self.X[:,[20]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['22'] = (self.X[:,[21]]==1).sum() / res['nobs']
+        res['X']['cod_tarif']['23'] = (self.X[:,[22]]==1).sum() / res['nobs']
+        res['X']['regiao'] = {}
+        res['X']['regiao']['01'] = (self.X[:,[23]]==1).sum() / res['nobs']
+        res['X']['regiao']['02'] = (self.X[:,[24]]==1).sum() / res['nobs']
+        res['X']['regiao']['03'] = (self.X[:,[25]]==1).sum() / res['nobs']
+        res['X']['regiao']['04'] = (self.X[:,[26]]==1).sum() / res['nobs']
+        res['X']['regiao']['05'] = (self.X[:,[27]]==1).sum() / res['nobs']
+        res['X']['regiao']['06'] = (self.X[:,[28]]==1).sum() / res['nobs']
+        res['X']['regiao']['07'] = (self.X[:,[29]]==1).sum() / res['nobs']
+        res['X']['regiao']['08'] = (self.X[:,[30]]==1).sum() / res['nobs']
+        res['X']['regiao']['09'] = (self.X[:,[31]]==1).sum() / res['nobs']
+        res['X']['regiao']['10'] = (self.X[:,[32]]==1).sum() / res['nobs']
+        res['X']['regiao']['11'] = len(self.X[:,23:63][np.where(~self.X[:,23:63].any(axis=1))[0]]) / res['nobs']
+        res['X']['regiao']['12'] = (self.X[:,[33]]==1).sum() / res['nobs']
+        res['X']['regiao']['13'] = (self.X[:,[34]]==1).sum() / res['nobs']
+        res['X']['regiao']['14'] = (self.X[:,[35]]==1).sum() / res['nobs']
+        res['X']['regiao']['15'] = (self.X[:,[36]]==1).sum() / res['nobs']
+        res['X']['regiao']['16'] = (self.X[:,[37]]==1).sum() / res['nobs']
+        res['X']['regiao']['17'] = (self.X[:,[38]]==1).sum() / res['nobs']
+        res['X']['regiao']['18'] = (self.X[:,[39]]==1).sum() / res['nobs']
+        res['X']['regiao']['19'] = (self.X[:,[40]]==1).sum() / res['nobs']
+        res['X']['regiao']['20'] = (self.X[:,[41]]==1).sum() / res['nobs']
+        res['X']['regiao']['21'] = (self.X[:,[42]]==1).sum() / res['nobs']
+        res['X']['regiao']['22'] = (self.X[:,[43]]==1).sum() / res['nobs']
+        res['X']['regiao']['23'] = (self.X[:,[44]]==1).sum() / res['nobs']
+        res['X']['regiao']['24'] = (self.X[:,[45]]==1).sum() / res['nobs']
+        res['X']['regiao']['25'] = (self.X[:,[46]]==1).sum() / res['nobs']
+        res['X']['regiao']['26'] = (self.X[:,[47]]==1).sum() / res['nobs']
+        res['X']['regiao']['27'] = (self.X[:,[48]]==1).sum() / res['nobs']
+        res['X']['regiao']['28'] = (self.X[:,[49]]==1).sum() / res['nobs']
+        res['X']['regiao']['29'] = (self.X[:,[50]]==1).sum() / res['nobs']
+        res['X']['regiao']['30'] = (self.X[:,[51]]==1).sum() / res['nobs']
+        res['X']['regiao']['31'] = (self.X[:,[52]]==1).sum() / res['nobs']
+        res['X']['regiao']['32'] = (self.X[:,[53]]==1).sum() / res['nobs']
+        res['X']['regiao']['33'] = (self.X[:,[54]]==1).sum() / res['nobs']
+        res['X']['regiao']['34'] = (self.X[:,[55]]==1).sum() / res['nobs']
+        res['X']['regiao']['35'] = (self.X[:,[56]]==1).sum() / res['nobs']
+        res['X']['regiao']['36'] = (self.X[:,[57]]==1).sum() / res['nobs']
+        res['X']['regiao']['37'] = (self.X[:,[58]]==1).sum() / res['nobs']
+        res['X']['regiao']['38'] = (self.X[:,[59]]==1).sum() / res['nobs']
+        res['X']['regiao']['39'] = (self.X[:,[60]]==1).sum() / res['nobs']
+        res['X']['regiao']['40'] = (self.X[:,[61]]==1).sum() / res['nobs']
+        res['X']['regiao']['41'] = (self.X[:,[62]]==1).sum() / res['nobs']
+        res['X']['sexo'] = {}
+        res['X']['sexo']['M'] = len(self.X[:,[63]][self.X[:,[63]]==0]) / res['nobs']
+        res['X']['sexo']['F'] = (self.X[:,[63]]==1).sum() / res['nobs']
+        res['X']['cod_cont'] = {}
+        res['X']['cod_cont']['1'] = len(self.X[:,[65]][self.X[:,[65]]==0]) / res['nobs']
+        res['X']['cod_cont']['2'] = (self.X[:,[65]]==1).sum() / res['nobs']
+        res['X']['bonus'] = {}
+        res['X']['bonus']['0'] = len(self.X[:,66:75][np.where(~self.X[:,66:75].any(axis=1))[0]]) / res['nobs']
+        res['X']['bonus']['1'] = (self.X[:,[66]]==1).sum() / res['nobs']
+        res['X']['bonus']['2'] = (self.X[:,[67]]==1).sum() / res['nobs']
+        res['X']['bonus']['3'] = (self.X[:,[68]]==1).sum() / res['nobs']
+        res['X']['bonus']['4'] = (self.X[:,[69]]==1).sum() / res['nobs']
+        res['X']['bonus']['5'] = (self.X[:,[70]]==1).sum() / res['nobs']
+        res['X']['bonus']['6'] = (self.X[:,[71]]==1).sum() / res['nobs']
+        res['X']['bonus']['7'] = (self.X[:,[72]]==1).sum() / res['nobs']
+        res['X']['bonus']['8'] = (self.X[:,[73]]==1).sum() / res['nobs']
+        res['X']['bonus']['9'] = (self.X[:,[74]]==1).sum() / res['nobs']
+        res['X']['tipo_franq'] = {}
+        res['X']['tipo_franq']['1'] = (self.X[:,[75]]==1).sum() / res['nobs']
+        res['X']['tipo_franq']['2'] = len(self.X[:,75:79][np.where(~self.X[:,75:79].any(axis=1))[0]]) / res['nobs']
+        res['X']['tipo_franq']['3'] = (self.X[:,[76]]==1).sum() / res['nobs']
+        res['X']['tipo_franq']['4'] = (self.X[:,[77]]==1).sum() / res['nobs']
+        res['X']['tipo_franq']['9'] = (self.X[:,[78]]==1).sum() / res['nobs']
+
+        return res
+ 
 
 class Poisson(Data):
     '''
@@ -131,12 +243,15 @@ class Poisson(Data):
     Parameters:
     ----------
     data, must be data attribute previously generated from data class call
-    ytype, 2-tuple with values in {'cas', 'rcd', 'app', 'out'} X {'count', 'count_mc', 'count_ec'}    
+    dtype, 2-tuple with values in {'cas', 'rcd', 'app', 'out'} X {'count'}
     '''
 
     def __init__(self, period, aa, dtype, threshold=None):
         super().__init__(period, aa, dtype)
         
+        if dtype[1] != 'count':
+            raise Exception('Count data must be provided to Poisson regression model')
+
         if threshold == None:
             X_exog = self.X
             y = self.y
@@ -194,8 +309,24 @@ if __name__ == '__main__':
 #    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     periods = ('1tr',)
 #    years = ('08', '09', '10', '11')
-    years = ('08',)
+    years = ('09',)
     for period in periods:
         for aa in years:
             dtype = ('rcd', 'count')
-            x = Poisson(period, aa, dtype)
+            x = Data(period, aa, dtype)
+
+#            # Routine for descriptive statistics 
+#            db1_file = '/home/pgsqldata/Susep/stats.db'
+#            x1 = Data(period, aa, dtype)
+#            db1 = shelve.open(db1_file)
+#            db1[dtype[0]][period+aa]['y_'+dtype[1]] = x1.desc_stats['y']
+#            db1[dtype[0]][period+aa]['X'] = x1.desc_stats['X']
+#            db1.close()
+#            print('Descriptive stats for ' + period + aa + ' made persistent in db stats')
+#            
+#            # Routine for Poisson regression
+#            db2_file = '/home/pgsqldata/Susep/poisson.db'
+#            x2 = Poisson(period, aa, dtype)
+#            db2 = shelve.open(db2_file)
+#            db2[dtype[0]][period+aa]['-ln L'] = x2.fit.fun
+#            db2[dtype[0]][period+aa]['coeffs'] = x2.fit.x
