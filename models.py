@@ -26,7 +26,7 @@ class Data:
     '''
     Data preparation for subsequently running model.
     Loads data from files 'data_mmmaa.pkl' according to period request.
-    Returns X_exog', and 'y' according to data type requested ({'cas', 'rcd', 'app', 'out'} X {'claim', 'count'}).
+    Returns X', and 'y' according to data type requested ({'cas', 'rcd', 'app', 'out'} X {'claim', 'count'}).
     
     Parameters:
     ----------
@@ -131,16 +131,16 @@ class Data:
                 res['count='+str(i[0])] = i[1] / res['nobs']
                 
         if self.dtype[1] == 'claim':
-            res['claims'] = ((self.y[self.y>0].mean(), self.y[self.y>0].std()), (np.amin(self.y[self.y>0]), np.amax(self.y[self.y>0])))
+            res['claims'] = ((self.y[self.y>0.1].mean(), self.y[self.y>0.1].std()), (np.amin(self.y[self.y>0.1]), np.amax(self.y[self.y>0.1])))
 
         res['X'] = {}
         # Continuous variables
-        res['X']['exposure'] = ((np.exp(self.X[:, [0]]).mean(), np.exp(self.X[:, [0]]).std()), (np.amin(np.exp(self.X[:, [0]])), np.amax(np.exp(self.X[:, [0]]))))
+        res['X']['exposure'] = ((np.exp(self.X[:,[0]]).mean(), np.exp(self.X[:,[0]]).std()), (np.amin(np.exp(self.X[:,[0]])), np.amax(np.exp(self.X[:,[0]]))))
         res['X']['idade'] = ((self.X[:,[64]].mean(), self.X[:,[64]].std()), (np.amin(self.X[:,[64]]), np.amax(self.X[:,[64]])))
-        res['X']['val_franq'] = ((self.X[:,[79]].mean(), self.X[:,[79]].std()), (np.amin(self.X[:,[79]]), np.amax(self.X[:,[79]])))
-        res['X']['is_cas'] = ((self.X[:,[80]].mean(), self.X[:,[80]].std()), (np.amin(self.X[:,[80]]), np.amax(self.X[:,[80]])))
-        res['X']['is_rcd'] = ((self.X[:,[81]].mean(), self.X[:,[81]].std()), (np.amin(self.X[:,[81]]), np.amax(self.X[:,[81]])))
-        res['X']['is_app'] = ((self.X[:,[82]].mean(), self.X[:,[82]].std()), (np.amin(self.X[:,[82]]), np.amax(self.X[:,[82]])))
+        res['X']['val_franq'] = ((self.X[:,[79]].mean(), self.X[:,[79]].std()), (self.X[:,[79]][self.X[:,[79]]>1e-5].mean(), self.X[:,[79]][self.X[:,[79]]>1e-5].std()), (np.amin(self.X[:,[79]][self.X[:,[79]]>1e-5]), np.amax(self.X[:,[79]]), len(self.X[:,[79]][self.X[:,[79]]>1e-5]) / res['nobs']))
+        res['X']['is_cas'] = ((self.X[:,[80]].mean(), self.X[:,[80]].std()), (self.X[:,[80]][self.X[:,[80]]>1e-5].mean(), self.X[:,[80]][self.X[:,[80]]>1e-5].std()), (np.amin(self.X[:,[80]][self.X[:,[80]]>1e-5]), np.amax(self.X[:,[80]]), len(self.X[:,[80]][self.X[:,[80]]>1e-5]) / res['nobs']))
+        res['X']['is_rcd'] = (((self.X[:,[81]].mean(), self.X[:,[81]].std()), (self.X[:,[81]][self.X[:,[81]]>1e-5].mean(), self.X[:,[81]][self.X[:,[81]]>1e-5].std()), (np.amin(self.X[:,[81]][self.X[:,[81]]>1e-5]), np.amax(self.X[:,[81]])), len(self.X[:,[81]][self.X[:,[81]]>1e-5]) / res['nobs']))
+        res['X']['is_app'] = (((self.X[:,[82]].mean(), self.X[:,[82]].std()), (self.X[:,[82]][self.X[:,[82]]>1e-5].mean(), self.X[:,[82]][self.X[:,[82]]>1e-5].std()), (np.amin(self.X[:,[82]][self.X[:,[82]]>1e-5]), np.amax(self.X[:,[82]])), len(self.X[:,[82]][self.X[:,[82]]>1e-5]) / res['nobs']))
         # Discrete variables
         res['X']['ano_modelo'] = {}
         res['X']['ano_modelo']['0'] = len(self.X[:,2:10][np.where(~self.X[:,2:10].any(axis=1))[0]]) / res['nobs']
@@ -243,38 +243,39 @@ class Poisson(Data):
     Parameters:
     ----------
     data, must be data attribute previously generated from data class call
+    w
     dtype, 2-tuple with values in {'cas', 'rcd', 'app', 'out'} X {'count'}
     '''
 
     def __init__(self, period, aa, dtype, threshold=None):
-        super().__init__(period, aa, dtype)
-        
         if dtype[1] != 'count':
             raise Exception('Count data must be provided to Poisson regression model')
 
+        super().__init__(period, aa, dtype)
+
         if threshold == None:
-            X_exog = self.X
+            X = self.X
             y = self.y
 
-        def log_likelihood(x):
+        def log_likelihood(beta):
             '''Log-likelihood of Poisson regression model'''
         
-            res = np.sum(-y * np.dot(X_exog, x) + np.exp(np.dot(X_exog, x)) + np.log(factorial(y)))
+            res = np.sum(-y * np.dot(X, beta) + np.exp(np.dot(X, beta)) + np.log(factorial(y)))
             return res
         
-        def gradient(x):
+        def gradient(beta):
             '''Gradient of Log-likelihood of Poisson regression model'''
         
-            aux_vec = -y + np.exp(np.dot(X_exog, x))
-            res = (aux_vec[:, np.newaxis] *  X_exog).sum(axis=0)
+            aux_vec = -y + np.exp(np.dot(X, beta))
+            res = (aux_vec[:, np.newaxis] *  X).sum(axis=0)
             return res
 
-        x0 = np.zeros(len(X_exog[0]))
+        x0 = np.zeros(len(X[0]))
         x0[0] = 1
         x0[1] = np.log(sum(y)/len(y))
         prec_param = 1e-4
         bounds = ((1 - prec_param, 1 + prec_param),)
-        for i in range(len(X_exog[0])-1):
+        for i in range(len(X[0])-1):
             bounds += ((None, None),)
         
         res = minimize(log_likelihood, x0, method='TNC', jac=gradient, bounds=bounds, options={'disp': True})
@@ -286,47 +287,48 @@ class Poisson(Data):
         self.fit = res
 
 
-    def var_MLH(x):
-        '''Variance for Poisson MLE using Hessian'''
+    def var_MLH(self):
+        '''
+        Variance for Poisson MLE using Hessian
+        nan's are inserted where beta=0
+        '''
     
-        sum_res = 0
-        for i in range(len(y)):
-            sum_res += np.exp(np.dot(X_exog[i], x)) * np.outer(X_exog[i], X_exog[i])
-            return np.linalg.inv(sum_res)
-    
-    
-    def var_MLOP(x):
+        index0 = np.where(self.fit.x == 0)[0]
+        X = np.delete(self.X, index0, 1)
+        beta = np.delete(self.fit.x, index0)
+        mu = np.exp(np.dot(X, beta))[:, np.newaxis]
+        var = np.linalg.inv((X * mu).T @ X)
+        std = np.sqrt(np.diag(var))
+        var = np.insert(var, index0, np.nan, axis=0)
+        var = np.insert(var, index0, np.nan, axis=1)
+        std = np.insert(std, index0, np.nan)
+        return (std, var)
+
+    def var_MLOP(self):
         '''Variance for Poisson MLE using summed outer product of first derivatives'''
     
         sum_res = 0
         for i in range(len(y)):
             sum_res += (y[i] - np.exp(np.dot(X_exog[i], x)))**2 * np.outer(X_exog[i], X_exog[i])
-            return np.linalg.inv(sum_res)
+        return np.linalg.inv(sum_res)
+
+    def std_NB1(self):
+        pass
+
+    def std_NB2(self):
+        pass
 
 
 if __name__ == '__main__':
-#    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
-#    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
-    periods = ('1tr',)
-#    years = ('08', '09', '10', '11')
-    years = ('09',)
+    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
+    years = ('08', '09', '10', '11')
+    dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
     for period in periods:
         for aa in years:
-            dtype = ('rcd', 'count')
-            x = Data(period, aa, dtype)
-
-#            # Routine for descriptive statistics 
-#            db1_file = '/home/pgsqldata/Susep/stats.db'
-#            x1 = Data(period, aa, dtype)
-#            db1 = shelve.open(db1_file)
-#            db1[dtype[0]][period+aa]['y_'+dtype[1]] = x1.desc_stats['y']
-#            db1[dtype[0]][period+aa]['X'] = x1.desc_stats['X']
-#            db1.close()
-#            print('Descriptive stats for ' + period + aa + ' made persistent in db stats')
-#            
-#            # Routine for Poisson regression
-#            db2_file = '/home/pgsqldata/Susep/poisson.db'
-#            x2 = Poisson(period, aa, dtype)
-#            db2 = shelve.open(db2_file)
-#            db2[dtype[0]][period+aa]['-ln L'] = x2.fit.fun
-#            db2[dtype[0]][period+aa]['coeffs'] = x2.fit.x
+            for dtype in dtypes:
+                db_file = '/home/pgsqldata/Susep/Poisson_' + dtype[0] + '.db'
+                x = Poisson(period, aa, dtype)
+                db = shelve.open(db_file)
+                db[period+aa] = x
+                db.close()
+                print('Instance from Poisson class for period ' + period + aa + ' of type ' + dtype[0] + ' made persistent in db file')
