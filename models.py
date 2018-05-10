@@ -119,9 +119,7 @@ class Data:
         self.X = X
         self.y = y
         self.dtype = dtype
-    
-    def threshold(self, threshold):
-        pass
+
 
     def desc_stats(self):
         res = {}
@@ -248,15 +246,11 @@ class Poisson(Data):
     dtype, 2-tuple with values in {'cas', 'rcd', 'app', 'out'} X {'count'}
     '''
 
-    def __init__(self, period, aa, dtype, threshold=None):
+    def __init__(self, period, aa, dtype):
         if dtype[1] != 'count':
             raise Exception('Count data must be provided to Poisson regression model')
 
         super().__init__(period, aa, dtype)
-
-        if threshold == None:
-            X = self.X
-            y = self.y
 
         def log_likelihood(beta):
             '''Log-likelihood of Poisson regression model'''
@@ -303,7 +297,7 @@ class Poisson(Data):
         var = np.insert(var, index0, np.nan, axis=0)
         var = np.insert(var, index0, np.nan, axis=1)
         std = np.insert(std, index0, np.nan)
-        return (std, var)
+        return (var, std)
 
     def var_MLOP(self):
         '''Variance for Poisson MLE using summed outer product of first derivatives'''
@@ -318,7 +312,7 @@ class Poisson(Data):
         var = np.insert(var, index0, np.nan, axis=0)
         var = np.insert(var, index0, np.nan, axis=1)
         std = np.insert(std, index0, np.nan)
-        return (std, var)
+        return (var, std)
 
     def var_NB1(self):
         '''
@@ -337,7 +331,7 @@ class Poisson(Data):
         var = np.insert(var, index0, np.nan, axis=0)
         var = np.insert(var, index0, np.nan, axis=1)
         std = np.insert(std, index0, np.nan)
-        return (std, var, phi)
+        return (var, std, phi)
 
     def var_NB2(self):
         '''
@@ -356,7 +350,7 @@ class Poisson(Data):
         var = np.insert(var, index0, np.nan, axis=0)
         var = np.insert(var, index0, np.nan, axis=1)
         std = np.insert(std, index0, np.nan)
-        return (std, var, alpha)
+        return (var, std, alpha)
 
     def var_RS(self):
         '''
@@ -373,19 +367,21 @@ class Poisson(Data):
         var = np.insert(var, index0, np.nan, axis=0)
         var = np.insert(var, index0, np.nan, axis=1)
         std = np.insert(std, index0, np.nan)
-        return (std, var)
+        return (var, std)
 
 
 if __name__ == '__main__':
-    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
+#    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
+    periods = ('1tr', '2tr', '3tr', '4tr')
     years = ('08', '09', '10', '11')
     dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
     for period in periods:
         for aa in years:
             for dtype in dtypes:
-                db_file = '/home/pgsqldata/Susep/Poisson_' + dtype[0] + '.db'
+                db_file = '/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db'
                 x = Poisson(period, aa, dtype)
+                x_res_dict = {'-ln L': x.fit.fun, 'coeffs': x.fit.x, 'var_MLH': x.var_MLH()[0], 'std_MLH': x.var_MLH()[1], 'var_MLOP': x.var_MLOP()[0], 'std_MLOP': x.var_MLOP()[1], 'var_NB1': x.var_NB1()[0], 'std_NB1': x.var_NB1()[1], 'phi_NB1': x.var_NB1()[2], 'var_RS': x.var_RS()[0], 'std_RS': x.var_RS()[1]}
                 db = shelve.open(db_file)
-                db[period+aa] = x
+                db[period+aa] = x_res_dict
                 db.close()
                 print('Instance from Poisson class for period ' + period + aa + ' of type ' + dtype[0] + ' made persistent in db file')
