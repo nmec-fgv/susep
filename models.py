@@ -9,6 +9,7 @@ import numpy as np
 import shelve
 from scipy.special import factorial
 from scipy.optimize import minimize
+import pdb
 
 
 def file_load(filename):
@@ -290,7 +291,7 @@ class Poisson(Data):
     def var_MLH(self):
         '''
         Variance for Poisson MLE using Hessian
-        nan's are inserted where beta=0
+        For all variances, nan's are inserted where beta=0
         '''
     
         index0 = np.where(self.fit.x == 0)[0]
@@ -307,16 +308,72 @@ class Poisson(Data):
     def var_MLOP(self):
         '''Variance for Poisson MLE using summed outer product of first derivatives'''
     
-        sum_res = 0
-        for i in range(len(y)):
-            sum_res += (y[i] - np.exp(np.dot(X_exog[i], x)))**2 * np.outer(X_exog[i], X_exog[i])
-        return np.linalg.inv(sum_res)
+        index0 = np.where(self.fit.x == 0)[0]
+        X = np.delete(self.X, index0, 1)
+        y = self.y[:, np.newaxis]
+        beta = np.delete(self.fit.x, index0)
+        mu = np.exp(np.dot(X, beta))[:, np.newaxis]
+        var = np.linalg.inv((X * np.square(y - mu)).T @ X)
+        std = np.sqrt(np.diag(var))
+        var = np.insert(var, index0, np.nan, axis=0)
+        var = np.insert(var, index0, np.nan, axis=1)
+        std = np.insert(std, index0, np.nan)
+        return (std, var)
 
-    def std_NB1(self):
-        pass
+    def var_NB1(self):
+        '''
+        Variance assuming var = phi * mu
+        Returns parameter phi
+        '''
 
-    def std_NB2(self):
-        pass
+        index0 = np.where(self.fit.x == 0)[0]
+        X = np.delete(self.X, index0, 1)
+        y = self.y[:, np.newaxis]
+        beta = np.delete(self.fit.x, index0)
+        mu = np.exp(np.dot(X, beta))[:, np.newaxis]
+        phi = (len(X) - np.shape(self.X)[1])**(-1) * (np.square(y - mu)/mu).sum()
+        var = phi * np.linalg.inv((X * mu).T @ X)
+        std = np.sqrt(np.diag(var))
+        var = np.insert(var, index0, np.nan, axis=0)
+        var = np.insert(var, index0, np.nan, axis=1)
+        std = np.insert(std, index0, np.nan)
+        return (std, var, phi)
+
+    def var_NB2(self):
+        '''
+        Variance assuming var = mu + alpha * mu^2
+        Returns parameter alpha
+        '''
+
+        index0 = np.where(self.fit.x == 0)[0]
+        X = np.delete(self.X, index0, 1)
+        y = self.y[:, np.newaxis]
+        beta = np.delete(self.fit.x, index0)
+        mu = np.exp(np.dot(X, beta))[:, np.newaxis]
+        alpha = (len(X) - np.shape(self.X)[1])**(-1) * ((np.square(y - mu) - mu) / np.square(mu)).sum()
+        var = np.linalg.inv((X * mu).T @ X) @ ((X * (mu + alpha * np.square(mu))).T @ X) @ np.linalg.inv((X * mu).T @ X) 
+        std = np.sqrt(np.diag(var))
+        var = np.insert(var, index0, np.nan, axis=0)
+        var = np.insert(var, index0, np.nan, axis=1)
+        std = np.insert(std, index0, np.nan)
+        return (std, var, alpha)
+
+    def var_RS(self):
+        '''
+        Variance estimator robust to specification error
+        '''
+
+        index0 = np.where(self.fit.x == 0)[0]
+        X = np.delete(self.X, index0, 1)
+        y = self.y[:, np.newaxis]
+        beta = np.delete(self.fit.x, index0)
+        mu = np.exp(np.dot(X, beta))[:, np.newaxis]
+        var = np.linalg.inv((X * mu).T @ X) @ ((X * (np.square(y - mu))).T @ X) @ np.linalg.inv((X * mu).T @ X) 
+        std = np.sqrt(np.diag(var))
+        var = np.insert(var, index0, np.nan, axis=0)
+        var = np.insert(var, index0, np.nan, axis=1)
+        std = np.insert(std, index0, np.nan)
+        return (std, var)
 
 
 if __name__ == '__main__':
