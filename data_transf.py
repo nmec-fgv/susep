@@ -23,7 +23,7 @@ def data_transf(data):
     Transformation of database records for regression purposes
     
     Data encoding:
-    base class: ano_modelo=0, passeio nac, regiao met sp, sexo masc, contrato V.M.R., classe bonus=0, tipo franquia = 2 
+    base class: ano_modelo=0, passeio nac, regiao met sp, sexo masc, contrato V.M.R., classe bonus=0, tipo franquia=2 
     res[item][0] -> exposure in years
     res[item][1] -> constant 1
     res[item][2] -> dummy dif(ano modelo, ano apolice) = 1
@@ -415,8 +415,7 @@ def data_transf(data):
 
 
 if __name__ == '__main__':
-#    months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
-    months = ('jul', 'ago', 'set', 'out', 'nov', 'dez')
+    months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     years = ('08', '09', '10', '11')
     for mmm in months:
         for aa in years:

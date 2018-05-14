@@ -1,0 +1,106 @@
+
+\begin{center}
+    \begin{longtable}{*{7}{c}}
+        \caption{\large{Poisson PMLE with different standard error estimates - period: %(period)s, data type: %(dtype)s}} \\
+        \hline\hline\\[-1.8ex]
+        & & \multicolumn{4}{c}{Standard Errors} & \\
+        \cmidrule(l{.75em}){3-6} 
+        \textbf{Variable} & \begin{tabular}{@{}c@{}} \textbf{Coefficient,}\\ \textbf{Poisson PMLE} \end{tabular} & \textbf{MLH} & \textbf{MLOP} & \textbf{NB1} & \textbf{RS} & \begin{tabular}{@{}c@{}} \textbf{t Statistic,}\\ \textbf{MLH} \end{tabular} \\
+        \hline\\[-1.8ex]
+        \endfirsthead
+        \multicolumn{7}{c}
+        {\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+        \hline\\[-1.8ex]
+        & & \multicolumn{4}{c}{Standard Errors} & \\
+        \cmidrule(l{.75em}){3-6} 
+        \textbf{Variable} & \begin{tabular}{@{}c@{}} \textbf{Coefficient,}\\ \textbf{Poisson PMLE} \end{tabular} & \textbf{MLH} & \textbf{MLOP} & \textbf{NB1} & \textbf{RS} & \begin{tabular}{@{}c@{}} \textbf{t Statistic,}\\ \textbf{MLH} \end{tabular} \\
+        \hline\\[-1.8ex]
+        \endhead
+        \hline\\[-1.8ex] \multicolumn{4}{r}{\textit{Continued on next page}} \\
+        \endfoot
+        \hline\hline\\[-1.8ex]
+        \endlastfoot
+        \textit{ONE} & %(coeff1)5.4f & %(MLH1)5.4f & %(MLOP1)5.4f & %(NB11)5.4f & %(RS1)5.4f & %(tstat1)5.4f\\ 
+        \textit{AGEV1} & %(coeff2)5.4f & %(MLH2)5.4f & %(MLOP2)5.4f & %(NB12)5.4f & %(RS2)5.4f & %(tstat2)5.4f\\ 
+        \textit{AGEV2} & %(coeff3)5.4f & %(MLH3)5.4f & %(MLOP3)5.4f & %(NB13)5.4f & %(RS3)5.4f & %(tstat3)5.4f\\ 
+        \textit{AGEV3} & %(coeff4)5.4f & %(MLH4)5.4f & %(MLOP4)5.4f & %(NB14)5.4f & %(RS4)5.4f & %(tstat4)5.4f\\ 
+        \textit{AGEV4} & %(coeff5)5.4f & %(MLH5)5.4f & %(MLOP5)5.4f & %(NB15)5.4f & %(RS5)5.4f & %(tstat5)5.4f\\ 
+        \textit{AGEV5} & %(coeff6)5.4f & %(MLH6)5.4f & %(MLOP6)5.4f & %(NB16)5.4f & %(RS6)5.4f & %(tstat6)5.4f\\ 
+        \textit{AGEV6} & %(coeff7)5.4f & %(MLH7)5.4f & %(MLOP7)5.4f & %(NB17)5.4f & %(RS7)5.4f & %(tstat7)5.4f\\ 
+        \textit{AGEV11} & %(coeff8)5.4f & %(MLH8)5.4f & %(MLOP8)5.4f & %(NB18)5.4f & %(RS8)5.4f & %(tstat8)5.4f\\ 
+        \textit{AGEV20} & %(coeff9)5.4f & %(MLH9)5.4f & %(MLOP9)5.4f & %(NB19)5.4f & %(RS9)5.4f & %(tstat9)5.4f\\ 
+        \textit{TYPEV11} & %(coeff10)5.4f & %(MLH10)5.4f & %(MLOP10)5.4f & %(NB110)5.4f & %(RS10)5.4f & %(tstat10)5.4f\\ 
+        \textit{TYPEV14A} & %(coeff11)5.4f & %(MLH11)5.4f & %(MLOP11)5.4f & %(NB111)5.4f & %(RS11)5.4f & %(tstat11)5.4f\\ 
+        \textit{TYPEV14B} & %(coeff12)5.4f & %(MLH12)5.4f & %(MLOP12)5.4f & %(NB112)5.4f & %(RS12)5.4f & %(tstat12)5.4f\\ 
+        \textit{TYPEV14C} & %(coeff13)5.4f & %(MLH13)5.4f & %(MLOP13)5.4f & %(NB113)5.4f & %(RS13)5.4f & %(tstat13)5.4f\\ 
+        \textit{TYPEV15} & %(coeff14)5.4f & %(MLH14)5.4f & %(MLOP14)5.4f & %(NB114)5.4f & %(RS14)5.4f & %(tstat14)5.4f\\ 
+        \textit{TYPEV16} & %(coeff15)5.4f & %(MLH15)5.4f & %(MLOP15)5.4f & %(NB115)5.4f & %(RS15)5.4f & %(tstat15)5.4f\\ 
+        \textit{TYPEV17} & %(coeff16)5.4f & %(MLH16)5.4f & %(MLOP16)5.4f & %(NB116)5.4f & %(RS16)5.4f & %(tstat16)5.4f\\ 
+        \textit{TYPEV18} & %(coeff17)5.4f & %(MLH17)5.4f & %(MLOP17)5.4f & %(NB117)5.4f & %(RS17)5.4f & %(tstat17)5.4f\\ 
+        \textit{TYPEV19} & %(coeff18)5.4f & %(MLH18)5.4f & %(MLOP18)5.4f & %(NB118)5.4f & %(RS18)5.4f & %(tstat18)5.4f\\ 
+        \textit{TYPEV20} & %(coeff19)5.4f & %(MLH19)5.4f & %(MLOP19)5.4f & %(NB119)5.4f & %(RS19)5.4f & %(tstat19)5.4f\\ 
+        \textit{TYPEV21} & %(coeff20)5.4f & %(MLH20)5.4f & %(MLOP20)5.4f & %(NB120)5.4f & %(RS20)5.4f & %(tstat20)5.4f\\ 
+        \textit{TYPEV22} & %(coeff21)5.4f & %(MLH21)5.4f & %(MLOP21)5.4f & %(NB121)5.4f & %(RS21)5.4f & %(tstat21)5.4f\\ 
+        \textit{TYPEV23} & %(coeff22)5.4f & %(MLH22)5.4f & %(MLOP22)5.4f & %(NB122)5.4f & %(RS22)5.4f & %(tstat22)5.4f\\ 
+        \textit{REGION1} & %(coeff23)5.4f & %(MLH23)5.4f & %(MLOP23)5.4f & %(NB123)5.4f & %(RS23)5.4f & %(tstat23)5.4f\\ 
+        \textit{REGION2} & %(coeff24)5.4f & %(MLH24)5.4f & %(MLOP24)5.4f & %(NB124)5.4f & %(RS24)5.4f & %(tstat24)5.4f\\ 
+        \textit{REGION3} & %(coeff25)5.4f & %(MLH25)5.4f & %(MLOP25)5.4f & %(NB125)5.4f & %(RS25)5.4f & %(tstat25)5.4f\\ 
+        \textit{REGION4} & %(coeff26)5.4f & %(MLH26)5.4f & %(MLOP26)5.4f & %(NB126)5.4f & %(RS26)5.4f & %(tstat26)5.4f\\ 
+        \textit{REGION5} & %(coeff27)5.4f & %(MLH27)5.4f & %(MLOP27)5.4f & %(NB127)5.4f & %(RS27)5.4f & %(tstat27)5.4f\\ 
+        \textit{REGION6} & %(coeff28)5.4f & %(MLH28)5.4f & %(MLOP28)5.4f & %(NB128)5.4f & %(RS28)5.4f & %(tstat28)5.4f\\ 
+        \textit{REGION7} & %(coeff29)5.4f & %(MLH29)5.4f & %(MLOP29)5.4f & %(NB129)5.4f & %(RS29)5.4f & %(tstat29)5.4f\\ 
+        \textit{REGION8} & %(coeff30)5.4f & %(MLH30)5.4f & %(MLOP30)5.4f & %(NB130)5.4f & %(RS30)5.4f & %(tstat30)5.4f\\ 
+        \textit{REGION9} & %(coeff31)5.4f & %(MLH31)5.4f & %(MLOP31)5.4f & %(NB131)5.4f & %(RS31)5.4f & %(tstat31)5.4f\\ 
+        \textit{REGION10} & %(coeff32)5.4f & %(MLH32)5.4f & %(MLOP32)5.4f & %(NB132)5.4f & %(RS32)5.4f & %(tstat32)5.4f\\ 
+        \textit{REGION12} & %(coeff34)5.4f & %(MLH34)5.4f & %(MLOP34)5.4f & %(NB134)5.4f & %(RS34)5.4f & %(tstat34)5.4f\\ 
+        \textit{REGION13} & %(coeff35)5.4f & %(MLH35)5.4f & %(MLOP35)5.4f & %(NB135)5.4f & %(RS35)5.4f & %(tstat35)5.4f\\ 
+        \textit{REGION14} & %(coeff36)5.4f & %(MLH36)5.4f & %(MLOP36)5.4f & %(NB136)5.4f & %(RS36)5.4f & %(tstat36)5.4f\\ 
+        \textit{REGION15} & %(coeff37)5.4f & %(MLH37)5.4f & %(MLOP37)5.4f & %(NB137)5.4f & %(RS37)5.4f & %(tstat37)5.4f\\ 
+        \textit{REGION16} & %(coeff38)5.4f & %(MLH38)5.4f & %(MLOP38)5.4f & %(NB138)5.4f & %(RS38)5.4f & %(tstat38)5.4f\\ 
+        \textit{REGION17} & %(coeff39)5.4f & %(MLH39)5.4f & %(MLOP39)5.4f & %(NB139)5.4f & %(RS39)5.4f & %(tstat39)5.4f\\ 
+        \textit{REGION18} & %(coeff40)5.4f & %(MLH40)5.4f & %(MLOP40)5.4f & %(NB140)5.4f & %(RS40)5.4f & %(tstat40)5.4f\\ 
+        \textit{REGION19} & %(coeff41)5.4f & %(MLH41)5.4f & %(MLOP41)5.4f & %(NB141)5.4f & %(RS41)5.4f & %(tstat41)5.4f\\ 
+        \textit{REGION20} & %(coeff42)5.4f & %(MLH42)5.4f & %(MLOP42)5.4f & %(NB142)5.4f & %(RS42)5.4f & %(tstat42)5.4f\\ 
+        \textit{REGION21} & %(coeff43)5.4f & %(MLH43)5.4f & %(MLOP43)5.4f & %(NB143)5.4f & %(RS43)5.4f & %(tstat43)5.4f\\ 
+        \textit{REGION22} & %(coeff44)5.4f & %(MLH44)5.4f & %(MLOP44)5.4f & %(NB144)5.4f & %(RS44)5.4f & %(tstat44)5.4f\\ 
+        \textit{REGION23} & %(coeff45)5.4f & %(MLH45)5.4f & %(MLOP45)5.4f & %(NB145)5.4f & %(RS45)5.4f & %(tstat45)5.4f\\ 
+        \textit{REGION24} & %(coeff46)5.4f & %(MLH46)5.4f & %(MLOP46)5.4f & %(NB146)5.4f & %(RS46)5.4f & %(tstat46)5.4f\\ 
+        \textit{REGION25} & %(coeff47)5.4f & %(MLH47)5.4f & %(MLOP47)5.4f & %(NB147)5.4f & %(RS47)5.4f & %(tstat47)5.4f\\ 
+        \textit{REGION26} & %(coeff48)5.4f & %(MLH48)5.4f & %(MLOP48)5.4f & %(NB148)5.4f & %(RS48)5.4f & %(tstat48)5.4f\\ 
+        \textit{REGION27} & %(coeff49)5.4f & %(MLH49)5.4f & %(MLOP49)5.4f & %(NB149)5.4f & %(RS49)5.4f & %(tstat49)5.4f\\ 
+        \textit{REGION28} & %(coeff50)5.4f & %(MLH50)5.4f & %(MLOP50)5.4f & %(NB150)5.4f & %(RS50)5.4f & %(tstat50)5.4f\\ 
+        \textit{REGION29} & %(coeff51)5.4f & %(MLH51)5.4f & %(MLOP51)5.4f & %(NB151)5.4f & %(RS51)5.4f & %(tstat51)5.4f\\ 
+        \textit{REGION30} & %(coeff52)5.4f & %(MLH52)5.4f & %(MLOP52)5.4f & %(NB152)5.4f & %(RS52)5.4f & %(tstat52)5.4f\\ 
+        \textit{REGION31} & %(coeff53)5.4f & %(MLH53)5.4f & %(MLOP53)5.4f & %(NB153)5.4f & %(RS53)5.4f & %(tstat53)5.4f\\ 
+        \textit{REGION32} & %(coeff54)5.4f & %(MLH54)5.4f & %(MLOP54)5.4f & %(NB154)5.4f & %(RS54)5.4f & %(tstat54)5.4f\\ 
+        \textit{REGION33} & %(coeff55)5.4f & %(MLH55)5.4f & %(MLOP55)5.4f & %(NB155)5.4f & %(RS55)5.4f & %(tstat55)5.4f\\ 
+        \textit{REGION34} & %(coeff56)5.4f & %(MLH56)5.4f & %(MLOP56)5.4f & %(NB156)5.4f & %(RS56)5.4f & %(tstat56)5.4f\\ 
+        \textit{REGION35} & %(coeff57)5.4f & %(MLH57)5.4f & %(MLOP57)5.4f & %(NB157)5.4f & %(RS57)5.4f & %(tstat57)5.4f\\ 
+        \textit{REGION36} & %(coeff58)5.4f & %(MLH58)5.4f & %(MLOP58)5.4f & %(NB158)5.4f & %(RS58)5.4f & %(tstat58)5.4f\\ 
+        \textit{REGION37} & %(coeff59)5.4f & %(MLH59)5.4f & %(MLOP59)5.4f & %(NB159)5.4f & %(RS59)5.4f & %(tstat59)5.4f\\ 
+        \textit{REGION38} & %(coeff60)5.4f & %(MLH60)5.4f & %(MLOP60)5.4f & %(NB160)5.4f & %(RS60)5.4f & %(tstat60)5.4f\\ 
+        \textit{REGION39} & %(coeff61)5.4f & %(MLH61)5.4f & %(MLOP61)5.4f & %(NB161)5.4f & %(RS61)5.4f & %(tstat61)5.4f\\ 
+        \textit{REGION40} & %(coeff62)5.4f & %(MLH62)5.4f & %(MLOP62)5.4f & %(NB162)5.4f & %(RS62)5.4f & %(tstat62)5.4f\\ 
+        \textit{REGION41} & %(coeff62)5.4f & %(MLH62)5.4f & %(MLOP62)5.4f & %(NB162)5.4f & %(RS62)5.4f & %(tstat62)5.4f\\ 
+        \textit{SEXF} & %(coeff63)5.4f & %(MLH63)5.4f & %(MLOP63)5.4f & %(NB163)5.4f & %(RS63)5.4f & %(tstat63)5.4f\\ 
+        \textit{AGE} & %(coeff64)5.4f & %(MLH64)5.4f & %(MLOP64)5.4f & %(NB164)5.4f & %(RS64)5.4f & %(tstat64)5.4f\\ 
+        \textit{POLTYPE} & %(coeff65)5.4f & %(MLH65)5.4f & %(MLOP65)5.4f & %(NB165)5.4f & %(RS65)5.4f & %(tstat65)5.4f\\ 
+        \textit{BONUSC1} & %(coeff66)5.4f & %(MLH66)5.4f & %(MLOP66)5.4f & %(NB166)5.4f & %(RS66)5.4f & %(tstat66)5.4f\\ 
+        \textit{BONUSC2} & %(coeff67)5.4f & %(MLH67)5.4f & %(MLOP67)5.4f & %(NB167)5.4f & %(RS67)5.4f & %(tstat67)5.4f\\ 
+        \textit{BONUSC3} & %(coeff68)5.4f & %(MLH68)5.4f & %(MLOP68)5.4f & %(NB168)5.4f & %(RS68)5.4f & %(tstat68)5.4f\\ 
+        \textit{BONUSC4} & %(coeff69)5.4f & %(MLH69)5.4f & %(MLOP69)5.4f & %(NB169)5.4f & %(RS69)5.4f & %(tstat69)5.4f\\ 
+        \textit{BONUSC5} & %(coeff70)5.4f & %(MLH70)5.4f & %(MLOP70)5.4f & %(NB170)5.4f & %(RS70)5.4f & %(tstat70)5.4f\\ 
+        \textit{BONUSC6} & %(coeff71)5.4f & %(MLH71)5.4f & %(MLOP71)5.4f & %(NB171)5.4f & %(RS71)5.4f & %(tstat71)5.4f\\ 
+        \textit{BONUSC7} & %(coeff72)5.4f & %(MLH72)5.4f & %(MLOP72)5.4f & %(NB172)5.4f & %(RS72)5.4f & %(tstat72)5.4f\\ 
+        \textit{BONUSC8} & %(coeff73)5.4f & %(MLH73)5.4f & %(MLOP73)5.4f & %(NB173)5.4f & %(RS73)5.4f & %(tstat73)5.4f\\ 
+        \textit{BONUSC9} & %(coeff74)5.4f & %(MLH74)5.4f & %(MLOP74)5.4f & %(NB174)5.4f & %(RS74)5.4f & %(tstat74)5.4f\\ 
+        \textit{DEDUCT1} & %(coeff75)5.4f & %(MLH75)5.4f & %(MLOP75)5.4f & %(NB175)5.4f & %(RS75)5.4f & %(tstat75)5.4f\\ 
+        \textit{DEDUCT3} & %(coeff76)5.4f & %(MLH76)5.4f & %(MLOP76)5.4f & %(NB176)5.4f & %(RS76)5.4f & %(tstat76)5.4f\\ 
+        \textit{DEDUCT4} & %(coeff77)5.4f & %(MLH77)5.4f & %(MLOP77)5.4f & %(NB177)5.4f & %(RS77)5.4f & %(tstat77)5.4f\\ 
+        \textit{DEDUCT9} & %(coeff78)5.4f & %(MLH78)5.4f & %(MLOP78)5.4f & %(NB178)5.4f & %(RS78)5.4f & %(tstat78)5.4f\\ 
+        \textit{DEDUCTV} & %(coeff79)5.4f & %(MLH79)5.4f & %(MLOP79)5.4f & %(NB179)5.4f & %(RS79)5.4f & %(tstat79)5.4f\\ 
+        \textit{COVCAS} & %(coeff80)5.4f & %(MLH80)5.4f & %(MLOP80)5.4f & %(NB180)5.4f & %(RS80)5.4f & %(tstat80)5.4f\\ 
+        \textit{COVRCD} & %(coeff81)5.4f & %(MLH81)5.4f & %(MLOP81)5.4f & %(NB181)5.4f & %(RS81)5.4f & %(tstat81)5.4f\\ 
+        \textit{COVAPP} & %(coeff82)5.4f & %(MLH82)5.4f & %(MLOP82)5.4f & %(NB182)5.4f & %(RS82)5.4f & %(tstat82)5.4f\\ 
+    \end{longtable}
+\end{center}
