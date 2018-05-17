@@ -5,6 +5,8 @@
 import os
 import pickle
 import numpy as np
+import re
+import pdb
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -114,7 +116,7 @@ def data_transf(data):
     '''
 
     res = []
-    for item, x in enumerate(data0):
+    for item, x in enumerate(data):
         res.append([0] * 87)
         res[item][1] = 1
         res[item][83] = []
@@ -140,7 +142,7 @@ def data_transf(data):
         elif (2000 + int(aa) - x[1]) > 20:
             res[item][9] = 1
 
-        if x[2] == ' 11':
+        if x[2] == ' 11' or x[2] == '11 ':
             res[item][10] = 1
         if x[2] == '14A':
             res[item][11] = 1
@@ -148,23 +150,23 @@ def data_transf(data):
             res[item][12] = 1
         if x[2] == '14C':
             res[item][13] = 1
-        if x[2] == ' 15':
+        if x[2] == ' 15' or x[2] == '15 ':
             res[item][14] = 1
-        if x[2] == ' 16':
+        if x[2] == ' 16' or x[2] == '16 ':
             res[item][15] = 1
-        if x[2] == ' 17':
+        if x[2] == ' 17' or x[2] == '17 ':
             res[item][16] = 1
-        if x[2] == ' 18':
+        if x[2] == ' 18' or x[2] == '18 ':
             res[item][17] = 1
-        if x[2] == ' 19':
+        if x[2] == ' 19' or x[2] == '19 ':
             res[item][18] = 1
-        if x[2] == ' 20':
+        if x[2] == ' 20' or x[2] == '20 ':
             res[item][19] = 1
-        if x[2] == ' 21':
+        if x[2] == ' 21' or x[2] == '21 ':
             res[item][20] = 1
-        if x[2] == ' 22':
+        if x[2] == ' 22' or x[2] == '22 ':
             res[item][21] = 1
-        if x[2] == ' 23':
+        if x[2] == ' 23' or x[2] == '23 ':
             res[item][22] = 1
 
         if x[3] == '01':
@@ -255,6 +257,11 @@ def data_transf(data):
         res[item][64] += relativedelta(x[4], x[7]).months / 12
         res[item][64] += relativedelta(x[4], x[7]).days / 365.2425
 
+        if x[8] != None:
+            aux8 = list(zip(re.findall(r' "(\d)" ', x[8]), re.findall(r'"f1":(\d+)', x[8]), re.findall(r'"f2":"(\d+-\d+-\d+)"', x[8])))
+        if x[9] != None:
+            aux9 = list(zip(re.findall(r'"f1":"(\d)"', x[9]), re.findall(r'"f2":"(\d+-\d+-\d+)"', x[9])))
+
         if x[8] == None and x[9] == None:
             delta_years = 0
             delta_years += relativedelta(x[5], x[4]).years
@@ -263,12 +270,12 @@ def data_transf(data):
             res[item][0] = delta_years
         elif x[8] == None and x[9] != None:
             fim_vig = x[5]
-            for i in x[9].values():
-                if i['f1'] in {'2', '3'}:
-                    if (datetime.strptime(i['f2'], '%Y-%m-%d').date()-x[4]).days < 0:
+            for i in aux9:
+                if i[0] in {'1', '2', '3'}:
+                    if (datetime.strptime(i[1], '%Y-%m-%d').date()-x[4]).days < 0:
                         fim_vig = x[4]
                     else:
-                        fim_vig = datetime.strptime(i['f2'], '%Y-%m-%d').date()
+                        fim_vig = datetime.strptime(i[1], '%Y-%m-%d').date()
 
             delta_years = 0
             delta_years += relativedelta(fim_vig, x[4]).years
@@ -280,31 +287,31 @@ def data_transf(data):
             aux_dict_rcd = {}
             aux_dict_app = {}
             aux_dict_out = {}
-            for j, k in zip(x[8].keys(), x[8].values()):
-                if j in {'1'}:
-                    if k['f1'] > 0:
-                        if k['f2'] not in aux_dict_cas.keys():
-                            aux_dict_cas[k['f2']] = k['f1']
+            for i in aux8:
+                if i[0] in {'1'}:
+                    if float(i[1]) > 1:
+                        if i[2] not in aux_dict_cas.keys():
+                            aux_dict_cas[i[2]] = float(i[1])
                         else:
-                            aux_dict_cas[k['f2']] += k['f1']
-                elif j in {'2', '3', '4'}:
-                    if k['f1'] > 0:
-                        if k['f2'] not in aux_dict_rcd.keys():
-                            aux_dict_rcd[k['f2']] = k['f1']
+                            aux_dict_cas[i[2]] += float(i[1])
+                elif i[0] in {'2', '3', '4'}:
+                    if float(i[1]) > 1:
+                        if i[2] not in aux_dict_rcd.keys():
+                            aux_dict_rcd[i[2]] = float(i[1])
                         else:
-                            aux_dict_rcd[k['f2']] += k['f1']
-                elif j in {'5', '6', '7'}:
-                    if k['f1'] > 0:
-                        if k['f2'] not in aux_dict_app.keys():
-                            aux_dict_app[k['f2']] = k['f1']
+                            aux_dict_rcd[i[2]] += float(i[1])
+                elif i[0] in {'5', '6', '7'}:
+                    if float(i[1]) > 1:
+                        if i[2] not in aux_dict_app.keys():
+                            aux_dict_app[i[2]] = float(i[1])
                         else:
-                            aux_dict_app[k['f2']] += k['f1']
-                elif j in {'8'}:
-                    if k['f1'] > 0:
-                        if k['f2'] not in aux_dict_out.keys():
-                            aux_dict_out[k['f2']] = k['f1']
+                            aux_dict_app[i[2]] += float(i[1])
+                elif i[0] in {'8'}:
+                    if float(i[1]) > 1:
+                        if i[2] not in aux_dict_out.keys():
+                            aux_dict_out[i[2]] = float(i[1])
                         else:
-                            aux_dict_out[k['f2']] += k['f1']
+                            aux_dict_out[i[2]] += float(i[1])
 
             for i in aux_dict_cas.values():
                 res[item][83].append(i)
@@ -321,36 +328,49 @@ def data_transf(data):
             delta_years += relativedelta(x[5], x[4]).days / 365.2425
             res[item][0] = delta_years
         else:
+            fim_vig = x[5]
+            for i in aux9:
+                if i[0] in {'1', '2', '3'}:
+                    if (datetime.strptime(i[1], '%Y-%m-%d').date()-x[4]).days < 0:
+                        fim_vig = x[4]
+                    else:
+                        fim_vig = datetime.strptime(i[1], '%Y-%m-%d').date()
+            
+            delta_years = 0
+            delta_years += relativedelta(fim_vig, x[4]).years
+            delta_years += relativedelta(fim_vig, x[4]).months / 12
+            delta_years += relativedelta(fim_vig, x[4]).days / 365.2425
+            res[item][0] = delta_years
+            
             aux_dict_cas = {}
             aux_dict_rcd = {}
             aux_dict_app = {}
             aux_dict_out = {}
-            fim_vig = x[5]
-            for j, k in zip(x[8].keys(), x[8].values()):
-                if j in {'1'}:
-                    if k['f1'] > 0:
-                        if k['f2'] not in aux_dict_cas.keys():
-                            aux_dict_cas[k['f2']] = k['f1']
+            for i in aux8:
+                if i[0] in {'1'}:
+                    if float(i[1]) > 1 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
+                        if i[2] not in aux_dict_cas.keys():
+                            aux_dict_cas[i[2]] = float(i[1])
                         else:
-                            aux_dict_cas[k['f2']] += k['f1']
-                elif j in {'2', '3', '4'}:
-                    if k['f1'] > 0:
-                        if k['f2'] not in aux_dict_rcd.keys():
-                            aux_dict_rcd[k['f2']] = k['f1']
+                            aux_dict_cas[i[2]] += float(i[1])
+                elif i[0] in {'2', '3', '4'}:
+                    if float(i[1]) > 1 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
+                        if i[2] not in aux_dict_rcd.keys():
+                            aux_dict_rcd[i[2]] = float(i[1])
                         else:
-                            aux_dict_rcd[k['f2']] += k['f1']
-                elif j in {'5', '6', '7'}:
-                    if k['f1'] > 0:
-                        if k['f2'] not in aux_dict_app.keys():
-                            aux_dict_app[k['f2']] = k['f1']
+                            aux_dict_rcd[i[2]] += float(i[1])
+                elif i[0] in {'5', '6', '7'}:
+                    if float(i[1]) > 1 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
+                        if i[2] not in aux_dict_app.keys():
+                            aux_dict_app[i[2]] = float(i[1])
                         else:
-                            aux_dict_app[k['f2']] += k['f1']
-                elif j in {'8'}:
-                    if k['f1'] > 0:
-                        if k['f2'] not in aux_dict_out.keys():
-                            aux_dict_out[k['f2']] = k['f1']
+                            aux_dict_app[i[2]] += float(i[1])
+                elif i[0] in {'8'}:
+                    if float(i[1]) > 1 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
+                        if i[2] not in aux_dict_out.keys():
+                            aux_dict_out[i[2]] = float(i[1])
                         else:
-                            aux_dict_out[k['f2']] += k['f1']
+                            aux_dict_out[i[2]] += float(i[1])
 
             for i in aux_dict_cas.values():
                 res[item][83].append(i)
@@ -360,19 +380,6 @@ def data_transf(data):
                 res[item][85].append(i)
             for i in aux_dict_out.values():
                 res[item][86].append(i)
-
-            for i in x[9].values():
-                if i['f1'] in {'2', '3'}:
-                    if (datetime.strptime(i['f2'], '%Y-%m-%d').date()-x[4]).days < 0:
-                        fim_vig = x[4]
-                    else:
-                        fim_vig = datetime.strptime(i['f2'], '%Y-%m-%d').date()
-            
-            delta_years = 0
-            delta_years += relativedelta(fim_vig, x[4]).years
-            delta_years += relativedelta(fim_vig, x[4]).months / 12
-            delta_years += relativedelta(fim_vig, x[4]).days / 365.2425
-            res[item][0] = delta_years
 
         if x[0] == '2':
             res[item][65] = 1

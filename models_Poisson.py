@@ -374,18 +374,24 @@ class Poisson(Data):
 
 if __name__ == '__main__':
     try:
-        os.remove('/home/ricardob/susep/models.log')
+        os.remove('/home/ricardob/susep/models_Poisson.log')
     except OSError:
         pass
 
-    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
+#    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
+    periods = ('1tr', '2tr', '3tr', '4tr')
     years = ('08', '09', '10', '11')
-    dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
+#    dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
+    dtypes =(('cas', 'count'),)
     for period in periods:
         for aa in years:
             for dtype in dtypes:
                 db_file = '/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db'
                 x = Poisson(period, aa, dtype)
+                if x.fit.success == 0:
+                    with open('models_Poisson.log', 'a') as log_file:
+                        log_file.write('\n' + period + aa + dtype[0] + ' coeffs failed')
+                    continue
                 try:
                     x_res_dict = {'desc_stats': x.desc_stats(), '-ln L': x.fit.fun, 'coeffs': x.fit.x[1:], 'var_MLH': x.var_MLH()[0], 'std_MLH': x.var_MLH()[1], 'var_MLOP': x.var_MLOP()[0], 'std_MLOP': x.var_MLOP()[1], 'var_NB1': x.var_NB1()[0], 'std_NB1': x.var_NB1()[1], 'phi_NB1': x.var_NB1()[2], 'var_RS': x.var_RS()[0], 'std_RS': x.var_RS()[1]}
                 except:
@@ -396,16 +402,16 @@ if __name__ == '__main__':
                     except:
                         x_res_dict['var_MLH'] =  np.zeros((82, 82))
                         x_res_dict['std_MLH'] =  np.zeros(82)
-                        with open('models.log', 'a') as log_file:
-                            log_file.write('\n' + period + aa + ' var_MLH failed')
+                        with open('models_Poisson.log', 'a') as log_file:
+                            log_file.write('\n' + period + aa + dtype[0] + ' var_MLH failed')
                     try:
                         x_res_dict['var_MLOP'] =  x.var_MLOP()[0]
                         x_res_dict['std_MLOP'] =  x.var_MLOP()[1]
                     except:
                         x_res_dict['var_MLOP'] =  np.zeros((82, 82))
                         x_res_dict['std_MLOP'] =  np.zeros(82)
-                        with open('models.log', 'a') as log_file:
-                            log_file.write('\n' + period + aa + ' var_MLOP failed')
+                        with open('models_Poisson.log', 'a') as log_file:
+                            log_file.write('\n' + period + aa + dtype[0] + ' var_MLOP failed')
                     try:
                         x_res_dict['var_NB1'] =  x.var_NB1()[0]
                         x_res_dict['std_NB1'] =  x.var_NB1()[1]
@@ -414,16 +420,16 @@ if __name__ == '__main__':
                         x_res_dict['var_NB1'] =  np.zeros((82, 82))
                         x_res_dict['std_NB1'] =  np.zeros(82)
                         x_res_dict['phi_NB1'] =  0
-                        with open('models.log', 'a') as log_file:
-                            log_file.write('\n' + period + aa + ' var_NB1 failed')
+                        with open('models_Poisson.log', 'a') as log_file:
+                            log_file.write('\n' + period + aa + dtype[0] + ' var_NB1 failed')
                     try:
                         x_res_dict['var_RS'] =  x.var_RS()[0]
                         x_res_dict['std_RS'] =  x.var_RS()[1]
                     except:
                         x_res_dict['var_RS'] =  np.zeros((82, 82))
                         x_res_dict['std_RS'] = np.zeros(82)
-                        with open('models.log', 'a') as log_file:
-                            log_file.write('\n' + period + aa + ' var_NB1 failed')
+                        with open('models_Poisson.log', 'a') as log_file:
+                            log_file.write('\n' + period + aa + dtype[0] + ' var_RS failed')
 
 
                 db = shelve.open(db_file)
