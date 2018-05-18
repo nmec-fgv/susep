@@ -116,6 +116,7 @@ class Data:
         X = np.asarray(X)
         X[:,[64]] = X[:,[64]] / 100
         X[:,79:83] = X[:,79:83] / 100000
+        X = np.append(X, np.square(X[:, [64]]), axis=1)
         self.X = X
         self.y = y
         self.dtype = dtype
@@ -128,6 +129,8 @@ class Data:
             (elem, freq) = np.unique(self.y, return_counts=True)
             for i in zip(elem, freq):
                 res['count='+str(i[0])] = i[1] / res['nobs']
+            res['count_mean'] = np.mean(self.y)
+            res['count_std'] = np.std(self.y)
                 
         if self.dtype[1] == 'claim':
             res['claims'] = ((self.y[self.y>0.1].mean(), self.y[self.y>0.1].std()), (np.amin(self.y[self.y>0.1]), np.amax(self.y[self.y>0.1])))
@@ -235,54 +238,75 @@ class Data:
         return res
  
 
-class Poisson(Data):
+class Poisson_regress(Data):
     '''
     Provides estimation of Poisson regression model, MLE and PMLE coincide.
 
     Parameters:
     ----------
-    data, must be data attribute previously generated from data class call
-    w
+    period, aa
     dtype, 2-tuple with values in {'cas', 'rcd', 'app', 'out'} X {'count'}
+    grab_results - bypasses optimization procedure, grabing results from file instead
     '''
 
-    def __init__(self, period, aa, dtype):
-        if dtype[1] != 'count':
-            raise Exception('Count data must be provided to Poisson regression model')
-
-        super().__init__(period, aa, dtype)
-        X = self.X
-        y = self.y
-
-        def log_likelihood(beta):
-            '''Log-likelihood of Poisson regression model'''
-        
-            res = np.sum(-y * np.dot(X, beta) + np.exp(np.dot(X, beta)) + np.log(factorial(y)))
-            return res
-        
-        def gradient(beta):
-            '''Gradient of Log-likelihood of Poisson regression model'''
-        
-            aux_vec = -y + np.exp(np.dot(X, beta))
-            res = (aux_vec[:, np.newaxis] *  X).sum(axis=0)
-            return res
-
-        x0 = np.zeros(len(X[0]))
-        x0[0] = 1
-        x0[1] = np.log(sum(y)/len(y))
-        prec_param = 1e-4
-        bounds = ((1 - prec_param, 1 + prec_param),)
-        for i in range(len(X[0])-1):
-            bounds += ((None, None),)
-        
-        res = minimize(log_likelihood, x0, method='TNC', jac=gradient, bounds=bounds, options={'disp': True})
-        if res.success == 0:
-            res = minimize(log_likelihood, x0, method='L-BFGS-B', jac=gradient, bounds=bounds, options={'disp': True})
+    def __init__(self, period, aa, dtype, grab_results='no'):
+        if grab_results == 'no':
+            if dtype[1] != 'count':
+                raise Exception('Count data must be provided to Poisson regression model')
+    
+            super().__init__(period, aa, dtype)
+            X = self.X
+            y = self.y
+    
+            def log_likelihood(beta):
+                '''Log-likelihood of Poisson regression model'''
+            
+                res = np.sum(-y * np.dot(X, beta) + np.exp(np.dot(X, beta)) + np.log(factorial(y)))
+                return res
+            
+            def gradient(beta):
+                '''Gradient of Log-likelihood of Poisson regression model'''
+            
+                aux_vec = -y + np.exp(np.dot(X, beta))
+                res = (aux_vec[:, np.newaxis] *  X).sum(axis=0)
+                return res
+    
+            x0 = np.zeros(len(X[0]))
+            x0[0] = 1
+            x0[1] = np.log(sum(y)/len(y))
+            prec_param = 1e-4
+            bounds = ((1 - prec_param, 1 + prec_param),)
+            for i in range(len(X[0])-1):
+                bounds += ((None, None),)
+            
+            res = minimize(log_likelihood, x0, method='TNC', jac=gradient, bounds=bounds, options={'disp': True})
             if res.success == 0:
-                res = minimize(log_likelihood, x0, method='SLSQP', jac=gradient, bounds=bounds, options={'disp': True})
+                res = minimize(log_likelihood, x0, method='L-BFGS-B', jac=gradient, bounds=bounds, options={'disp': True})
+                if res.success == 0:
+                    res = minimize(log_likelihood, x0, method='SLSQP', jac=gradient, bounds=bounds, options={'disp': True})
+    
+            self.fit_success = res.success
+            self.fit_x = res.x
+            self.fit_fun = res.fun
+        
+        elif grab_results == 'yes':
+            if dtype[1] != 'count':
+                raise Exception('Count data must be provided to Poisson regression model')
+            
+            super().__init__(period, aa, dtype)
+            X = self.X
+            y = self.y
 
-        self.fit = res
+            try:
+                os.path.exists('/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db')
+            except Exception as error:
+                print('File PoissonResults_' + dtype[0] + '.db not found')
 
+            x_res_dict = shelve.open('/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db')
+            self.fit_success = x_res_dict[period+aa]['success']
+            self.fit_x = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
+            self.fit_fun = x_res_dict[period+aa]['-ln L']
+            x_res_dict.close()
 
     def var_MLH(self):
         '''
@@ -290,10 +314,9 @@ class Poisson(Data):
         For all variances, nan's are inserted where beta=0
         '''
     
-        index0 = np.where(self.fit.x[1:] == 0)[0]
+        mu = np.exp(np.dot(self.X, self.fit_x))[:, np.newaxis]
+        index0 = np.where(self.fit_x[1:] == 0)[0]
         X = np.delete(self.X[:, 1:], index0, 1)
-        beta = np.delete(self.fit.x[1:], index0)
-        mu = np.exp(np.dot(X, beta))[:, np.newaxis]
         var = np.linalg.inv((X * mu).T @ X)
         std = np.sqrt(np.diag(var))
         var = np.insert(var, index0, np.nan, axis=0)
@@ -304,11 +327,10 @@ class Poisson(Data):
     def var_MLOP(self):
         '''Variance for Poisson MLE using summed outer product of first derivatives'''
     
-        index0 = np.where(self.fit.x[1:] == 0)[0]
+        mu = np.exp(np.dot(self.X, self.fit_x))[:, np.newaxis]
+        index0 = np.where(self.fit_x[1:] == 0)[0]
         X = np.delete(self.X[:, 1:], index0, 1)
         y = self.y[:, np.newaxis]
-        beta = np.delete(self.fit.x[1:], index0)
-        mu = np.exp(np.dot(X, beta))[:, np.newaxis]
         var = np.linalg.inv((X * np.square(y - mu)).T @ X)
         std = np.sqrt(np.diag(var))
         var = np.insert(var, index0, np.nan, axis=0)
@@ -322,12 +344,11 @@ class Poisson(Data):
         Returns parameter phi
         '''
 
-        index0 = np.where(self.fit.x[1:] == 0)[0]
+        mu = np.exp(np.dot(self.X, self.fit_x))[:, np.newaxis]
+        index0 = np.where(self.fit_x[1:] == 0)[0]
         X = np.delete(self.X[:, 1:], index0, 1)
         y = self.y[:, np.newaxis]
-        beta = np.delete(self.fit.x[1:], index0)
-        mu = np.exp(np.dot(X, beta))[:, np.newaxis]
-        phi = (len(X) - np.shape(self.X[:, 1:])[1])**(-1) * (np.square(y - mu)/mu).sum()
+        phi = (len(X) - np.shape(self.X[:, 1:])[1]+1)**(-1) * (np.square(y - mu)/mu).sum()
         var = phi * np.linalg.inv((X * mu).T @ X)
         std = np.sqrt(np.diag(var))
         var = np.insert(var, index0, np.nan, axis=0)
@@ -341,12 +362,11 @@ class Poisson(Data):
         Returns parameter alpha
         '''
 
-        index0 = np.where(self.fit.x[1:] == 0)[0]
+        mu = np.exp(np.dot(self.X, self.fit_x))[:, np.newaxis]
+        index0 = np.where(self.fit_x[1:] == 0)[0]
         X = np.delete(self.X[:, 1:], index0, 1)
         y = self.y[:, np.newaxis]
-        beta = np.delete(self.fit.x[1:], index0)
-        mu = np.exp(np.dot(X, beta))[:, np.newaxis]
-        alpha = (len(X) - np.shape(self.X[:, 1:])[1])**(-1) * ((np.square(y - mu) - mu) / np.square(mu)).sum()
+        alpha = (len(X) - np.shape(self.X[:, 1:])[1]+1)**(-1) * ((np.square(y - mu) - mu) / np.square(mu)).sum()
         var = np.linalg.inv((X * mu).T @ X) @ ((X * (mu + alpha * np.square(mu))).T @ X) @ np.linalg.inv((X * mu).T @ X) 
         std = np.sqrt(np.diag(var))
         var = np.insert(var, index0, np.nan, axis=0)
@@ -359,17 +379,101 @@ class Poisson(Data):
         Variance estimator robust to specification error
         '''
 
-        index0 = np.where(self.fit.x[1:] == 0)[0]
+        mu = np.exp(np.dot(self.X, self.fit_x))[:, np.newaxis]
+        index0 = np.where(self.fit_x[1:] == 0)[0]
         X = np.delete(self.X[:, 1:], index0, 1)
         y = self.y[:, np.newaxis]
-        beta = np.delete(self.fit.x[1:], index0)
-        mu = np.exp(np.dot(X, beta))[:, np.newaxis]
         var = np.linalg.inv((X * mu).T @ X) @ ((X * (np.square(y - mu))).T @ X) @ np.linalg.inv((X * mu).T @ X) 
         std = np.sqrt(np.diag(var))
         var = np.insert(var, index0, np.nan, axis=0)
         var = np.insert(var, index0, np.nan, axis=1)
         std = np.insert(std, index0, np.nan)
         return (var, std)
+
+    def save_results(self, period, aa, dtype):
+        if self.fit_success == 0:
+            with open('models_Poisson.log', 'a') as log_file:
+                log_file.write('\n' + period + aa + dtype[0] + ' coeffs failed')
+        else:
+            try:
+                x_res_dict = {'desc_stats': self.desc_stats(), 'success': self.fit_success, '-ln L': self.fit_fun, 'coeffs': self.fit_x[1:], 'var_MLH': self.var_MLH()[0], 'std_MLH': self.var_MLH()[1], 'var_MLOP': self.var_MLOP()[0], 'std_MLOP': self.var_MLOP()[1], 'var_NB1': self.var_NB1()[0], 'std_NB1': self.var_NB1()[1], 'phi_NB1': self.var_NB1()[2], 'var_RS': self.var_RS()[0], 'std_RS': self.var_RS()[1]}
+            except:
+                x_res_dict = {'desc_stats': self.desc_stats(), 'success': self.fit_success, '-ln L': self.fit_fun, 'coeffs': self.fit_x[1:]}
+                try:
+                    x_res_dict['var_MLH'] =  self.var_MLH()[0]
+                    x_res_dict['std_MLH'] =  self.var_MLH()[1]
+                except:
+                    x_res_dict['var_MLH'] =  np.zeros((len(x_res_dict['coeffs']), len(x_res_dict['coeffs'])))
+                    x_res_dict['std_MLH'] =  np.zeros(len(x_res_dict['coeffs']))
+                    with open('models_Poisson.log', 'a') as log_file:
+                        log_file.write('\n' + period + aa + dtype[0] + ' var_MLH failed')
+                try:
+                    x_res_dict['var_MLOP'] =  self.var_MLOP()[0]
+                    x_res_dict['std_MLOP'] =  self.var_MLOP()[1]
+                except:
+                    x_res_dict['var_MLOP'] =  np.zeros((len(x_res_dict['coeffs']), len(x_res_dict['coeffs'])))
+                    x_res_dict['std_MLOP'] =  np.zeros(len(x_res_dict['coeffs']))
+                    with open('models_Poisson.log', 'a') as log_file:
+                        log_file.write('\n' + period + aa + dtype[0] + ' var_MLOP failed')
+                try:
+                    x_res_dict['var_NB1'] =  self.var_NB1()[0]
+                    x_res_dict['std_NB1'] =  self.var_NB1()[1]
+                    x_res_dict['phi_NB1'] =  self.var_NB1()[2]
+                except:
+                    x_res_dict['var_NB1'] =  np.zeros((len(x_res_dict['coeffs']), len(x_res_dict['coeffs'])))
+                    x_res_dict['std_NB1'] =  np.zeros(len(x_res_dict['coeffs']))
+                    x_res_dict['phi_NB1'] =  0
+                    with open('models_Poisson.log', 'a') as log_file:
+                        log_file.write('\n' + period + aa + dtype[0] + ' var_NB1 failed')
+                try:
+                    x_res_dict['var_RS'] =  self.var_RS()[0]
+                    x_res_dict['std_RS'] =  self.var_RS()[1]
+                except:
+                    x_res_dict['var_RS'] =  np.zeros((len(x_res_dict['coeffs']), len(x_res_dict['coeffs'])))
+                    x_res_dict['std_RS'] = np.zeros(len(x_res_dict['coeffs']))
+                    with open('models_Poisson.log', 'a') as log_file:
+                        log_file.write('\n' + period + aa + dtype[0] + ' var_RS failed')
+    
+            db_file = '/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db'
+            db = shelve.open(db_file)
+            db[period+aa] = x.results_dict(period, aa, dtype)
+            db.close()
+            print('Results from Poisson class instance for period ' + period + aa + ' of type ' + dtype[0] + ' saved in db file')
+
+
+#class Model_test(Data):
+#    '''
+#    Provides methods for testing adequacy of models
+#
+#    Parameters:
+#    ----------
+#    dtype, 2-tuple with values in {'cas', 'rcd', 'app', 'out'} X {'count'}
+#    '''
+#
+#    def __init__(self, model, period, aa, dtype):
+#        super().__init__(period, aa, dtype)
+#        dbfile = '/home/pgsqldata/Susep/' + model + 'Results_' + dtype[0] + '.db'
+#        try:
+#            os.path.exists(dbfile)
+#        except Exception as error:
+#            print('File ' + dbfile + ' not found')
+#
+#        x_res_dict = shelve.open(dbfile)
+#        self.fit_success = x_res_dict[period+aa]['success']
+#        if self.fit_success == 0:
+#            raise Exception('Model optimization failed to converge for ' + model + period + aa)
+#
+#        self.fit_x = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
+#        self.fit_fun = x_res_dict[period+aa]['-ln L']
+#        x_res_dict.close()
+#    
+#    def fitted_freqs(beta):
+#        mu = np.exp(np.dot(self.X, self.fit_x))[:, np.newaxis]
+#        p_j = {}
+#        for j in range(np.unique(self.y).max()):
+#            p_j[str(j)] = np.multiply(np.exp(-mu), mu**j) / np.factorial(j)
+#
+#        return p_j
 
 
 if __name__ == '__main__':
@@ -379,60 +483,12 @@ if __name__ == '__main__':
         pass
 
 #    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
-    periods = ('1tr', '2tr', '3tr', '4tr')
+#    periods = ('1tr', '2tr', '3tr', '4tr')
+    dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
+    periods = ('1tr', '2tr', '3tr')
     years = ('08', '09', '10', '11')
-#    dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
-    dtypes =(('cas', 'count'),)
     for period in periods:
         for aa in years:
             for dtype in dtypes:
-                db_file = '/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db'
-                x = Poisson(period, aa, dtype)
-                if x.fit.success == 0:
-                    with open('models_Poisson.log', 'a') as log_file:
-                        log_file.write('\n' + period + aa + dtype[0] + ' coeffs failed')
-                    continue
-                try:
-                    x_res_dict = {'desc_stats': x.desc_stats(), '-ln L': x.fit.fun, 'coeffs': x.fit.x[1:], 'var_MLH': x.var_MLH()[0], 'std_MLH': x.var_MLH()[1], 'var_MLOP': x.var_MLOP()[0], 'std_MLOP': x.var_MLOP()[1], 'var_NB1': x.var_NB1()[0], 'std_NB1': x.var_NB1()[1], 'phi_NB1': x.var_NB1()[2], 'var_RS': x.var_RS()[0], 'std_RS': x.var_RS()[1]}
-                except:
-                    x_res_dict = {'desc_stats': x.desc_stats(), '-ln L': x.fit.fun, 'coeffs': x.fit.x[1:]}
-                    try:
-                        x_res_dict['var_MLH'] =  x.var_MLH()[0]
-                        x_res_dict['std_MLH'] =  x.var_MLH()[1]
-                    except:
-                        x_res_dict['var_MLH'] =  np.zeros((82, 82))
-                        x_res_dict['std_MLH'] =  np.zeros(82)
-                        with open('models_Poisson.log', 'a') as log_file:
-                            log_file.write('\n' + period + aa + dtype[0] + ' var_MLH failed')
-                    try:
-                        x_res_dict['var_MLOP'] =  x.var_MLOP()[0]
-                        x_res_dict['std_MLOP'] =  x.var_MLOP()[1]
-                    except:
-                        x_res_dict['var_MLOP'] =  np.zeros((82, 82))
-                        x_res_dict['std_MLOP'] =  np.zeros(82)
-                        with open('models_Poisson.log', 'a') as log_file:
-                            log_file.write('\n' + period + aa + dtype[0] + ' var_MLOP failed')
-                    try:
-                        x_res_dict['var_NB1'] =  x.var_NB1()[0]
-                        x_res_dict['std_NB1'] =  x.var_NB1()[1]
-                        x_res_dict['phi_NB1'] =  x.var_NB1()[2]
-                    except:
-                        x_res_dict['var_NB1'] =  np.zeros((82, 82))
-                        x_res_dict['std_NB1'] =  np.zeros(82)
-                        x_res_dict['phi_NB1'] =  0
-                        with open('models_Poisson.log', 'a') as log_file:
-                            log_file.write('\n' + period + aa + dtype[0] + ' var_NB1 failed')
-                    try:
-                        x_res_dict['var_RS'] =  x.var_RS()[0]
-                        x_res_dict['std_RS'] =  x.var_RS()[1]
-                    except:
-                        x_res_dict['var_RS'] =  np.zeros((82, 82))
-                        x_res_dict['std_RS'] = np.zeros(82)
-                        with open('models_Poisson.log', 'a') as log_file:
-                            log_file.write('\n' + period + aa + dtype[0] + ' var_RS failed')
-
-
-                db = shelve.open(db_file)
-                db[period+aa] = x_res_dict
-                db.close()
-                print('Results from Poisson class instance for period ' + period + aa + ' of type ' + dtype[0] + ' saved in db file')
+                x = Poisson_regress(period, aa, dtype)
+                x.save_results(period, aa, dtype)
