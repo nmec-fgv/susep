@@ -293,20 +293,18 @@ class Poisson_regress(Data):
             if dtype[1] != 'count':
                 raise Exception('Count data must be provided to Poisson regression model')
             
+            if not os.path.exists('/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db'):
+                raise Exception('File PoissonResults_' + dtype[0] + '.db not found')
+
             super().__init__(period, aa, dtype)
-            X = self.X
-            y = self.y
-
-            try:
-                os.path.exists('/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db')
-            except Exception as error:
-                print('File PoissonResults_' + dtype[0] + '.db not found')
-
             x_res_dict = shelve.open('/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db')
             self.fit_success = x_res_dict[period+aa]['success']
             self.fit_x = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
             self.fit_fun = x_res_dict[period+aa]['-ln L']
             x_res_dict.close()
+
+        else:
+            print('Invalid input for grab_results parameter: must be either "yes" or "no"')
 
     def var_MLH(self):
         '''
@@ -348,7 +346,7 @@ class Poisson_regress(Data):
         index0 = np.where(self.fit_x[1:] == 0)[0]
         X = np.delete(self.X[:, 1:], index0, 1)
         y = self.y[:, np.newaxis]
-        phi = (len(X) - np.shape(self.X[:, 1:])[1]+1)**(-1) * (np.square(y - mu)/mu).sum()
+        phi = (len(X) - np.shape(self.X[:, 1:])[1])**(-1) * (np.square(y - mu)/mu).sum()
         var = phi * np.linalg.inv((X * mu).T @ X)
         std = np.sqrt(np.diag(var))
         var = np.insert(var, index0, np.nan, axis=0)
@@ -366,7 +364,7 @@ class Poisson_regress(Data):
         index0 = np.where(self.fit_x[1:] == 0)[0]
         X = np.delete(self.X[:, 1:], index0, 1)
         y = self.y[:, np.newaxis]
-        alpha = (len(X) - np.shape(self.X[:, 1:])[1]+1)**(-1) * ((np.square(y - mu) - mu) / np.square(mu)).sum()
+        alpha = (len(X) - np.shape(self.X[:, 1:])[1])**(-1) * ((np.square(y - mu) - mu) / np.square(mu)).sum()
         var = np.linalg.inv((X * mu).T @ X) @ ((X * (mu + alpha * np.square(mu))).T @ X) @ np.linalg.inv((X * mu).T @ X) 
         std = np.sqrt(np.diag(var))
         var = np.insert(var, index0, np.nan, axis=0)
@@ -436,57 +434,127 @@ class Poisson_regress(Data):
     
             db_file = '/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db'
             db = shelve.open(db_file)
-            db[period+aa] = x.results_dict(period, aa, dtype)
+            db[period+aa] = x_res_dict
             db.close()
             print('Results from Poisson class instance for period ' + period + aa + ' of type ' + dtype[0] + ' saved in db file')
 
 
-#class Model_test(Data):
-#    '''
-#    Provides methods for testing adequacy of models
-#
-#    Parameters:
-#    ----------
-#    dtype, 2-tuple with values in {'cas', 'rcd', 'app', 'out'} X {'count'}
-#    '''
-#
-#    def __init__(self, model, period, aa, dtype):
-#        super().__init__(period, aa, dtype)
-#        dbfile = '/home/pgsqldata/Susep/' + model + 'Results_' + dtype[0] + '.db'
-#        try:
-#            os.path.exists(dbfile)
-#        except Exception as error:
-#            print('File ' + dbfile + ' not found')
-#
-#        x_res_dict = shelve.open(dbfile)
-#        self.fit_success = x_res_dict[period+aa]['success']
-#        if self.fit_success == 0:
-#            raise Exception('Model optimization failed to converge for ' + model + period + aa)
-#
-#        self.fit_x = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
-#        self.fit_fun = x_res_dict[period+aa]['-ln L']
-#        x_res_dict.close()
-#    
-#    def fitted_freqs(beta):
-#        mu = np.exp(np.dot(self.X, self.fit_x))[:, np.newaxis]
-#        p_j = {}
-#        for j in range(np.unique(self.y).max()):
-#            p_j[str(j)] = np.multiply(np.exp(-mu), mu**j) / np.factorial(j)
-#
-#        return p_j
+class Model_tests(Data):
+    '''
+    Provides methods for testing adequacy of models
+
+    Parameters:
+    ----------
+    dtype, 2-tuple with values in {'cas', 'rcd', 'app', 'out'} X {'count'}
+    '''
+
+    def __init__(self, model, period, aa, dtype):
+        self.model = model
+        dbfile = '/home/pgsqldata/Susep/' + model + 'Results_' + dtype[0] + '.db'
+        if not os.path.exists(dbfile): 
+            raise Exception('File ' + dbfile + ' not found')
+
+        super().__init__(period, aa, dtype)
+        x_res_dict = shelve.open(dbfile)
+        self.fit_success = x_res_dict[period+aa]['success']
+        if self.fit_success == 0:
+            raise Exception('Model optimization failed to converge for ' + model + period + aa)
+
+        self.fit_x = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
+        self.fit_fun = x_res_dict[period+aa]['-ln L']
+        self.desc_stats = x_res_dict[period+aa]['desc_stats']
+        if model in {'Poisson'}:
+            self.var_MLH = x_res_dict[period+aa]['var_MLH']
+            self.std_MLH = x_res_dict[period+aa]['std_MLH']
+            self.var_MLOP = x_res_dict[period+aa]['var_MLOP']
+            self.std_MLOP = x_res_dict[period+aa]['std_MLOP']
+            self.var_NB1 = x_res_dict[period+aa]['var_NB1']
+            self.std_NB1 = x_res_dict[period+aa]['std_NB1']
+            self.phi_NB1 = x_res_dict[period+aa]['phi_NB1']
+            self.var_RS = x_res_dict[period+aa]['var_RS']
+            self.std_RS = x_res_dict[period+aa]['std_RS']
+        
+        x_res_dict.close()
+        self.mu = np.exp(np.dot(self.X, self.fit_x))
+    
+    def fitted_freqs(self):
+        '''
+        Fitted frequencies according to model specification
+        
+        ##Obtain Chi-Square distribuion of statistic in Andrews(88)
+        '''
+
+        if self.model == 'Poisson':
+            p_j = {}
+            for j in range(np.unique(self.y).max()):
+                p_j[str(j)] = (np.multiply(np.exp(-self.mu), self.mu**j) / factorial(j)).sum() / len(self.X)
+        else:
+            pass
+
+        return p_j
+
+    def pearson_stat(self):
+        '''
+        Pearson statistic equals sum_i[(y_i - mu_i)^2 / omega_i]
+        If model specification is Poisson, omega_i = mu_i
+        
+        ## Obtain Chi-Square distribuion of statistic in McCullagh(86)
+        '''
+
+        if self.model == 'Poisson':
+            ps = self.phi_NB1 * (np.shape(self.X)[0] - np.shape(self.X[:, 1:])[1])
+            n_minus_k = (np.shape(self.X)[0] - np.shape(self.X[:, 1:])[1])
+        else:
+            pass
+
+        return (ps, n_minus_k)
+
+    def deviance_r2(self):
+        '''
+        Pseudo R^2 according to 1 - (D(y, mu)/D(y, y_barr) or 1 - RSS/TSS
+        R^2 for Poisson: sum[y_i * ln(mu_i/y_bar) - (y_i - mu_i)] / sum [y_i * ln(y_i/y_bar)] 
+        '''
+
+        if self.model == 'Poisson':
+            r2_dev = (self.y * np.log(self.mu / np.mean(self.y)) - (self.y - self.mu)).sum() / np.where(self.y == 0, 0, self.y * np.log(self.y / np.mean(self.y))).sum()
+        else:
+            pass
+
+        return r2_dev
+
+    def residuals(self, submodel='standard'):
+        '''
+        Computes Pearson (p), deviance (d) and Anscombe (a) residuals
+        For Pearson residuals, Poisson NB1 variance phi * mu is used 
+        '''
+
+        if self.model == 'Poisson' and submodel == 'standard':
+            p = (self.y - self.mu) / np.sqrt(self.mu)
+        elif self.model == 'Poisson' and submodel == 'NB1':
+            p = (self.y - self.mu) / np.sqrt(self.phi_NB1 * self.mu)
+        else:
+            pass
+
+        if self.model == 'Poisson':
+            d = np.where(self.y - self.mu >= 0, 1, -1) * np.sqrt(2 * (np.where(self.y ==0, 0, self.y * np.log(self.y / np.mean(self.y))) - (self.y - self.mu)))
+            a = 1.5 * (self.y**(2/3) - self.mu**(2/3)) / self.mu**(1/6)
+
+        return (p, d, a)
+
 
 
 if __name__ == '__main__':
-    try:
-        os.remove('/home/ricardob/susep/models_Poisson.log')
-    except OSError:
-        pass
+#    try:
+#        os.remove('/home/ricardob/susep/models_Poisson.log')
+#    except OSError:
+#        pass
 
-#    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
+#    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
 #    periods = ('1tr', '2tr', '3tr', '4tr')
-    dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
-    periods = ('1tr', '2tr', '3tr')
-    years = ('08', '09', '10', '11')
+    periods = ('4tr',)
+    dtypes =(('rcd', 'count'), ('app', 'count'))
+#    years = ('08', '09', '10', '11')
+    years = ('11',)
     for period in periods:
         for aa in years:
             for dtype in dtypes:
