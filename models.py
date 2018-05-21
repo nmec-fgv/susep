@@ -5,10 +5,11 @@
 
 import os
 import pickle
-import numpy as np
 import shelve
+import numpy as np
 from scipy.special import factorial
 from scipy.optimize import minimize
+from scipy.stats import norm
 import pdb
 
 
@@ -35,7 +36,7 @@ class Data:
     threshold, dict containing keys 'cas', 'rcd', 'app', 'out', which must be provided and set to zero if no threshold is intended.
     '''
 
-    def __init__(self, period, aa, dtype):
+    def __init__(self, period, aa, dtype, binary_count='no'):
         
         periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez', '1tr', '2tr', '3tr', '4tr')
         years = ('08', '09', '10', '11')
@@ -86,8 +87,17 @@ class Data:
     
                 y = []
                 X = X_in
-                for i, item in enumerate(y_in):
-                    y.append(len(item))
+                if binary_count == 'no':
+                    for item in y_in:
+                        y.append(len(item))
+                elif binary_count == 'yes':
+                    for item in y_in:
+                        if len(item) > 0:
+                            y.append(1)
+                        else:
+                            y.append(0)
+                else:
+                    raise Exception('Parameter value for binary_count invalid, must be in {"yes", "no"}.')
 
                 return (X, y)
 
@@ -238,7 +248,7 @@ class Data:
         return res
  
 
-class Poisson_regress(Data):
+class Poisson_model(Data):
     '''
     Provides estimation of Poisson regression model, MLE and PMLE coincide.
 
@@ -259,13 +269,13 @@ class Poisson_regress(Data):
             y = self.y
     
             def log_likelihood(beta):
-                '''Log-likelihood of Poisson regression model'''
+                '''Log-likelihood for Poisson regression model'''
             
                 res = np.sum(-y * np.dot(X, beta) + np.exp(np.dot(X, beta)) + np.log(factorial(y)))
                 return res
             
             def gradient(beta):
-                '''Gradient of Log-likelihood of Poisson regression model'''
+                '''Gradient of Log-likelihood for Poisson regression model'''
             
                 aux_vec = -y + np.exp(np.dot(X, beta))
                 res = (aux_vec[:, np.newaxis] *  X).sum(axis=0)
@@ -439,7 +449,7 @@ class Poisson_regress(Data):
             print('Results from Poisson class instance for period ' + period + aa + ' of type ' + dtype[0] + ' saved in db file')
 
 
-class Model_tests(Data):
+class Poisson_tests(Data):
     '''
     Provides methods for testing adequacy of models
 
@@ -541,22 +551,179 @@ class Model_tests(Data):
 
         return (p, d, a)
 
+class Binary_models(Data):
+    '''
+    Provides estimation of binary outcome regression models.
+    Distributions used: logistic, normal and poisson
+
+    Parameters:
+    ----------
+    distribution, with possible values in {'Logistic', 'Normal', 'Poisson'}
+    period, aa
+    dtype, 2-tuple with values in {'cas', 'rcd', 'app', 'out'} X {'count'}
+    grab_results - bypasses optimization procedure, grabing results from file instead
+    '''
+
+    def __init__(self, distribution, period, aa, dtype, grab_results='no'):
+        if grab_results == 'no':
+            super().__init__(period, aa, dtype, binary_count='yes')
+            X = self.X
+            y = self.y
+            desc_stats = self.desc_stats()
+            if distribution == 'Logit': 
+                def log_likelihood(beta):
+                    '''Log-likelihood for Binary Logit model'''
+                
+                    res = -1 * (np.sum(y * np.log(np.exp(np.dot(X, beta)) / (1 + np.exp(np.dot(X, beta)))) + (1 - y) * np.log(1 - np.exp(np.dot(X, beta)) / (1 + np.exp(np.dot(X, beta))))))
+                    return res
+                
+                def gradient(beta):
+                    '''Gradient of Log-likelihood for Binary Logit model'''
+                
+                    aux_vec = y - np.exp(np.dot(X, beta)) / (1 + np.exp(np.dot(X, beta)))
+                    res = -1 * (aux_vec[:, np.newaxis] *  X).sum(axis=0)
+                    return res
+
+                def var_ML(X, beta):
+                    '''
+                    Variance for binary outcome model using logistic distribution:
+                    [sum_i exp(x_i'beta)/(1+exp(x_i'beta))^2 * x_i * x_i']^(-1) 
+                    '''
+                
+                    lambda_prime = (np.exp(np.dot(X, beta))/(1 + np.exp(np.dot(X, beta)))**2)[:, np.newaxis]
+                    index0 = np.where(beta[1:] == 0)[0]
+                    X = np.delete(X[:, 1:], index0, 1)
+                    var = np.linalg.inv((X * lambda_prime).T @ X)
+                    std = np.sqrt(np.diag(var))
+                    var = np.insert(var, index0, np.nan, axis=0)
+                    var = np.insert(var, index0, np.nan, axis=1)
+                    std = np.insert(std, index0, np.nan)
+                    return (var, std)
+                    
+            
+            elif distribution == 'Probit': 
+                def log_likelihood(beta):
+                    '''Log-likelihood for Binary Probit model'''
+                
+                    res = -1 * (np.sum(y * np.log(norm.cdf(np.dot(X, beta))) + (1 - y) * np.log(1 - norm.cdf(np.dot(X, beta)))))
+                    return res
+                
+                def gradient(beta):
+                    '''Gradient of Log-likelihood for Binary Probit model'''
+                
+                    aux_vec = norm.pdf(np.dot(X, beta))/(norm.cdf(np.dot(X, beta)) * (1 - norm.cdf(np.dot(X, beta)))) * (y - norm.cdf(np.dot(X, beta)))
+                    res = -1 * (aux_vec[:, np.newaxis] *  X).sum(axis=0)
+                    return res
+
+                def var_ML(X, beta):
+                    '''
+                    Variance for binary outcome model using normal distribution:
+                    [sum_i phi(x_i'beta)^2/Phi(x_i'beta)(1-Phi(x_i'beta)) * x_i * x_i']^(-1) 
+                    where Phi and phi are the cdf and pdf of the normal distribution
+                    '''
+                
+                    weight = (norm.pdf(np.dot(X, beta))**2/(norm.cdf(np.dot(X, beta)) * (1 - norm.cdf(np.dot(X, beta)))))[:, np.newaxis]
+                    index0 = np.where(beta[1:] == 0)[0]
+                    X = np.delete(X[:, 1:], index0, 1)
+                    var = np.linalg.inv((X * weight).T @ X)
+                    std = np.sqrt(np.diag(var))
+                    var = np.insert(var, index0, np.nan, axis=0)
+                    var = np.insert(var, index0, np.nan, axis=1)
+                    std = np.insert(std, index0, np.nan)
+                    return (var, std)
+
+            elif distribution == 'Poisson': 
+                def log_likelihood(beta):
+                    '''Log-likelihood for Binary Poisson model'''
+                
+                    res = -1 * np.sum(y * np.log(1 - np.exp(-np.exp(np.dot(X, beta)))) + (1 - y) * np.log(np.exp(-np.exp(np.dot(X, beta)))))
+                    return res
+
+                def gradient(beta):
+                    '''
+                    Gradient of Log-likelihood for Binary Poisson model
+                    Formula is obtained combining Cameron, Trivedi (05) eq. 14.5 and F = 1 - exp(-exp(x_i'beta)), F' = beta_k * exp(-exp(x_i'beta)+x_i'beta):
+                    sum_i (y_i - 1 + exp(-exp(X_i'beta))/[exp(-exp(x_i'beta)) - exp(-2exp(x_i'beta))] * exp(-exp(x_i'beta)+x_i'beta) * x_i * beta_k
+                    '''
+                
+                    aux_vec = ((y - 1 + np.exp(-np.exp(np.dot(X, beta)))) / (np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2 * np.exp(np.dot(X, beta))))) * np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
+                    res = -1 * (aux_vec[:, np.newaxis] *  X).sum(axis=0)
+                    return res
+
+                def var_ML(X, beta):
+                    '''
+                    Variance for binary outcome model using poisson distribution
+                    Obtained by substituting F = 1 - exp(-exp(x_i'beta)) in eq. 14.7, Cameron and Trivedi (05)
+                    '''
+
+                    weight = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))**2 / (np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2 * np.exp(np.dot(X, beta))))[:, np.newaxis]
+                    index0 = np.where(beta[1:] == 0)[0]
+                    X = np.delete(X[:, 1:], index0, 1)
+                    var = np.linalg.inv((X * weight).T @ X)
+                    std = np.sqrt(np.diag(var))
+                    var = np.insert(var, index0, np.nan, axis=0)
+                    var = np.insert(var, index0, np.nan, axis=1)
+                    std = np.insert(std, index0, np.nan)
+                    return (var, std)
+
+    
+                def save_results(res1, res2, desc_stats, distribution, period, aa, dtype):
+                    if res1.fit.success == 0:
+                        with open('models_BinaryResults.log', 'a') as log_file:
+                            log_file.write('\n' + distribution + period + aa + dtype[0] + ' coeffs failed')
+                    else:
+                        x_res_dict = {'desc_stats': desc_stats, '-ln L': res1.fit.fun, 'coeffs': res1.fit.x[1:], 'var_ML': res2[0], 'std_ML': res2[1]}
+            
+                        db_file = '/home/pgsqldata/Susep/BinaryModelResults_' + distribution + '_' + dtype[0] + '.db'
+                        db = shelve.open(db_file)
+                        db[period+aa] = x_res_dict
+                        db.close()
+                        print('Results from Binary Model class instance, distribution ' + distribution + ', for period ' + period + aa + ' of type ' + dtype[0] + ' saved in db file')
+
+            x0 = np.zeros(len(X[0]))
+            x0[0] = 1
+            x0[1] = np.log(sum(y)/len(y))
+            prec_param = 1e-4
+            bounds = ((1 - prec_param, 1 + prec_param),)
+            for i in range(len(X[0])-1):
+                bounds += ((None, None),)
+            
+            res1 = minimize(log_likelihood, x0, method='TNC', jac=gradient, bounds=bounds, options={'disp': True})
+            if res.success == 0:
+                res1 = minimize(log_likelihood, x0, method='L-BFGS-B', jac=gradient, bounds=bounds, options={'disp': True})
+                if res.success == 0:
+                    res1 = minimize(log_likelihood, x0, method='SLSQP', jac=gradient, bounds=bounds, options={'disp': True})
+            
+            try:
+                res2 = var_ML(X, res1.x)
+            except:
+                res2 = (np.zeros((len(res1.x), len(res1.x))), np.zeros(len(res1.x)))
+                with open('models_BinaryResults.log', 'a') as log_file:
+                        log_file.write('\n' + distribution + period + aa + dtype[0] + ' var_ML failed')
+
+            save_results(res1, res2, desc_stats, distribution, period, aa, dtype)
+            self.fit_success = res1.success
+            self.fit_x = res1.x
+            self.fit_fun = res1.fun
+            self.var_ML = res2[0]
+            self.std_ML = res2[1]
+
+        elif grab_results == 'yes':
+            super().__init__(period, aa, dtype, binary_count='yes')
+            x_res_dict = shelve.open('/home/pgsqldata/Susep/BinaryModelResults_' + distribution + '_' + dtype[0] + '.db')
+            self.fit_x = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
+            self.fit_fun = x_res_dict[period+aa]['-ln L']
+            self.var_ML = x_res_dict[period+aa]['var_ML']
+            self.std_ML = x_res_dict[period+aa]['std_ML']
+            x_res_dict.close()
 
 
 if __name__ == '__main__':
-#    try:
-#        os.remove('/home/ricardob/susep/models_Poisson.log')
-#    except OSError:
-#        pass
-
 #    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
-#    periods = ('1tr', '2tr', '3tr', '4tr')
-    periods = ('4tr',)
-    dtypes =(('rcd', 'count'), ('app', 'count'))
-#    years = ('08', '09', '10', '11')
-    years = ('11',)
+    periods = ('1tr', '2tr', '3tr', '4tr')
+    dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
+    years = ('08', '09', '10', '11')
     for period in periods:
         for aa in years:
             for dtype in dtypes:
-                x = Poisson_regress(period, aa, dtype)
-                x.save_results(period, aa, dtype)
+                x = Binary_models('Logit', period, aa, dtype)
