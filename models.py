@@ -569,7 +569,8 @@ class Binary_models(Data):
             super().__init__(period, aa, dtype, binary_count='yes')
             X = self.X
             y = self.y
-            desc_stats = self.desc_stats()
+            self.desc_stats = self.desc_stats()
+            desc_stats = self.desc_stats
             if distribution == 'Logit': 
                 def log_likelihood(beta):
                     '''Log-likelihood for Binary Logit model'''
@@ -667,18 +668,18 @@ class Binary_models(Data):
                     return (var, std)
 
     
-                def save_results(res1, res2, desc_stats, distribution, period, aa, dtype):
-                    if res1.fit.success == 0:
-                        with open('models_BinaryResults.log', 'a') as log_file:
-                            log_file.write('\n' + distribution + period + aa + dtype[0] + ' coeffs failed')
-                    else:
-                        x_res_dict = {'desc_stats': desc_stats, '-ln L': res1.fit.fun, 'coeffs': res1.fit.x[1:], 'var_ML': res2[0], 'std_ML': res2[1]}
-            
-                        db_file = '/home/pgsqldata/Susep/BinaryModelResults_' + distribution + '_' + dtype[0] + '.db'
-                        db = shelve.open(db_file)
-                        db[period+aa] = x_res_dict
-                        db.close()
-                        print('Results from Binary Model class instance, distribution ' + distribution + ', for period ' + period + aa + ' of type ' + dtype[0] + ' saved in db file')
+            def save_results(res1, res2, desc_stats, distribution, period, aa, dtype):
+                pdb.set_trace()
+                if res1.success == 0:
+                    with open('models_BinaryResults.log', 'a') as log_file:
+                        log_file.write('\n' + distribution + period + aa + dtype[0] + ' coeffs failed')
+                else:
+                    x_res_dict = {'desc_stats': desc_stats, '-ln L': res1.fun, 'coeffs': res1.x[1:], 'var_ML': res2[0], 'std_ML': res2[1]}
+                    db_file = '/home/pgsqldata/Susep/BinaryModelResults_' + distribution + '_' + dtype[0] + '.db'
+                    db = shelve.open(db_file)
+                    db[period+aa] = x_res_dict
+                    db.close()
+                    print('Results from Binary Model class instance, distribution ' + distribution + ', for period ' + period + aa + ' of type ' + dtype[0] + ' saved in db file')
 
             x0 = np.zeros(len(X[0]))
             x0[0] = 1
@@ -689,9 +690,9 @@ class Binary_models(Data):
                 bounds += ((None, None),)
             
             res1 = minimize(log_likelihood, x0, method='TNC', jac=gradient, bounds=bounds, options={'disp': True})
-            if res.success == 0:
+            if res1.success == 0:
                 res1 = minimize(log_likelihood, x0, method='L-BFGS-B', jac=gradient, bounds=bounds, options={'disp': True})
-                if res.success == 0:
+                if res1.success == 0:
                     res1 = minimize(log_likelihood, x0, method='SLSQP', jac=gradient, bounds=bounds, options={'disp': True})
             
             try:
@@ -711,6 +712,7 @@ class Binary_models(Data):
         elif grab_results == 'yes':
             super().__init__(period, aa, dtype, binary_count='yes')
             x_res_dict = shelve.open('/home/pgsqldata/Susep/BinaryModelResults_' + distribution + '_' + dtype[0] + '.db')
+            self.desc_stats = x_res_dict[period+aa]['desc_stats']
             self.fit_x = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
             self.fit_fun = x_res_dict[period+aa]['-ln L']
             self.var_ML = x_res_dict[period+aa]['var_ML']
