@@ -668,21 +668,25 @@ class Binary_models(Data):
                     '''
                     Variance for binary outcome model using poisson distribution
                     Obtained by substituting F = 1 - exp(-exp(x_i'beta)) in eq. 14.7, Cameron and Trivedi (05)
+                    Variance for binary outcomes has simple form (sum_i weight * x_i * x_i')^(-1) where weight = F'^2/F1*F0
+                    Denominator of weights may be zero if F1 is sufficiently close to zero given mu_i - this is a rare event and the solution given here consists of making the weight equal to zero for such i
                     '''
 
                     F0 = np.exp(-np.exp(np.dot(X, beta)))
                     F1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
                     denominator = np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2*np.exp(np.dot(X, beta)))
-                    denominator[denominator < 1e-308] = 1e-308
                     F1_prime = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
+                    index1 = np.where(denominator < 1e-308)
+                    denominator[index1] = 1e-308
+                    F1_prime[index1] = 0.
                     weight = (np.square(F1_prime) / denominator)[:, np.newaxis]
-                    index0 = np.where(beta[1:] == 0)[0]
-                    X = np.delete(X[:, 1:], index0, 1)
+                    index2 = np.where(beta[1:] == 0)[0]
+                    X = np.delete(X[:, 1:], index2, 1)
                     var = np.linalg.inv((X * weight).T @ X)
                     std = np.sqrt(np.diag(var))
-                    var = np.insert(var, index0, np.nan, axis=0)
-                    var = np.insert(var, index0, np.nan, axis=1)
-                    std = np.insert(std, index0, np.nan)
+                    var = np.insert(var, index2, np.nan, axis=0)
+                    var = np.insert(var, index2, np.nan, axis=1)
+                    std = np.insert(std, index2, np.nan)
                     return (var, std)
     
             def save_results(res1, res2, desc_stats, distribution, period, aa, dtype):
@@ -747,7 +751,7 @@ if __name__ == '__main__':
 #    dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
     dtypes =(('cas', 'count'), ('rcd', 'count'))
     years = ('08', '09', '10', '11')
-    distributions = ('Logit', 'Probit', 'Poisson')
+    distributions = ('Poisson', 'Logit', 'Probit')
     for period in periods:
         for aa in years:
             for dtype in dtypes:
