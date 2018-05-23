@@ -635,9 +635,16 @@ class Binary_models(Data):
 
             elif distribution == 'Poisson': 
                 def log_likelihood(beta):
-                    '''Log-likelihood for Binary Poisson model'''
+                    '''
+                    Log-likelihood for Binary Poisson model, where distribution for Bernoulli parameter p is specified as:
+                    F = 1 - exp(-exp(x_i'beta)), the probability of y > 0 for the Poisson distribution, and mu = exp(x_i'beta)
+                    Due to proximity of mu_i to zero, a lower bound equal to min np.log such that np.log > -inf is imposed
+                    '''
                 
-                    res = -1 * np.sum(y * np.log(1 - np.exp(-np.exp(np.dot(X, beta)))) + (1 - y) * np.log(np.exp(-np.exp(np.dot(X, beta)))))
+                    F0 = np.exp(-np.exp(np.dot(X, beta)))
+                    F1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
+                    F1[F1 < 1e-323] = 1e-323
+                    res = -1 * np.sum(y * np.log(F1) + (1 - y) * np.log(F0))
                     return res
 
                 def gradient(beta):
@@ -645,9 +652,15 @@ class Binary_models(Data):
                     Gradient of Log-likelihood for Binary Poisson model
                     Formula is obtained combining Cameron, Trivedi (05) eq. 14.5 and F = 1 - exp(-exp(x_i'beta)), F' = beta_k * exp(-exp(x_i'beta)+x_i'beta):
                     sum_i (y_i - 1 + exp(-exp(X_i'beta))/[exp(-exp(x_i'beta)) - exp(-2exp(x_i'beta))] * exp(-exp(x_i'beta)+x_i'beta) * x_i * beta_k
+                    Denominator is restricted to system limit min to avoid inf ratio
                     '''
                 
-                    aux_vec = ((y - 1 + np.exp(-np.exp(np.dot(X, beta)))) / (np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2 * np.exp(np.dot(X, beta))))) * np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
+                    F0 = np.exp(-np.exp(np.dot(X, beta)))
+                    F1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
+                    denominator = np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2*np.exp(np.dot(X, beta)))
+                    denominator[denominator < 1e-308] = 1e-308
+                    F1_prime = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
+                    aux_vec = ((y - F1) / denominator) * F1_prime
                     res = -1 * (aux_vec[:, np.newaxis] *  X).sum(axis=0)
                     return res
 
@@ -657,7 +670,12 @@ class Binary_models(Data):
                     Obtained by substituting F = 1 - exp(-exp(x_i'beta)) in eq. 14.7, Cameron and Trivedi (05)
                     '''
 
-                    weight = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))**2 / (np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2 * np.exp(np.dot(X, beta))))[:, np.newaxis]
+                    F0 = np.exp(-np.exp(np.dot(X, beta)))
+                    F1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
+                    denominator = np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2*np.exp(np.dot(X, beta)))
+                    denominator[denominator < 1e-308] = 1e-308
+                    F1_prime = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
+                    weight = (np.square(F1_prime) / denominator)[:, np.newaxis]
                     index0 = np.where(beta[1:] == 0)[0]
                     X = np.delete(X[:, 1:], index0, 1)
                     var = np.linalg.inv((X * weight).T @ X)
@@ -666,10 +684,8 @@ class Binary_models(Data):
                     var = np.insert(var, index0, np.nan, axis=1)
                     std = np.insert(std, index0, np.nan)
                     return (var, std)
-
     
             def save_results(res1, res2, desc_stats, distribution, period, aa, dtype):
-                pdb.set_trace()
                 if res1.success == 0:
                     with open('models_BinaryResults.log', 'a') as log_file:
                         log_file.write('\n' + distribution + period + aa + dtype[0] + ' coeffs failed')
@@ -681,9 +697,14 @@ class Binary_models(Data):
                     db.close()
                     print('Results from Binary Model class instance, distribution ' + distribution + ', for period ' + period + aa + ' of type ' + dtype[0] + ' saved in db file')
 
-            x0 = np.zeros(len(X[0]))
-            x0[0] = 1
-            x0[1] = np.log(sum(y)/len(y))
+            if distribution != 'Poisson':
+                x0 = np.zeros(len(X[0]))
+                x0[0] = 1
+                x0[1] = np.log(sum(y)/len(y))
+            elif distribution == 'Poisson':
+                x_res_dict = shelve.open('/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db')
+                x0 = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
+
             prec_param = 1e-4
             bounds = ((1 - prec_param, 1 + prec_param),)
             for i in range(len(X[0])-1):
@@ -703,9 +724,9 @@ class Binary_models(Data):
                         log_file.write('\n' + distribution + period + aa + dtype[0] + ' var_ML failed')
 
             save_results(res1, res2, desc_stats, distribution, period, aa, dtype)
-            self.fit_success = res1.success
-            self.fit_x = res1.x
-            self.fit_fun = res1.fun
+            self.success = res1.success
+            self.x = res1.x
+            self.fun = res1.fun
             self.var_ML = res2[0]
             self.std_ML = res2[1]
 
@@ -713,8 +734,8 @@ class Binary_models(Data):
             super().__init__(period, aa, dtype, binary_count='yes')
             x_res_dict = shelve.open('/home/pgsqldata/Susep/BinaryModelResults_' + distribution + '_' + dtype[0] + '.db')
             self.desc_stats = x_res_dict[period+aa]['desc_stats']
-            self.fit_x = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
-            self.fit_fun = x_res_dict[period+aa]['-ln L']
+            self.x = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
+            self.fun = x_res_dict[period+aa]['-ln L']
             self.var_ML = x_res_dict[period+aa]['var_ML']
             self.std_ML = x_res_dict[period+aa]['std_ML']
             x_res_dict.close()
@@ -723,9 +744,13 @@ class Binary_models(Data):
 if __name__ == '__main__':
 #    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     periods = ('1tr', '2tr', '3tr', '4tr')
-    dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
+#    dtypes =(('cas', 'count'), ('rcd', 'count'), ('app', 'count'))
+    dtypes =(('cas', 'count'), ('rcd', 'count'))
     years = ('08', '09', '10', '11')
+    distributions = ('Logit', 'Probit', 'Poisson')
     for period in periods:
         for aa in years:
             for dtype in dtypes:
-                x = Binary_models('Logit', period, aa, dtype)
+                for distribution in distributions:
+                    print('Next regression: ' + distribution + '_' + period + aa + dtype[0])
+                    x = Binary_models(distribution, period, aa, dtype)
