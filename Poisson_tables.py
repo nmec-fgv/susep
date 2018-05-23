@@ -5,7 +5,7 @@ import shelve
 import pdb
 
 try:
-    with open('table_template.tex', 'r') as cfile:
+    with open('Poisson_template.tex', 'r') as cfile:
         template = cfile.read()
     with open('begin_template.tex', 'r') as cfile:
         begin = cfile.read()

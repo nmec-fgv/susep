@@ -13,6 +13,14 @@ from scipy.stats import norm
 import pdb
 
 
+# Lower bound parameters for logs and ratios, plus precision parameter:
+
+lb_log = 1e-323
+lb_ratio = 1e-308
+prec_param = 1e-4
+
+# Auxiliary functions:
+
 def file_load(filename):
     try:
         os.path.exists('/home/pgsqldata/Susep/' + filename)
@@ -23,6 +31,7 @@ def file_load(filename):
 
     return x
 
+# Classes:
 
 class Data:
     '''
@@ -565,8 +574,12 @@ class Binary_models(Data):
     '''
 
     def __init__(self, distribution, period, aa, dtype, grab_results='no'):
+        self.distribution = distribution
+        self.period = period
+        self.aa = aa
+        self.dtype = dtype
+        super().__init__(period, aa, dtype, binary_count='yes')
         if grab_results == 'no':
-            super().__init__(period, aa, dtype, binary_count='yes')
             X = self.X
             y = self.y
             self.desc_stats = self.desc_stats()
@@ -643,7 +656,7 @@ class Binary_models(Data):
                 
                     F0 = np.exp(-np.exp(np.dot(X, beta)))
                     F1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
-                    F1[F1 < 1e-323] = 1e-323
+                    F1[F1 < lb_log] = lb_log
                     res = -1 * np.sum(y * np.log(F1) + (1 - y) * np.log(F0))
                     return res
 
@@ -658,7 +671,7 @@ class Binary_models(Data):
                     F0 = np.exp(-np.exp(np.dot(X, beta)))
                     F1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
                     denominator = np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2*np.exp(np.dot(X, beta)))
-                    denominator[denominator < 1e-308] = 1e-308
+                    denominator[denominator < lb_ratio] = lb_ratio
                     F1_prime = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
                     aux_vec = ((y - F1) / denominator) * F1_prime
                     res = -1 * (aux_vec[:, np.newaxis] *  X).sum(axis=0)
@@ -676,8 +689,8 @@ class Binary_models(Data):
                     F1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
                     denominator = np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2*np.exp(np.dot(X, beta)))
                     F1_prime = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
-                    index1 = np.where(denominator < 1e-308)
-                    denominator[index1] = 1e-308
+                    index1 = np.where(denominator < lb_ratio)
+                    denominator[index1] = lb_ratio
                     F1_prime[index1] = 0.
                     weight = (np.square(F1_prime) / denominator)[:, np.newaxis]
                     index2 = np.where(beta[1:] == 0)[0]
@@ -735,7 +748,6 @@ class Binary_models(Data):
             self.std_ML = res2[1]
 
         elif grab_results == 'yes':
-            super().__init__(period, aa, dtype, binary_count='yes')
             x_res_dict = shelve.open('/home/pgsqldata/Susep/BinaryModelResults_' + distribution + '_' + dtype[0] + '.db')
             self.desc_stats = x_res_dict[period+aa]['desc_stats']
             self.x = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
@@ -743,6 +755,30 @@ class Binary_models(Data):
             self.var_ML = x_res_dict[period+aa]['var_ML']
             self.std_ML = x_res_dict[period+aa]['std_ML']
             x_res_dict.close()
+
+    def pseudo_R2(self):
+        '''
+        Relative gains pseudo-R2 as proposed by McFadden(74)
+        '''
+
+        if self.distribution == 'Logit':
+            p_hat = np.exp(np.dot(self.X, self.x)) / (1 + np.exp(np.dot(self.X, self.x)))
+        elif self.distribution == 'Probit':
+            p_hat = norm.cdf(np.dot(self.X, self.x))
+        elif self.distribution == 'Poisson':
+            p_hat = 1 - np.exp(-np.exp(np.dot(self.X, self.x)))
+
+        N = len(self.y)
+        y_bar = np.mean(self.y)
+        index0 = np.where(p_hat < lb_log)
+        p_hat[index0] = lb_log
+        R2 = 1 - (self.y * np.log(p_hat) + (1 - self.y) * np.log(1 - p_hat)).sum() / (N * (y_bar * np.log(y_bar) + (1 - y_bar) * np.log(1 - y_bar)))
+        db_file = '/home/pgsqldata/Susep/BinaryModelResults_' + self.distribution + '_' + self.dtype[0] + '.db'
+        db = shelve.open(db_file)
+        db[self.period+self.aa]['pseudo_R2'] = R2
+        db.close()
+
+        return R2
 
 
 if __name__ == '__main__':
