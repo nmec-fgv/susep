@@ -721,6 +721,7 @@ class Binary_models(Data):
             elif distribution == 'Poisson':
                 x_res_dict = shelve.open('/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db')
                 x0 = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
+                x_res_dict.close()
 
             prec_param = 1e-4
             bounds = ((1 - prec_param, 1 + prec_param),)

@@ -1,107 +1,108 @@
-
+{\small
 \begin{center}
-    \begin{longtable}{*{7}{c}}
-        \caption{\large{Poisson PMLE with different standard error estimates - period: %(period)s, data type: %(dtype)s}} \\
+    \begin{longtable}{{l}*{8}{c}}
+        \caption{\large{Parameter estimates and inference, models of regression w/ binary outcomes and Poisson regression. Period: %(period)s, data type: %(dtype)s}} \\
         \hline\hline\\[-1.8ex]
-        & & \multicolumn{4}{c}{Standard Errors} & \\
-        \cmidrule(l{.75em}){3-6} 
-        \textbf{Variable} & \begin{tabular}{@{}c@{}} \textbf{Coefficient,}\\ \textbf{Poisson PMLE} \end{tabular} & \textbf{MLH} & \textbf{MLOP} & \textbf{NB1} & \textbf{RS} & \begin{tabular}{@{}c@{}} \textbf{t Statistic,}\\ \textbf{MLH} \end{tabular} \\
+        & \multicolumn{4}{c}{Coefficients} & \multicolumn{4}{c}{z stats}\\
+        \cmidrule(l{.75em}){2-5} \cmidrule(l{.75em}){6-9}
+        \textbf{Variable} & \textbf{Logit} & \textbf{Probit} & \textbf{Binary Poisson} & \textbf{Poisson} & \textbf{Logit} & \textbf{Probit} & \textbf{Binary Poisson} & \textbf{Poisson}\\
         \hline\\[-1.8ex]
         \endfirsthead
-        \multicolumn{7}{c}
+        \multicolumn{9}{c}
         {\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
         \hline\\[-1.8ex]
-        & & \multicolumn{4}{c}{Standard Errors} & \\
-        \cmidrule(l{.75em}){3-6} 
-        \textbf{Variable} & \begin{tabular}{@{}c@{}} \textbf{Coefficient,}\\ \textbf{Poisson PMLE} \end{tabular} & \textbf{MLH} & \textbf{MLOP} & \textbf{NB1} & \textbf{RS} & \begin{tabular}{@{}c@{}} \textbf{t Statistic,}\\ \textbf{MLH} \end{tabular} \\
+        & \multicolumn{4}{c}{Coefficients} & \multicolumn{4}{c}{z stats}\\
+        \cmidrule(l{.75em}){2-5} \cmidrule(l{.75em}){6-9}
+        \textbf{Variable} & \textbf{Logit} & \textbf{Probit} & \textbf{Binary Poisson} & \textbf{Poisson} & \textbf{Logit} & \textbf{Probit} & \textbf{Binary Poisson} & \textbf{Poisson}\\
         \hline\\[-1.8ex]
         \endhead
-        \hline\\[-1.8ex] \multicolumn{4}{r}{\textit{Continued on next page}} \\
+        \hline\\[-1.8ex] \multicolumn{5}{r}{\textit{Continued on next page}} \\
         \endfoot
         \hline\hline\\[-1.8ex]
         \endlastfoot
-        \textit{ONE} & %(coeff1)5.4g & %(MLH1)5.4g & %(MLOP1)5.4g & %(NB11)5.4g & %(RS1)5.4g & %(tstat1)5.4g\\ 
-        \textit{AGEV1} & %(coeff2)5.4g & %(MLH2)5.4g & %(MLOP2)5.4g & %(NB12)5.4g & %(RS2)5.4g & %(tstat2)5.4g\\ 
-        \textit{AGEV2} & %(coeff3)5.4g & %(MLH3)5.4g & %(MLOP3)5.4g & %(NB13)5.4g & %(RS3)5.4g & %(tstat3)5.4g\\ 
-        \textit{AGEV3} & %(coeff4)5.4g & %(MLH4)5.4g & %(MLOP4)5.4g & %(NB14)5.4g & %(RS4)5.4g & %(tstat4)5.4g\\ 
-        \textit{AGEV4} & %(coeff5)5.4g & %(MLH5)5.4g & %(MLOP5)5.4g & %(NB15)5.4g & %(RS5)5.4g & %(tstat5)5.4g\\ 
-        \textit{AGEV5} & %(coeff6)5.4g & %(MLH6)5.4g & %(MLOP6)5.4g & %(NB16)5.4g & %(RS6)5.4g & %(tstat6)5.4g\\ 
-        \textit{AGEV6} & %(coeff7)5.4g & %(MLH7)5.4g & %(MLOP7)5.4g & %(NB17)5.4g & %(RS7)5.4g & %(tstat7)5.4g\\ 
-        \textit{AGEV11} & %(coeff8)5.4g & %(MLH8)5.4g & %(MLOP8)5.4g & %(NB18)5.4g & %(RS8)5.4g & %(tstat8)5.4g\\ 
-        \textit{AGEV20} & %(coeff9)5.4g & %(MLH9)5.4g & %(MLOP9)5.4g & %(NB19)5.4g & %(RS9)5.4g & %(tstat9)5.4g\\ 
-        \textit{TYPEV11} & %(coeff10)5.4g & %(MLH10)5.4g & %(MLOP10)5.4g & %(NB110)5.4g & %(RS10)5.4g & %(tstat10)5.4g\\ 
-        \textit{TYPEV14A} & %(coeff11)5.4g & %(MLH11)5.4g & %(MLOP11)5.4g & %(NB111)5.4g & %(RS11)5.4g & %(tstat11)5.4g\\ 
-        \textit{TYPEV14B} & %(coeff12)5.4g & %(MLH12)5.4g & %(MLOP12)5.4g & %(NB112)5.4g & %(RS12)5.4g & %(tstat12)5.4g\\ 
-        \textit{TYPEV14C} & %(coeff13)5.4g & %(MLH13)5.4g & %(MLOP13)5.4g & %(NB113)5.4g & %(RS13)5.4g & %(tstat13)5.4g\\ 
-        \textit{TYPEV15} & %(coeff14)5.4g & %(MLH14)5.4g & %(MLOP14)5.4g & %(NB114)5.4g & %(RS14)5.4g & %(tstat14)5.4g\\ 
-        \textit{TYPEV16} & %(coeff15)5.4g & %(MLH15)5.4g & %(MLOP15)5.4g & %(NB115)5.4g & %(RS15)5.4g & %(tstat15)5.4g\\ 
-        \textit{TYPEV17} & %(coeff16)5.4g & %(MLH16)5.4g & %(MLOP16)5.4g & %(NB116)5.4g & %(RS16)5.4g & %(tstat16)5.4g\\ 
-        \textit{TYPEV18} & %(coeff17)5.4g & %(MLH17)5.4g & %(MLOP17)5.4g & %(NB117)5.4g & %(RS17)5.4g & %(tstat17)5.4g\\ 
-        \textit{TYPEV19} & %(coeff18)5.4g & %(MLH18)5.4g & %(MLOP18)5.4g & %(NB118)5.4g & %(RS18)5.4g & %(tstat18)5.4g\\ 
-        \textit{TYPEV20} & %(coeff19)5.4g & %(MLH19)5.4g & %(MLOP19)5.4g & %(NB119)5.4g & %(RS19)5.4g & %(tstat19)5.4g\\ 
-        \textit{TYPEV21} & %(coeff20)5.4g & %(MLH20)5.4g & %(MLOP20)5.4g & %(NB120)5.4g & %(RS20)5.4g & %(tstat20)5.4g\\ 
-        \textit{TYPEV22} & %(coeff21)5.4g & %(MLH21)5.4g & %(MLOP21)5.4g & %(NB121)5.4g & %(RS21)5.4g & %(tstat21)5.4g\\ 
-        \textit{TYPEV23} & %(coeff22)5.4g & %(MLH22)5.4g & %(MLOP22)5.4g & %(NB122)5.4g & %(RS22)5.4g & %(tstat22)5.4g\\ 
-        \textit{REGION1} & %(coeff23)5.4g & %(MLH23)5.4g & %(MLOP23)5.4g & %(NB123)5.4g & %(RS23)5.4g & %(tstat23)5.4g\\ 
-        \textit{REGION2} & %(coeff24)5.4g & %(MLH24)5.4g & %(MLOP24)5.4g & %(NB124)5.4g & %(RS24)5.4g & %(tstat24)5.4g\\ 
-        \textit{REGION3} & %(coeff25)5.4g & %(MLH25)5.4g & %(MLOP25)5.4g & %(NB125)5.4g & %(RS25)5.4g & %(tstat25)5.4g\\ 
-        \textit{REGION4} & %(coeff26)5.4g & %(MLH26)5.4g & %(MLOP26)5.4g & %(NB126)5.4g & %(RS26)5.4g & %(tstat26)5.4g\\ 
-        \textit{REGION5} & %(coeff27)5.4g & %(MLH27)5.4g & %(MLOP27)5.4g & %(NB127)5.4g & %(RS27)5.4g & %(tstat27)5.4g\\ 
-        \textit{REGION6} & %(coeff28)5.4g & %(MLH28)5.4g & %(MLOP28)5.4g & %(NB128)5.4g & %(RS28)5.4g & %(tstat28)5.4g\\ 
-        \textit{REGION7} & %(coeff29)5.4g & %(MLH29)5.4g & %(MLOP29)5.4g & %(NB129)5.4g & %(RS29)5.4g & %(tstat29)5.4g\\ 
-        \textit{REGION8} & %(coeff30)5.4g & %(MLH30)5.4g & %(MLOP30)5.4g & %(NB130)5.4g & %(RS30)5.4g & %(tstat30)5.4g\\ 
-        \textit{REGION9} & %(coeff31)5.4g & %(MLH31)5.4g & %(MLOP31)5.4g & %(NB131)5.4g & %(RS31)5.4g & %(tstat31)5.4g\\ 
-        \textit{REGION10} & %(coeff32)5.4g & %(MLH32)5.4g & %(MLOP32)5.4g & %(NB132)5.4g & %(RS32)5.4g & %(tstat32)5.4g\\ 
-        \textit{REGION12} & %(coeff34)5.4g & %(MLH34)5.4g & %(MLOP34)5.4g & %(NB134)5.4g & %(RS34)5.4g & %(tstat34)5.4g\\ 
-        \textit{REGION13} & %(coeff35)5.4g & %(MLH35)5.4g & %(MLOP35)5.4g & %(NB135)5.4g & %(RS35)5.4g & %(tstat35)5.4g\\ 
-        \textit{REGION14} & %(coeff36)5.4g & %(MLH36)5.4g & %(MLOP36)5.4g & %(NB136)5.4g & %(RS36)5.4g & %(tstat36)5.4g\\ 
-        \textit{REGION15} & %(coeff37)5.4g & %(MLH37)5.4g & %(MLOP37)5.4g & %(NB137)5.4g & %(RS37)5.4g & %(tstat37)5.4g\\ 
-        \textit{REGION16} & %(coeff38)5.4g & %(MLH38)5.4g & %(MLOP38)5.4g & %(NB138)5.4g & %(RS38)5.4g & %(tstat38)5.4g\\ 
-        \textit{REGION17} & %(coeff39)5.4g & %(MLH39)5.4g & %(MLOP39)5.4g & %(NB139)5.4g & %(RS39)5.4g & %(tstat39)5.4g\\ 
-        \textit{REGION18} & %(coeff40)5.4g & %(MLH40)5.4g & %(MLOP40)5.4g & %(NB140)5.4g & %(RS40)5.4g & %(tstat40)5.4g\\ 
-        \textit{REGION19} & %(coeff41)5.4g & %(MLH41)5.4g & %(MLOP41)5.4g & %(NB141)5.4g & %(RS41)5.4g & %(tstat41)5.4g\\ 
-        \textit{REGION20} & %(coeff42)5.4g & %(MLH42)5.4g & %(MLOP42)5.4g & %(NB142)5.4g & %(RS42)5.4g & %(tstat42)5.4g\\ 
-        \textit{REGION21} & %(coeff43)5.4g & %(MLH43)5.4g & %(MLOP43)5.4g & %(NB143)5.4g & %(RS43)5.4g & %(tstat43)5.4g\\ 
-        \textit{REGION22} & %(coeff44)5.4g & %(MLH44)5.4g & %(MLOP44)5.4g & %(NB144)5.4g & %(RS44)5.4g & %(tstat44)5.4g\\ 
-        \textit{REGION23} & %(coeff45)5.4g & %(MLH45)5.4g & %(MLOP45)5.4g & %(NB145)5.4g & %(RS45)5.4g & %(tstat45)5.4g\\ 
-        \textit{REGION24} & %(coeff46)5.4g & %(MLH46)5.4g & %(MLOP46)5.4g & %(NB146)5.4g & %(RS46)5.4g & %(tstat46)5.4g\\ 
-        \textit{REGION25} & %(coeff47)5.4g & %(MLH47)5.4g & %(MLOP47)5.4g & %(NB147)5.4g & %(RS47)5.4g & %(tstat47)5.4g\\ 
-        \textit{REGION26} & %(coeff48)5.4g & %(MLH48)5.4g & %(MLOP48)5.4g & %(NB148)5.4g & %(RS48)5.4g & %(tstat48)5.4g\\ 
-        \textit{REGION27} & %(coeff49)5.4g & %(MLH49)5.4g & %(MLOP49)5.4g & %(NB149)5.4g & %(RS49)5.4g & %(tstat49)5.4g\\ 
-        \textit{REGION28} & %(coeff50)5.4g & %(MLH50)5.4g & %(MLOP50)5.4g & %(NB150)5.4g & %(RS50)5.4g & %(tstat50)5.4g\\ 
-        \textit{REGION29} & %(coeff51)5.4g & %(MLH51)5.4g & %(MLOP51)5.4g & %(NB151)5.4g & %(RS51)5.4g & %(tstat51)5.4g\\ 
-        \textit{REGION30} & %(coeff52)5.4g & %(MLH52)5.4g & %(MLOP52)5.4g & %(NB152)5.4g & %(RS52)5.4g & %(tstat52)5.4g\\ 
-        \textit{REGION31} & %(coeff53)5.4g & %(MLH53)5.4g & %(MLOP53)5.4g & %(NB153)5.4g & %(RS53)5.4g & %(tstat53)5.4g\\ 
-        \textit{REGION32} & %(coeff54)5.4g & %(MLH54)5.4g & %(MLOP54)5.4g & %(NB154)5.4g & %(RS54)5.4g & %(tstat54)5.4g\\ 
-        \textit{REGION33} & %(coeff55)5.4g & %(MLH55)5.4g & %(MLOP55)5.4g & %(NB155)5.4g & %(RS55)5.4g & %(tstat55)5.4g\\ 
-        \textit{REGION34} & %(coeff56)5.4g & %(MLH56)5.4g & %(MLOP56)5.4g & %(NB156)5.4g & %(RS56)5.4g & %(tstat56)5.4g\\ 
-        \textit{REGION35} & %(coeff57)5.4g & %(MLH57)5.4g & %(MLOP57)5.4g & %(NB157)5.4g & %(RS57)5.4g & %(tstat57)5.4g\\ 
-        \textit{REGION36} & %(coeff58)5.4g & %(MLH58)5.4g & %(MLOP58)5.4g & %(NB158)5.4g & %(RS58)5.4g & %(tstat58)5.4g\\ 
-        \textit{REGION37} & %(coeff59)5.4g & %(MLH59)5.4g & %(MLOP59)5.4g & %(NB159)5.4g & %(RS59)5.4g & %(tstat59)5.4g\\ 
-        \textit{REGION38} & %(coeff60)5.4g & %(MLH60)5.4g & %(MLOP60)5.4g & %(NB160)5.4g & %(RS60)5.4g & %(tstat60)5.4g\\ 
-        \textit{REGION39} & %(coeff61)5.4g & %(MLH61)5.4g & %(MLOP61)5.4g & %(NB161)5.4g & %(RS61)5.4g & %(tstat61)5.4g\\ 
-        \textit{REGION40} & %(coeff62)5.4g & %(MLH62)5.4g & %(MLOP62)5.4g & %(NB162)5.4g & %(RS62)5.4g & %(tstat62)5.4g\\ 
-        \textit{REGION41} & %(coeff62)5.4g & %(MLH62)5.4g & %(MLOP62)5.4g & %(NB162)5.4g & %(RS62)5.4g & %(tstat62)5.4g\\ 
-        \textit{SEXF} & %(coeff63)5.4g & %(MLH63)5.4g & %(MLOP63)5.4g & %(NB163)5.4g & %(RS63)5.4g & %(tstat63)5.4g\\ 
-        \textit{AGE} & %(coeff64)5.4g & %(MLH64)5.4g & %(MLOP64)5.4g & %(NB164)5.4g & %(RS64)5.4g & %(tstat64)5.4g\\ 
-        \textit{AGESQ} & %(coeff83)5.4g & %(MLH83)5.4g & %(MLOP83)5.4g & %(NB183)5.4g & %(RS83)5.4g & %(tstat83)5.4g\\ 
-        \textit{POLTYPE} & %(coeff65)5.4g & %(MLH65)5.4g & %(MLOP65)5.4g & %(NB165)5.4g & %(RS65)5.4g & %(tstat65)5.4g\\ 
-        \textit{BONUSC1} & %(coeff66)5.4g & %(MLH66)5.4g & %(MLOP66)5.4g & %(NB166)5.4g & %(RS66)5.4g & %(tstat66)5.4g\\ 
-        \textit{BONUSC2} & %(coeff67)5.4g & %(MLH67)5.4g & %(MLOP67)5.4g & %(NB167)5.4g & %(RS67)5.4g & %(tstat67)5.4g\\ 
-        \textit{BONUSC3} & %(coeff68)5.4g & %(MLH68)5.4g & %(MLOP68)5.4g & %(NB168)5.4g & %(RS68)5.4g & %(tstat68)5.4g\\ 
-        \textit{BONUSC4} & %(coeff69)5.4g & %(MLH69)5.4g & %(MLOP69)5.4g & %(NB169)5.4g & %(RS69)5.4g & %(tstat69)5.4g\\ 
-        \textit{BONUSC5} & %(coeff70)5.4g & %(MLH70)5.4g & %(MLOP70)5.4g & %(NB170)5.4g & %(RS70)5.4g & %(tstat70)5.4g\\ 
-        \textit{BONUSC6} & %(coeff71)5.4g & %(MLH71)5.4g & %(MLOP71)5.4g & %(NB171)5.4g & %(RS71)5.4g & %(tstat71)5.4g\\ 
-        \textit{BONUSC7} & %(coeff72)5.4g & %(MLH72)5.4g & %(MLOP72)5.4g & %(NB172)5.4g & %(RS72)5.4g & %(tstat72)5.4g\\ 
-        \textit{BONUSC8} & %(coeff73)5.4g & %(MLH73)5.4g & %(MLOP73)5.4g & %(NB173)5.4g & %(RS73)5.4g & %(tstat73)5.4g\\ 
-        \textit{BONUSC9} & %(coeff74)5.4g & %(MLH74)5.4g & %(MLOP74)5.4g & %(NB174)5.4g & %(RS74)5.4g & %(tstat74)5.4g\\ 
-        \textit{DEDUCT1} & %(coeff75)5.4g & %(MLH75)5.4g & %(MLOP75)5.4g & %(NB175)5.4g & %(RS75)5.4g & %(tstat75)5.4g\\ 
-        \textit{DEDUCT3} & %(coeff76)5.4g & %(MLH76)5.4g & %(MLOP76)5.4g & %(NB176)5.4g & %(RS76)5.4g & %(tstat76)5.4g\\ 
-        \textit{DEDUCT4} & %(coeff77)5.4g & %(MLH77)5.4g & %(MLOP77)5.4g & %(NB177)5.4g & %(RS77)5.4g & %(tstat77)5.4g\\ 
-        \textit{DEDUCT9} & %(coeff78)5.4g & %(MLH78)5.4g & %(MLOP78)5.4g & %(NB178)5.4g & %(RS78)5.4g & %(tstat78)5.4g\\ 
-        \textit{DEDUCTV} & %(coeff79)5.4g & %(MLH79)5.4g & %(MLOP79)5.4g & %(NB179)5.4g & %(RS79)5.4g & %(tstat79)5.4g\\ 
-        \textit{COVCAS} & %(coeff80)5.4g & %(MLH80)5.4g & %(MLOP80)5.4g & %(NB180)5.4g & %(RS80)5.4g & %(tstat80)5.4g\\ 
-        \textit{COVRCD} & %(coeff81)5.4g & %(MLH81)5.4g & %(MLOP81)5.4g & %(NB181)5.4g & %(RS81)5.4g & %(tstat81)5.4g\\ 
-        \textit{COVAPP} & %(coeff82)5.4g & %(MLH82)5.4g & %(MLOP82)5.4g & %(NB182)5.4g & %(RS82)5.4g & %(tstat82)5.4g\\ 
+        \textit{ONE} & %(coeffLt1)8.4f & %(coeffPt1)8.4f & %(coeffBP1)8.4f & %(coeffPs1)8.4f & %(zLt1)8.4f & %(zPt1)8.4f & %(zBP1)8.4f & %(zPs1)8.4f \\ 
+        \textit{AGEV1} & %(coeffLt2)8.4f & %(coeffPt2)8.4f & %(coeffBP2)8.4f & %(coeffPs2)8.4f & %(zLt2)8.4f & %(zPt2)8.4f & %(zBP2)8.4f & %(zPs2)8.4f \\ 
+        \textit{AGEV2} & %(coeffLt3)8.4f & %(coeffPt3)8.4f & %(coeffBP3)8.4f & %(coeffPs3)8.4f & %(zLt3)8.4f & %(zPt3)8.4f & %(zBP3)8.4f & %(zPs3)8.4f \\ 
+        \textit{AGEV3} & %(coeffLt4)8.4f & %(coeffPt4)8.4f & %(coeffBP4)8.4f & %(coeffPs4)8.4f & %(zLt4)8.4f & %(zPt4)8.4f & %(zBP4)8.4f & %(zPs4)8.4f \\ 
+        \textit{AGEV4} & %(coeffLt5)8.4f & %(coeffPt5)8.4f & %(coeffBP5)8.4f & %(coeffPs5)8.4f & %(zLt5)8.4f & %(zPt5)8.4f & %(zBP5)8.4f & %(zPs5)8.4f \\ 
+        \textit{AGEV5} & %(coeffLt6)8.4f & %(coeffPt6)8.4f & %(coeffBP6)8.4f & %(coeffPs6)8.4f & %(zLt6)8.4f & %(zPt6)8.4f & %(zBP6)8.4f & %(zPs6)8.4f \\ 
+        \textit{AGEV6} & %(coeffLt7)8.4f & %(coeffPt7)8.4f & %(coeffBP7)8.4f & %(coeffPs7)8.4f & %(zLt7)8.4f & %(zPt7)8.4f & %(zBP7)8.4f & %(zPs7)8.4f \\ 
+        \textit{AGEV11} & %(coeffLt8)8.4f & %(coeffPt8)8.4f & %(coeffBP8)8.4f & %(coeffPs8)8.4f & %(zLt8)8.4f & %(zPt8)8.4f & %(zBP8)8.4f & %(zPs8)8.4f \\ 
+        \textit{AGEV20} & %(coeffLt9)8.4f & %(coeffPt9)8.4f & %(coeffBP9)8.4f & %(coeffPs9)8.4f & %(zLt9)8.4f & %(zPt9)8.4f & %(zBP9)8.4f & %(zPs9)8.4f \\ 
+        \textit{TYPEV11} & %(coeffLt10)8.4f & %(coeffPt10)8.4f & %(coeffBP10)8.4f & %(coeffPs10)8.4f & %(zLt10)8.4f & %(zPt10)8.4f & %(zBP10)8.4f & %(zPs10)8.4f \\ 
+        \textit{TYPEV14A} & %(coeffLt11)8.4f & %(coeffPt11)8.4f & %(coeffBP11)8.4f & %(coeffPs11)8.4f & %(zLt11)8.4f & %(zPt11)8.4f & %(zBP11)8.4f & %(zPs11)8.4f \\ 
+        \textit{TYPEV14B} & %(coeffLt12)8.4f & %(coeffPt12)8.4f & %(coeffBP12)8.4f & %(coeffPs12)8.4f & %(zLt12)8.4f & %(zPt12)8.4f & %(zBP12)8.4f & %(zPs12)8.4f \\ 
+        \textit{TYPEV14C} & %(coeffLt13)8.4f & %(coeffPt13)8.4f & %(coeffBP13)8.4f & %(coeffPs13)8.4f & %(zLt13)8.4f & %(zPt13)8.4f & %(zBP13)8.4f & %(zPs13)8.4f \\ 
+        \textit{TYPEV15} & %(coeffLt14)8.4f & %(coeffPt14)8.4f & %(coeffBP14)8.4f & %(coeffPs14)8.4f & %(zLt14)8.4f & %(zPt14)8.4f & %(zBP14)8.4f & %(zPs14)8.4f \\ 
+        \textit{TYPEV16} & %(coeffLt15)8.4f & %(coeffPt15)8.4f & %(coeffBP15)8.4f & %(coeffPs15)8.4f & %(zLt15)8.4f & %(zPt15)8.4f & %(zBP15)8.4f & %(zPs15)8.4f \\ 
+        \textit{TYPEV17} & %(coeffLt16)8.4f & %(coeffPt16)8.4f & %(coeffBP16)8.4f & %(coeffPs16)8.4f & %(zLt16)8.4f & %(zPt16)8.4f & %(zBP16)8.4f & %(zPs16)8.4f \\ 
+        \textit{TYPEV18} & %(coeffLt17)8.4f & %(coeffPt17)8.4f & %(coeffBP17)8.4f & %(coeffPs17)8.4f & %(zLt17)8.4f & %(zPt17)8.4f & %(zBP17)8.4f & %(zPs17)8.4f \\ 
+        \textit{TYPEV19} & %(coeffLt18)8.4f & %(coeffPt18)8.4f & %(coeffBP18)8.4f & %(coeffPs18)8.4f & %(zLt18)8.4f & %(zPt18)8.4f & %(zBP18)8.4f & %(zPs18)8.4f \\ 
+        \textit{TYPEV20} & %(coeffLt19)8.4f & %(coeffPt19)8.4f & %(coeffBP19)8.4f & %(coeffPs19)8.4f & %(zLt19)8.4f & %(zPt19)8.4f & %(zBP19)8.4f & %(zPs19)8.4f \\ 
+        \textit{TYPEV21} & %(coeffLt20)8.4f & %(coeffPt20)8.4f & %(coeffBP20)8.4f & %(coeffPs20)8.4f & %(zLt20)8.4f & %(zPt20)8.4f & %(zBP20)8.4f & %(zPs20)8.4f \\ 
+        \textit{TYPEV22} & %(coeffLt21)8.4f & %(coeffPt21)8.4f & %(coeffBP21)8.4f & %(coeffPs21)8.4f & %(zLt21)8.4f & %(zPt21)8.4f & %(zBP21)8.4f & %(zPs21)8.4f \\ 
+        \textit{TYPEV23} & %(coeffLt22)8.4f & %(coeffPt22)8.4f & %(coeffBP22)8.4f & %(coeffPs22)8.4f & %(zLt22)8.4f & %(zPt22)8.4f & %(zBP22)8.4f & %(zPs22)8.4f \\ 
+        \textit{REGION1} & %(coeffLt23)8.4f & %(coeffPt23)8.4f & %(coeffBP23)8.4f & %(coeffPs23)8.4f & %(zLt23)8.4f & %(zPt23)8.4f & %(zBP23)8.4f & %(zPs23)8.4f \\ 
+        \textit{REGION2} & %(coeffLt24)8.4f & %(coeffPt24)8.4f & %(coeffBP24)8.4f & %(coeffPs24)8.4f & %(zLt24)8.4f & %(zPt24)8.4f & %(zBP24)8.4f & %(zPs24)8.4f \\ 
+        \textit{REGION3} & %(coeffLt25)8.4f & %(coeffPt25)8.4f & %(coeffBP25)8.4f & %(coeffPs25)8.4f & %(zLt25)8.4f & %(zPt25)8.4f & %(zBP25)8.4f & %(zPs25)8.4f \\ 
+        \textit{REGION4} & %(coeffLt26)8.4f & %(coeffPt26)8.4f & %(coeffBP26)8.4f & %(coeffPs26)8.4f & %(zLt26)8.4f & %(zPt26)8.4f & %(zBP26)8.4f & %(zPs26)8.4f \\ 
+        \textit{REGION5} & %(coeffLt27)8.4f & %(coeffPt27)8.4f & %(coeffBP27)8.4f & %(coeffPs27)8.4f & %(zLt27)8.4f & %(zPt27)8.4f & %(zBP27)8.4f & %(zPs27)8.4f \\ 
+        \textit{REGION6} & %(coeffLt28)8.4f & %(coeffPt28)8.4f & %(coeffBP28)8.4f & %(coeffPs28)8.4f & %(zLt28)8.4f & %(zPt28)8.4f & %(zBP28)8.4f & %(zPs28)8.4f \\ 
+        \textit{REGION7} & %(coeffLt29)8.4f & %(coeffPt29)8.4f & %(coeffBP29)8.4f & %(coeffPs29)8.4f & %(zLt29)8.4f & %(zPt29)8.4f & %(zBP29)8.4f & %(zPs29)8.4f \\ 
+        \textit{REGION8} & %(coeffLt30)8.4f & %(coeffPt30)8.4f & %(coeffBP30)8.4f & %(coeffPs30)8.4f & %(zLt30)8.4f & %(zPt30)8.4f & %(zBP30)8.4f & %(zPs30)8.4f \\ 
+        \textit{REGION9} & %(coeffLt31)8.4f & %(coeffPt31)8.4f & %(coeffBP31)8.4f & %(coeffPs31)8.4f & %(zLt31)8.4f & %(zPt31)8.4f & %(zBP31)8.4f & %(zPs31)8.4f \\ 
+        \textit{REGION10} & %(coeffLt32)8.4f & %(coeffPt32)8.4f & %(coeffBP32)8.4f & %(coeffPs32)8.4f & %(zLt32)8.4f & %(zPt32)8.4f & %(zBP32)8.4f & %(zPs32)8.4f \\ 
+        \textit{REGION12} & %(coeffLt33)8.4f & %(coeffPt33)8.4f & %(coeffBP33)8.4f & %(coeffPs33)8.4f & %(zLt33)8.4f & %(zPt33)8.4f & %(zBP33)8.4f & %(zPs33)8.4f \\ 
+        \textit{REGION13} & %(coeffLt34)8.4f & %(coeffPt34)8.4f & %(coeffBP34)8.4f & %(coeffPs34)8.4f & %(zLt34)8.4f & %(zPt34)8.4f & %(zBP34)8.4f & %(zPs34)8.4f \\ 
+        \textit{REGION14} & %(coeffLt35)8.4f & %(coeffPt35)8.4f & %(coeffBP35)8.4f & %(coeffPs35)8.4f & %(zLt35)8.4f & %(zPt35)8.4f & %(zBP35)8.4f & %(zPs35)8.4f \\ 
+        \textit{REGION15} & %(coeffLt36)8.4f & %(coeffPt36)8.4f & %(coeffBP36)8.4f & %(coeffPs36)8.4f & %(zLt36)8.4f & %(zPt36)8.4f & %(zBP36)8.4f & %(zPs36)8.4f \\ 
+        \textit{REGION16} & %(coeffLt37)8.4f & %(coeffPt37)8.4f & %(coeffBP37)8.4f & %(coeffPs37)8.4f & %(zLt37)8.4f & %(zPt37)8.4f & %(zBP37)8.4f & %(zPs37)8.4f \\ 
+        \textit{REGION17} & %(coeffLt38)8.4f & %(coeffPt38)8.4f & %(coeffBP38)8.4f & %(coeffPs38)8.4f & %(zLt38)8.4f & %(zPt38)8.4f & %(zBP38)8.4f & %(zPs38)8.4f \\ 
+        \textit{REGION18} & %(coeffLt39)8.4f & %(coeffPt39)8.4f & %(coeffBP39)8.4f & %(coeffPs39)8.4f & %(zLt39)8.4f & %(zPt39)8.4f & %(zBP39)8.4f & %(zPs39)8.4f \\ 
+        \textit{REGION19} & %(coeffLt40)8.4f & %(coeffPt40)8.4f & %(coeffBP40)8.4f & %(coeffPs40)8.4f & %(zLt40)8.4f & %(zPt40)8.4f & %(zBP40)8.4f & %(zPs40)8.4f \\ 
+        \textit{REGION20} & %(coeffLt41)8.4f & %(coeffPt41)8.4f & %(coeffBP41)8.4f & %(coeffPs41)8.4f & %(zLt41)8.4f & %(zPt41)8.4f & %(zBP41)8.4f & %(zPs41)8.4f \\ 
+        \textit{REGION21} & %(coeffLt42)8.4f & %(coeffPt42)8.4f & %(coeffBP42)8.4f & %(coeffPs42)8.4f & %(zLt42)8.4f & %(zPt42)8.4f & %(zBP42)8.4f & %(zPs42)8.4f \\ 
+        \textit{REGION22} & %(coeffLt43)8.4f & %(coeffPt43)8.4f & %(coeffBP43)8.4f & %(coeffPs43)8.4f & %(zLt43)8.4f & %(zPt43)8.4f & %(zBP43)8.4f & %(zPs43)8.4f \\ 
+        \textit{REGION23} & %(coeffLt44)8.4f & %(coeffPt44)8.4f & %(coeffBP44)8.4f & %(coeffPs44)8.4f & %(zLt44)8.4f & %(zPt44)8.4f & %(zBP44)8.4f & %(zPs44)8.4f \\ 
+        \textit{REGION24} & %(coeffLt45)8.4f & %(coeffPt45)8.4f & %(coeffBP45)8.4f & %(coeffPs45)8.4f & %(zLt45)8.4f & %(zPt45)8.4f & %(zBP45)8.4f & %(zPs45)8.4f \\ 
+        \textit{REGION25} & %(coeffLt46)8.4f & %(coeffPt46)8.4f & %(coeffBP46)8.4f & %(coeffPs46)8.4f & %(zLt46)8.4f & %(zPt46)8.4f & %(zBP46)8.4f & %(zPs46)8.4f \\ 
+        \textit{REGION26} & %(coeffLt47)8.4f & %(coeffPt47)8.4f & %(coeffBP47)8.4f & %(coeffPs47)8.4f & %(zLt47)8.4f & %(zPt47)8.4f & %(zBP47)8.4f & %(zPs47)8.4f \\ 
+        \textit{REGION27} & %(coeffLt48)8.4f & %(coeffPt48)8.4f & %(coeffBP48)8.4f & %(coeffPs48)8.4f & %(zLt48)8.4f & %(zPt48)8.4f & %(zBP48)8.4f & %(zPs48)8.4f \\ 
+        \textit{REGION28} & %(coeffLt49)8.4f & %(coeffPt49)8.4f & %(coeffBP49)8.4f & %(coeffPs49)8.4f & %(zLt49)8.4f & %(zPt49)8.4f & %(zBP49)8.4f & %(zPs49)8.4f \\ 
+        \textit{REGION29} & %(coeffLt50)8.4f & %(coeffPt50)8.4f & %(coeffBP50)8.4f & %(coeffPs50)8.4f & %(zLt50)8.4f & %(zPt50)8.4f & %(zBP50)8.4f & %(zPs50)8.4f \\ 
+        \textit{REGION30} & %(coeffLt51)8.4f & %(coeffPt51)8.4f & %(coeffBP51)8.4f & %(coeffPs51)8.4f & %(zLt51)8.4f & %(zPt51)8.4f & %(zBP51)8.4f & %(zPs51)8.4f \\ 
+        \textit{REGION31} & %(coeffLt52)8.4f & %(coeffPt52)8.4f & %(coeffBP52)8.4f & %(coeffPs52)8.4f & %(zLt52)8.4f & %(zPt52)8.4f & %(zBP52)8.4f & %(zPs52)8.4f \\ 
+        \textit{REGION32} & %(coeffLt53)8.4f & %(coeffPt53)8.4f & %(coeffBP53)8.4f & %(coeffPs53)8.4f & %(zLt53)8.4f & %(zPt53)8.4f & %(zBP53)8.4f & %(zPs53)8.4f \\ 
+        \textit{REGION33} & %(coeffLt54)8.4f & %(coeffPt54)8.4f & %(coeffBP54)8.4f & %(coeffPs54)8.4f & %(zLt54)8.4f & %(zPt54)8.4f & %(zBP54)8.4f & %(zPs54)8.4f \\ 
+        \textit{REGION34} & %(coeffLt55)8.4f & %(coeffPt55)8.4f & %(coeffBP55)8.4f & %(coeffPs55)8.4f & %(zLt55)8.4f & %(zPt55)8.4f & %(zBP55)8.4f & %(zPs55)8.4f \\ 
+        \textit{REGION35} & %(coeffLt56)8.4f & %(coeffPt56)8.4f & %(coeffBP56)8.4f & %(coeffPs56)8.4f & %(zLt56)8.4f & %(zPt56)8.4f & %(zBP56)8.4f & %(zPs56)8.4f \\ 
+        \textit{REGION36} & %(coeffLt57)8.4f & %(coeffPt57)8.4f & %(coeffBP57)8.4f & %(coeffPs57)8.4f & %(zLt57)8.4f & %(zPt57)8.4f & %(zBP57)8.4f & %(zPs57)8.4f \\ 
+        \textit{REGION37} & %(coeffLt58)8.4f & %(coeffPt58)8.4f & %(coeffBP58)8.4f & %(coeffPs58)8.4f & %(zLt58)8.4f & %(zPt58)8.4f & %(zBP58)8.4f & %(zPs58)8.4f \\ 
+        \textit{REGION38} & %(coeffLt59)8.4f & %(coeffPt59)8.4f & %(coeffBP59)8.4f & %(coeffPs59)8.4f & %(zLt59)8.4f & %(zPt59)8.4f & %(zBP59)8.4f & %(zPs59)8.4f \\ 
+        \textit{REGION39} & %(coeffLt60)8.4f & %(coeffPt60)8.4f & %(coeffBP60)8.4f & %(coeffPs60)8.4f & %(zLt60)8.4f & %(zPt60)8.4f & %(zBP60)8.4f & %(zPs60)8.4f \\ 
+        \textit{REGION40} & %(coeffLt61)8.4f & %(coeffPt61)8.4f & %(coeffBP61)8.4f & %(coeffPs61)8.4f & %(zLt61)8.4f & %(zPt61)8.4f & %(zBP61)8.4f & %(zPs61)8.4f \\ 
+        \textit{REGION41} & %(coeffLt62)8.4f & %(coeffPt62)8.4f & %(coeffBP62)8.4f & %(coeffPs62)8.4f & %(zLt62)8.4f & %(zPt62)8.4f & %(zBP62)8.4f & %(zPs62)8.4f \\ 
+        \textit{SEXF} & %(coeffLt63)8.4f & %(coeffPt63)8.4f & %(coeffBP63)8.4f & %(coeffPs63)8.4f & %(zLt63)8.4f & %(zPt63)8.4f & %(zBP63)8.4f & %(zPs63)8.4f \\ 
+        \textit{AGE} & %(coeffLt64)8.4f & %(coeffPt64)8.4f & %(coeffBP64)8.4f & %(coeffPs64)8.4f & %(zLt64)8.4f & %(zPt64)8.4f & %(zBP64)8.4f & %(zPs64)8.4f \\ 
+        \textit{AGESQ} & %(coeffLt83)8.4f & %(coeffPt83)8.4f & %(coeffBP83)8.4f & %(coeffPs83)8.4f & %(zLt83)8.4f & %(zPt83)8.4f & %(zBP83)8.4f & %(zPs83)8.4f \\ 
+        \textit{POLTYPE} & %(coeffLt65)8.4f & %(coeffPt65)8.4f & %(coeffBP65)8.4f & %(coeffPs65)8.4f & %(zLt65)8.4f & %(zPt65)8.4f & %(zBP65)8.4f & %(zPs65)8.4f \\ 
+        \textit{BONUSC1} & %(coeffLt66)8.4f & %(coeffPt66)8.4f & %(coeffBP66)8.4f & %(coeffPs66)8.4f & %(zLt66)8.4f & %(zPt66)8.4f & %(zBP66)8.4f & %(zPs66)8.4f \\ 
+        \textit{BONUSC2} & %(coeffLt67)8.4f & %(coeffPt67)8.4f & %(coeffBP67)8.4f & %(coeffPs67)8.4f & %(zLt67)8.4f & %(zPt67)8.4f & %(zBP67)8.4f & %(zPs67)8.4f \\ 
+        \textit{BONUSC3} & %(coeffLt68)8.4f & %(coeffPt68)8.4f & %(coeffBP68)8.4f & %(coeffPs68)8.4f & %(zLt68)8.4f & %(zPt68)8.4f & %(zBP68)8.4f & %(zPs68)8.4f \\ 
+        \textit{BONUSC4} & %(coeffLt69)8.4f & %(coeffPt69)8.4f & %(coeffBP69)8.4f & %(coeffPs69)8.4f & %(zLt69)8.4f & %(zPt69)8.4f & %(zBP69)8.4f & %(zPs69)8.4f \\ 
+        \textit{BONUSC5} & %(coeffLt70)8.4f & %(coeffPt70)8.4f & %(coeffBP70)8.4f & %(coeffPs70)8.4f & %(zLt70)8.4f & %(zPt70)8.4f & %(zBP70)8.4f & %(zPs70)8.4f \\ 
+        \textit{BONUSC6} & %(coeffLt71)8.4f & %(coeffPt71)8.4f & %(coeffBP71)8.4f & %(coeffPs71)8.4f & %(zLt71)8.4f & %(zPt71)8.4f & %(zBP71)8.4f & %(zPs71)8.4f \\ 
+        \textit{BONUSC7} & %(coeffLt72)8.4f & %(coeffPt72)8.4f & %(coeffBP72)8.4f & %(coeffPs72)8.4f & %(zLt72)8.4f & %(zPt72)8.4f & %(zBP72)8.4f & %(zPs72)8.4f \\ 
+        \textit{BONUSC8} & %(coeffLt73)8.4f & %(coeffPt73)8.4f & %(coeffBP73)8.4f & %(coeffPs73)8.4f & %(zLt73)8.4f & %(zPt73)8.4f & %(zBP73)8.4f & %(zPs73)8.4f \\ 
+        \textit{BONUSC9} & %(coeffLt74)8.4f & %(coeffPt74)8.4f & %(coeffBP74)8.4f & %(coeffPs74)8.4f & %(zLt74)8.4f & %(zPt74)8.4f & %(zBP74)8.4f & %(zPs74)8.4f \\ 
+        \textit{DEDUCT1} & %(coeffLt75)8.4f & %(coeffPt75)8.4f & %(coeffBP75)8.4f & %(coeffPs75)8.4f & %(zLt75)8.4f & %(zPt75)8.4f & %(zBP75)8.4f & %(zPs75)8.4f \\ 
+        \textit{DEDUCT3} & %(coeffLt76)8.4f & %(coeffPt76)8.4f & %(coeffBP76)8.4f & %(coeffPs76)8.4f & %(zLt76)8.4f & %(zPt76)8.4f & %(zBP76)8.4f & %(zPs76)8.4f \\ 
+        \textit{DEDUCT4} & %(coeffLt77)8.4f & %(coeffPt77)8.4f & %(coeffBP77)8.4f & %(coeffPs77)8.4f & %(zLt77)8.4f & %(zPt77)8.4f & %(zBP77)8.4f & %(zPs77)8.4f \\ 
+        \textit{DEDUCT9} & %(coeffLt78)8.4f & %(coeffPt78)8.4f & %(coeffBP78)8.4f & %(coeffPs78)8.4f & %(zLt78)8.4f & %(zPt78)8.4f & %(zBP78)8.4f & %(zPs78)8.4f \\ 
+        \textit{DEDUCTV} & %(coeffLt79)8.4f & %(coeffPt79)8.4f & %(coeffBP79)8.4f & %(coeffPs79)8.4f & %(zLt79)8.4f & %(zPt79)8.4f & %(zBP79)8.4f & %(zPs79)8.4f \\ 
+        \textit{COVCAS} & %(coeffLt80)8.4f & %(coeffPt80)8.4f & %(coeffBP80)8.4f & %(coeffPs80)8.4f & %(zLt80)8.4f & %(zPt80)8.4f & %(zBP80)8.4f & %(zPs80)8.4f \\ 
+        \textit{COVRCD} & %(coeffLt81)8.4f & %(coeffPt81)8.4f & %(coeffBP81)8.4f & %(coeffPs81)8.4f & %(zLt81)8.4f & %(zPt81)8.4f & %(zBP81)8.4f & %(zPs81)8.4f \\ 
+        \textit{COVAPP} & %(coeffLt82)8.4f & %(coeffPt82)8.4f & %(coeffBP82)8.4f & %(coeffPs82)8.4f & %(zLt82)8.4f & %(zPt82)8.4f & %(zBP82)8.4f & %(zPs82)8.4f \\ 
     \end{longtable}
 \end{center}
+}

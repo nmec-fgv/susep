@@ -28,8 +28,9 @@ for period in periods:
         for dtype in dtypes:
             db_file = '/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db'
             db = shelve.open(db_file)
-            aux_dict = {}
             res_dict = db[period+aa] 
+            db.close()
+            aux_dict = {}
             aux_dict['period'] = period+aa
             aux_dict['dtype'] = dtype[0]
             for i in range(1, len(res_dict['coeffs'])+1):
