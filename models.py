@@ -7,6 +7,7 @@ import os
 import pickle
 import shelve
 import numpy as np
+import sympy
 from scipy.special import factorial
 from scipy.optimize import minimize
 from scipy.stats import norm
@@ -598,21 +599,17 @@ class Binary_models(Data):
                     res = -1 * (aux_vec[:, np.newaxis] *  X).sum(axis=0)
                     return res
 
-                def var_ML(X, beta):
+                def var_aux_ML(X, beta):
                     '''
-                    Variance for binary outcome model using logistic distribution:
+                    Variance term before inversion for binary outcome model using logistic distribution:
                     [sum_i exp(x_i'beta)/(1+exp(x_i'beta))^2 * x_i * x_i']^(-1) 
                     '''
                 
                     lambda_prime = (np.exp(np.dot(X, beta))/(1 + np.exp(np.dot(X, beta)))**2)[:, np.newaxis]
                     index0 = np.where(beta[1:] == 0)[0]
                     X = np.delete(X[:, 1:], index0, 1)
-                    var = np.linalg.inv((X * lambda_prime).T @ X)
-                    std = np.sqrt(np.diag(var))
-                    var = np.insert(var, index0, np.nan, axis=0)
-                    var = np.insert(var, index0, np.nan, axis=1)
-                    std = np.insert(std, index0, np.nan)
-                    return (var, std)
+                    var_aux = (X * lambda_prime).T @ X
+                    return (var_aux, index0)
                     
             
             elif distribution == 'Probit': 
@@ -629,9 +626,9 @@ class Binary_models(Data):
                     res = -1 * (aux_vec[:, np.newaxis] *  X).sum(axis=0)
                     return res
 
-                def var_ML(X, beta):
+                def var_aux_ML(X, beta):
                     '''
-                    Variance for binary outcome model using normal distribution:
+                    Variance term before inversion for binary outcome model using normal distribution:
                     [sum_i phi(x_i'beta)^2/Phi(x_i'beta)(1-Phi(x_i'beta)) * x_i * x_i']^(-1) 
                     where Phi and phi are the cdf and pdf of the normal distribution
                     '''
@@ -639,12 +636,8 @@ class Binary_models(Data):
                     weight = (norm.pdf(np.dot(X, beta))**2/(norm.cdf(np.dot(X, beta)) * (1 - norm.cdf(np.dot(X, beta)))))[:, np.newaxis]
                     index0 = np.where(beta[1:] == 0)[0]
                     X = np.delete(X[:, 1:], index0, 1)
-                    var = np.linalg.inv((X * weight).T @ X)
-                    std = np.sqrt(np.diag(var))
-                    var = np.insert(var, index0, np.nan, axis=0)
-                    var = np.insert(var, index0, np.nan, axis=1)
-                    std = np.insert(std, index0, np.nan)
-                    return (var, std)
+                    var_aux = (X * weight).T @ X
+                    return (var_aux, index0)
 
             elif distribution == 'Poisson': 
                 def log_likelihood(beta):
@@ -677,76 +670,72 @@ class Binary_models(Data):
                     res = -1 * (aux_vec[:, np.newaxis] *  X).sum(axis=0)
                     return res
 
-                def var_ML(X, beta):
+                def var_aux_ML(X, beta):
                     '''
-                    Variance for binary outcome model using poisson distribution
+                    Variance term before inversion for binary outcome model using poisson distribution
                     Obtained by substituting F = 1 - exp(-exp(x_i'beta)) in eq. 14.7, Cameron and Trivedi (05)
                     Variance for binary outcomes has simple form (sum_i weight * x_i * x_i')^(-1) where weight = F'^2/F1*F0
                     Denominator of weights may be zero if F1 is sufficiently close to zero given mu_i - this is a rare event and the solution given here consists of making the weight equal to zero for such i
                     '''
 
-                    F0 = np.exp(-np.exp(np.dot(X, beta)))
-                    F1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
                     denominator = np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2*np.exp(np.dot(X, beta)))
                     F1_prime = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
                     index1 = np.where(denominator < lb_ratio)
                     denominator[index1] = lb_ratio
                     F1_prime[index1] = 0.
                     weight = (np.square(F1_prime) / denominator)[:, np.newaxis]
-                    index2 = np.where(beta[1:] == 0)[0]
-                    X = np.delete(X[:, 1:], index2, 1)
-                    var = np.linalg.inv((X * weight).T @ X)
-                    std = np.sqrt(np.diag(var))
-                    var = np.insert(var, index2, np.nan, axis=0)
-                    var = np.insert(var, index2, np.nan, axis=1)
-                    std = np.insert(std, index2, np.nan)
-                    return (var, std)
+                    index0 = np.where(beta[1:] == 0)[0]
+                    X = np.delete(X[:, 1:], index0, 1)
+                    var_aux = (X * weight).T @ X
+                    return (var_aux, index0)
     
-            def save_results(res1, res2, desc_stats, distribution, period, aa, dtype):
-                if res1.success == 0:
+            def save_results(coeffs, var, std, desc_stats, distribution, period, aa, dtype):
+                if coeffs.success == 0:
                     with open('models_BinaryResults.log', 'a') as log_file:
                         log_file.write('\n' + distribution + period + aa + dtype[0] + ' coeffs failed')
                 else:
-                    x_res_dict = {'desc_stats': desc_stats, '-ln L': res1.fun, 'coeffs': res1.x[1:], 'var_ML': res2[0], 'std_ML': res2[1]}
+                    x_res_dict = {'desc_stats': desc_stats, '-ln L': coeffs.fun, 'coeffs': coeffs.x[1:], 'var_ML': var, 'std_ML': std}
                     db_file = '/home/pgsqldata/Susep/BinaryModelResults_' + distribution + '_' + dtype[0] + '.db'
                     db = shelve.open(db_file)
                     db[period+aa] = x_res_dict
                     db.close()
                     print('Results from Binary Model class instance, distribution ' + distribution + ', for period ' + period + aa + ' of type ' + dtype[0] + ' saved in db file')
 
-            if distribution != 'Poisson':
-                x0 = np.zeros(len(X[0]))
-                x0[0] = 1
-                x0[1] = np.log(sum(y)/len(y))
-            elif distribution == 'Poisson':
-                x_res_dict = shelve.open('/home/pgsqldata/Susep/PoissonResults_' + dtype[0] + '.db')
-                x0 = np.insert(x_res_dict[period+aa]['coeffs'], 0, 1)
-                x_res_dict.close()
-
-            prec_param = 1e-4
+            x0 = np.zeros(len(X[0]))
+            x0[0] = 1
+            x0[1] = np.log(sum(y)/len(y))
             bounds = ((1 - prec_param, 1 + prec_param),)
             for i in range(len(X[0])-1):
                 bounds += ((None, None),)
             
-            res1 = minimize(log_likelihood, x0, method='TNC', jac=gradient, bounds=bounds, options={'disp': True})
-            if res1.success == 0:
-                res1 = minimize(log_likelihood, x0, method='L-BFGS-B', jac=gradient, bounds=bounds, options={'disp': True})
-                if res1.success == 0:
-                    res1 = minimize(log_likelihood, x0, method='SLSQP', jac=gradient, bounds=bounds, options={'disp': True})
+            coeffs = minimize(log_likelihood, x0, method='TNC', jac=gradient, bounds=bounds, options={'disp': True})
+            if coeffs.success == 0:
+                coeffs = minimize(log_likelihood, x0, method='L-BFGS-B', jac=gradient, bounds=bounds, options={'disp': True})
+                if coeffs.success == 0:
+                    coeffs = minimize(log_likelihood, x0, method='SLSQP', jac=gradient, bounds=bounds, options={'disp': True})
             
+            var_aux, index0 = var_aux_ML(X, coeffs.x)
             try:
-                res2 = var_ML(X, res1.x)
+                var = np.linalg.inv(var_aux)
             except:
-                res2 = (np.zeros((len(res1.x), len(res1.x))), np.zeros(len(res1.x)))
+                _, index2 = sympy.Matrix(var_aux).rref()
+                var_aux = var_aux[index2, :][:, index2]
+                var = np.linalg.inv(var_aux)
+                index3 = list(set(range(len(var_aux))) - set(index2))
+                var = np.insert(var, index3, np.nan, axis=0)
+                var = np.insert(var, index3, np.nan, axis=1)
                 with open('models_BinaryResults.log', 'a') as log_file:
-                        log_file.write('\n' + distribution + period + aa + dtype[0] + ' var_ML failed')
+                    log_file.write('\n' + distribution + period + aa + dtype[0] + ' var_aux_ML singular, removed dependent columns: ', index3)
 
-            save_results(res1, res2, desc_stats, distribution, period, aa, dtype)
-            self.success = res1.success
-            self.x = res1.x
-            self.fun = res1.fun
-            self.var_ML = res2[0]
-            self.std_ML = res2[1]
+            var = np.insert(var, index0, np.nan, axis=0)
+            var = np.insert(var, index0, np.nan, axis=1)
+            std = np.sqrt(np.diag(var))
+            save_results(coeffs, var, std, desc_stats, distribution, period, aa, dtype)
+            self.success = coeffs.success
+            self.x = coeffs.x
+            self.fun = coeffs.fun
+            self.var_ML = var
+            self.std_ML = std
 
         elif grab_results == 'yes':
             x_res_dict = shelve.open('/home/pgsqldata/Susep/BinaryModelResults_' + distribution + '_' + dtype[0] + '.db')
@@ -793,5 +782,15 @@ if __name__ == '__main__':
         for aa in years:
             for dtype in dtypes:
                 for distribution in distributions:
+                    if period == '1tr' and distribution != 'Poisson':
+                        continue
+                    if period == '1tr' and aa == '08' and distribution == 'Poisson':
+                        continue
+                    if period == '1tr' and aa == '09' and dtype[0] == 'rcd' and distribution == 'Poisson':
+                        continue
+                    if period == '1tr' and aa == '10' and distribution == 'Poisson':
+                        continue
+                    if period == '2tr' and aa == '08' and distribution != 'Poisson':
+                        continue
                     print('Next regression: ' + distribution + '_' + period + aa + dtype[0])
-                    x = Binary_models(distribution, period, aa, dtype)
+                    Binary_models(distribution, period, aa, dtype)
