@@ -589,7 +589,10 @@ class Binary_models(Data):
                 def log_likelihood(beta):
                     '''Log-likelihood for Binary Logit model'''
                 
-                    res = -1 * (np.sum(y * np.log(np.exp(np.dot(X, beta)) / (1 + np.exp(np.dot(X, beta)))) + (1 - y) * np.log(1 - np.exp(np.dot(X, beta)) / (1 + np.exp(np.dot(X, beta))))))
+                    p1 = np.exp(np.dot(X, beta)) / (1 + np.exp(np.dot(X, beta)))
+                    p0 = 1 - p1
+                    p1[p1 < lb_log] = lb_log
+                    res = -1 * np.sum(y * np.log(p1) + (1 - y) * np.log(p0))
                     return res
                 
                 def gradient(beta):
@@ -605,10 +608,10 @@ class Binary_models(Data):
                     [sum_i exp(x_i'beta)/(1+exp(x_i'beta))^2 * x_i * x_i']^(-1) 
                     '''
                 
-                    lambda_prime = (np.exp(np.dot(X, beta))/(1 + np.exp(np.dot(X, beta)))**2)[:, np.newaxis]
+                    F_prime = (np.exp(np.dot(X, beta))/(1 + np.exp(np.dot(X, beta)))**2)[:, np.newaxis]
                     index0 = np.where(beta[1:] == 0)[0]
                     X = np.delete(X[:, 1:], index0, 1)
-                    var_aux = (X * lambda_prime).T @ X
+                    var_aux = (X * F_prime).T @ X
                     return (var_aux, index0)
                     
             
@@ -616,13 +619,21 @@ class Binary_models(Data):
                 def log_likelihood(beta):
                     '''Log-likelihood for Binary Probit model'''
                 
-                    res = -1 * (np.sum(y * np.log(norm.cdf(np.dot(X, beta))) + (1 - y) * np.log(1 - norm.cdf(np.dot(X, beta)))))
+                    p1 = norm.cdf(np.dot(X, beta))
+                    p0 = 1 - p1
+                    p1[p1 < lb_log] = lb_log
+                    res = -1 * np.sum(y * np.log(p1) + (1 - y) * np.log(p0))
                     return res
                 
                 def gradient(beta):
                     '''Gradient of Log-likelihood for Binary Probit model'''
                 
-                    aux_vec = norm.pdf(np.dot(X, beta))/(norm.cdf(np.dot(X, beta)) * (1 - norm.cdf(np.dot(X, beta)))) * (y - norm.cdf(np.dot(X, beta)))
+                    p1 = norm.cdf(np.dot(X, beta))
+                    p0 = 1 - p1
+                    denominator = p1 * p0
+                    denominator[denominator < lb_ratio] = lb_ratio
+                    weight = p1 / denominator
+                    aux_vec = weight * (y - p1)
                     res = -1 * (aux_vec[:, np.newaxis] *  X).sum(axis=0)
                     return res
 
@@ -647,10 +658,10 @@ class Binary_models(Data):
                     Due to proximity of mu_i to zero, a lower bound equal to min np.log such that np.log > -inf is imposed
                     '''
                 
-                    F0 = np.exp(-np.exp(np.dot(X, beta)))
-                    F1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
-                    F1[F1 < lb_log] = lb_log
-                    res = -1 * np.sum(y * np.log(F1) + (1 - y) * np.log(F0))
+                    p1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
+                    p0 = 1 - p1
+                    p1[p1 < lb_log] = lb_log
+                    res = -1 * np.sum(y * np.log(p1) + (1 - y) * np.log(p0))
                     return res
 
                 def gradient(beta):
@@ -661,12 +672,11 @@ class Binary_models(Data):
                     Denominator is restricted to system limit min to avoid inf ratio
                     '''
                 
-                    F0 = np.exp(-np.exp(np.dot(X, beta)))
-                    F1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
+                    p1 = 1 - np.exp(-np.exp(np.dot(X, beta)))
                     denominator = np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2*np.exp(np.dot(X, beta)))
                     denominator[denominator < lb_ratio] = lb_ratio
-                    F1_prime = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
-                    aux_vec = ((y - F1) / denominator) * F1_prime
+                    p1_prime = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
+                    aux_vec = ((y - p1) / denominator) * p1_prime
                     res = -1 * (aux_vec[:, np.newaxis] *  X).sum(axis=0)
                     return res
 
@@ -674,16 +684,16 @@ class Binary_models(Data):
                     '''
                     Variance term before inversion for binary outcome model using poisson distribution
                     Obtained by substituting F = 1 - exp(-exp(x_i'beta)) in eq. 14.7, Cameron and Trivedi (05)
-                    Variance for binary outcomes has simple form (sum_i weight * x_i * x_i')^(-1) where weight = F'^2/F1*F0
-                    Denominator of weights may be zero if F1 is sufficiently close to zero given mu_i - this is a rare event and the solution given here consists of making the weight equal to zero for such i
+                    Variance for binary outcomes has simple form (sum_i weight * x_i * x_i')^(-1) where weight = F'^2/p1*p0
+                    Denominator of weights may be zero if p1 is sufficiently close to zero given mu_i - this is a rare event and the solution given here consists of making the weight equal to zero for such i
                     '''
 
                     denominator = np.exp(-np.exp(np.dot(X, beta))) - np.exp(-2*np.exp(np.dot(X, beta)))
-                    F1_prime = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
+                    F_prime = np.exp(-np.exp(np.dot(X, beta)) + np.dot(X, beta))
                     index1 = np.where(denominator < lb_ratio)
                     denominator[index1] = lb_ratio
-                    F1_prime[index1] = 0.
-                    weight = (np.square(F1_prime) / denominator)[:, np.newaxis]
+                    F_prime[index1] = 0.
+                    weight = (np.square(F_prime) / denominator)[:, np.newaxis]
                     index0 = np.where(beta[1:] == 0)[0]
                     X = np.delete(X[:, 1:], index0, 1)
                     var_aux = (X * weight).T @ X
@@ -725,7 +735,7 @@ class Binary_models(Data):
                 var = np.insert(var, index3, np.nan, axis=0)
                 var = np.insert(var, index3, np.nan, axis=1)
                 with open('models_BinaryResults.log', 'a') as log_file:
-                    log_file.write('\n' + distribution + period + aa + dtype[0] + ' var_aux_ML singular, removed dependent columns: ', index3)
+                    log_file.write('\n' + distribution + period + aa + dtype[0] + ' var_aux_ML singular, removed dependent columns: ' + str(index3))
 
             var = np.insert(var, index0, np.nan, axis=0)
             var = np.insert(var, index0, np.nan, axis=1)
@@ -782,15 +792,5 @@ if __name__ == '__main__':
         for aa in years:
             for dtype in dtypes:
                 for distribution in distributions:
-                    if period == '1tr' and distribution != 'Poisson':
-                        continue
-                    if period == '1tr' and aa == '08' and distribution == 'Poisson':
-                        continue
-                    if period == '1tr' and aa == '09' and dtype[0] == 'rcd' and distribution == 'Poisson':
-                        continue
-                    if period == '1tr' and aa == '10' and distribution == 'Poisson':
-                        continue
-                    if period == '2tr' and aa == '08' and distribution != 'Poisson':
-                        continue
                     print('Next regression: ' + distribution + '_' + period + aa + dtype[0])
                     Binary_models(distribution, period, aa, dtype)
