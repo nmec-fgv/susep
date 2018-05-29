@@ -1,5 +1,5 @@
-Data/
 *~
-Data_old/
+*.log
+*.aux
 Python_old/
 __pycache__/
