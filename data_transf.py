@@ -309,7 +309,7 @@ def data_transf(data):
                     continue
 
                 if i[0] in {'1'}:
-                    if float(i[1]) > 1:
+                    if float(i[1]) >= 10:
                         if i[2] not in aux_dict_cas.keys():
                             aux_dict_cas[i[2]] = float(i[1])
                             aux_dict2_cas[i[2]] = float(i[1]) / cpi[i[2][:-3]]
@@ -317,7 +317,7 @@ def data_transf(data):
                             aux_dict_cas[i[2]] += float(i[1])
                             aux_dict2_cas[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'2', '3', '4'}:
-                    if float(i[1]) > 1:
+                    if float(i[1]) >= 10:
                         if i[2] not in aux_dict_rcd.keys():
                             aux_dict_rcd[i[2]] = float(i[1])
                             aux_dict2_rcd[i[2]] = float(i[1]) / cpi[i[2][:-3]]
@@ -325,7 +325,7 @@ def data_transf(data):
                             aux_dict_rcd[i[2]] += float(i[1])
                             aux_dict2_rcd[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'5', '6', '7'}:
-                    if float(i[1]) > 1:
+                    if float(i[1]) >= 10:
                         if i[2] not in aux_dict_app.keys():
                             aux_dict_app[i[2]] = float(i[1])
                             aux_dict2_app[i[2]] = float(i[1]) / cpi[i[2][:-3]]
@@ -333,7 +333,7 @@ def data_transf(data):
                             aux_dict_app[i[2]] += float(i[1])
                             aux_dict2_app[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'8'}:
-                    if float(i[1]) > 1:
+                    if float(i[1]) >= 5:
                         if i[2] not in aux_dict_out.keys():
                             aux_dict_out[i[2]] = float(i[1])
                             aux_dict2_out[i[2]] = float(i[1]) / cpi[i[2][:-3]]
@@ -392,7 +392,7 @@ def data_transf(data):
                     continue
 
                 if i[0] in {'1'}:
-                    if float(i[1]) > 1 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
+                    if float(i[1]) >= 10 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
                         if i[2] not in aux_dict_cas.keys():
                             aux_dict_cas[i[2]] = float(i[1])
                             aux_dict2_cas[i[2]] = float(i[1]) / cpi[i[2][:-3]]
@@ -400,7 +400,7 @@ def data_transf(data):
                             aux_dict_cas[i[2]] += float(i[1])
                             aux_dict2_cas[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'2', '3', '4'}:
-                    if float(i[1]) > 1 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
+                    if float(i[1]) >= 10 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
                         if i[2] not in aux_dict_rcd.keys():
                             aux_dict_rcd[i[2]] = float(i[1])
                             aux_dict2_rcd[i[2]] = float(i[1]) / cpi[i[2][:-3]]
@@ -408,7 +408,7 @@ def data_transf(data):
                             aux_dict_rcd[i[2]] += float(i[1])
                             aux_dict2_rcd[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'5', '6', '7'}:
-                    if float(i[1]) > 1 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
+                    if float(i[1]) >= 10 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
                         if i[2] not in aux_dict_app.keys():
                             aux_dict_app[i[2]] = float(i[1])
                             aux_dict2_app[i[2]] = float(i[1]) / cpi[i[2][:-3]]
@@ -416,7 +416,7 @@ def data_transf(data):
                             aux_dict_app[i[2]] += float(i[1])
                             aux_dict2_app[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'8'}:
-                    if float(i[1]) > 1 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
+                    if float(i[1]) >= 5 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days > 0:
                         if i[2] not in aux_dict_out.keys():
                             aux_dict_out[i[2]] = float(i[1])
                             aux_dict2_out[i[2]] = float(i[1]) / cpi[i[2][:-3]]

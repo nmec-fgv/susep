@@ -44,6 +44,7 @@ def save_results(res_dict, model, coverage, period, aa):
     db[period+aa] = res_dict
     db.close()
     print('Results for model ' + model + ', coverage ' + coverage + ' period ' + period + aa + ' saved in db file')
+
     return
 
 def grab_results(model, coverage, period, aa, keys=None):
@@ -696,8 +697,7 @@ class Testing(Data):
 
 if __name__ == '__main__':
 #    periods = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
-#    periods = ('1tr', '2tr', '3tr', '4tr')
-    periods = ('1tr', '2tr')
+    periods = ('1tr', '2tr', '3tr', '4tr')
     years = ('08', '09', '10', '11')
     models = ('Poisson', 'Logit', 'Probit', 'BPoisson')
     coverages = ('cas', 'rcd')
@@ -705,5 +705,7 @@ if __name__ == '__main__':
         for aa in years:
             for model in models:
                 for coverage in coverages:
+                    if period == '1tr' and aa == '08':
+                        continue
                     print('Next regression: ' + model + '_' + coverage + period + aa)
                     Estimation(model, coverage, period, aa)

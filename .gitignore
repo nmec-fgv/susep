@@ -2,4 +2,6 @@
 *.log
 *.aux
 Python_old/
+old_results/
+plots/
 __pycache__/
