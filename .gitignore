@@ -2,6 +2,9 @@
 *.log
 *.aux
 Python_old/
+Python_oldest/
+old_data/
 old_results/
+oldest_results/
 plots/
 __pycache__/

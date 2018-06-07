@@ -12,14 +12,14 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 # Data directory:
-data_directory = '/home/pgsqldata/Susep/'
+data_dir = '/home/pgsqldata/Susep/'
 
 # IPCA for severity adjustment, below is hardcoded jan-2008 to dez-2016, with jan-2008 as base value 1.0
 dates = ['2008-01', '2008-02', '2008-03', '2008-04', '2008-05', '2008-06', '2008-07', '2008-08', '2008-09', '2008-10', '2008-11', '2008-12', '2009-01', '2009-02', '2009-03', '2009-04', '2009-05', '2009-06', '2009-07', '2009-08', '2009-09', '2009-10', '2009-11', '2009-12', '2010-01', '2010-02', '2010-03', '2010-04', '2010-05', '2010-06', '2010-07', '2010-08', '2010-09', '2010-10', '2010-11', '2010-12', '2011-01', '2011-02', '2011-03', '2011-04', '2011-05', '2011-06', '2011-07', '2011-08', '2011-09', '2011-10', '2011-11', '2011-12', '2012-01', '2012-02', '2012-03', '2012-04', '2012-05', '2012-06', '2012-07', '2012-08', '2012-09', '2012-10', '2012-11', '2012-12', '2013-01', '2013-02', '2013-03', '2013-04', '2013-05', '2013-06', '2013-07', '2013-08', '2013-09', '2013-10', '2013-11', '2013-12', '2014-01', '2014-02', '2014-03', '2014-04', '2014-05', '2014-06', '2014-07', '2014-08', '2014-09', '2014-10', '2014-11', '2014-12', '2015-01', '2015-02', '2015-03', '2015-04', '2015-05', '2015-06', '2015-07', '2015-08', '2015-09', '2015-10', '2015-11', '2015-12', '2016-01', '2016-02', '2016-03', '2016-04', '2016-05', '2016-06', '2016-07', '2016-08', '2016-09', '2016-10', '2016-11', '2016-12']
 factors = [1.00000000, 1.00540000, 1.01032646, 1.01517603, 1.02075950, 1.02882350, 1.03643679, 1.04192990, 1.04484731, 1.04756391, 1.05227795, 1.05606615, 1.05902313, 1.06410645, 1.06995903, 1.07209895, 1.07724502, 1.08230808, 1.08620438, 1.08881127, 1.09044449, 1.09306156, 1.09612213, 1.10061623, 1.10468851, 1.11297368, 1.12165487, 1.12748748, 1.13391415, 1.13878999, 1.13878999, 1.13890386, 1.13935943, 1.14448654, 1.15307019, 1.16264067, 1.16996531, 1.17967602, 1.18911343, 1.19850743, 1.20773593, 1.21341229, 1.21523241, 1.21717678, 1.22168034, 1.22815524, 1.23343631, 1.23985018, 1.24604943, 1.25302731, 1.25866593, 1.26130913, 1.26938151, 1.27395128, 1.27497044, 1.28045281, 1.28570267, 1.29303118, 1.30066006, 1.30846402, 1.31880089, 1.33014257, 1.33812343, 1.34441261, 1.35180688, 1.35680856, 1.36033627, 1.36074437, 1.36401015, 1.36878419, 1.37658626, 1.38401983, 1.39675281, 1.40443495, 1.41412555, 1.42713550, 1.43669731, 1.44330612, 1.44907934, 1.44922425, 1.45284731, 1.46112854, 1.46726528, 1.47474834, 1.48625137, 1.50468089, 1.52303800, 1.54314210, 1.55409841, 1.56559874, 1.57796697, 1.58775036, 1.59124341, 1.59983613, 1.61295478, 1.62924563, 1.64488638, 1.66577644, 1.68076843, 1.68799573, 1.69829251, 1.71153919, 1.71752957, 1.72646073, 1.73405716, 1.73544440, 1.73995656, 1.74308848]
 cpi = dict(zip(dates, factors))
 
-def data_transf(data0, aa):
+def data_transf(data0):
     '''
     Transformation of database records
 
@@ -144,7 +144,7 @@ def data_transf(data0, aa):
     sev_cpi_outros -> real, claim severity others (total) cpi adjusted
     '''
 
-    data = dict(exposure=np.empty(len(data0)), pol_type=np.empty(len(data0), dtype=int), veh_age=np.empty(len(data0), dtype=int), veh_type=np.empty(len(data0), dtype=int), region=np.empty(len(data0), dtype=int), sex=np.empty(len(data0), dtype=int), age=np.empty(len(data0)), bonus_c=np.empty(len(data0), dtype=int), bonus_d=np.empty(len(data0), dtype=int), deduct_type=np.empty(len(data0), dtype=int), deduct=np.empty(len(data0)), cov_casco=np.empty(len(data0)), cov_rcdmat=np.empty(len(data0)), cov_rcdc=np.empty(len(data0)), cov_rcdmor=np.empty(len(data0)), cov_app_ma=np.empty(len(data0)), cov_app_ipa=np.empty(len(data0)), cov_app_dmh=np.empty(len(data0)), pre_casco=np.empty(len(data0)), pre_rcdmat=np.empty(len(data0)), pre_rcdc=np.empty(len(data0)), pre_rcdmor=np.empty(len(data0)), pre_app_ma=np.empty(len(data0)), pre_app_ipa=np.empty(len(data0)), pre_app_dmh=np.empty(len(data0)), pre_outros=np.empty(len(data0)),freq_casco=np.zeros(len(data0), dtype=int), sev_casco=np.zeros(len(data0)), sev_cpi_casco=np.zeros(len(data0)), freq_rcd=np.zeros(len(data0), dtype=int), freq_rcdmat=np.zeros(len(data0), dtype=int), sev_rcdmat=np.zeros(len(data0)), sev_cpi_rcdmat=np.zeros(len(data0)), freq_rcdc=np.zeros(len(data0), dtype=int), sev_rcdc=np.zeros(len(data0)), sev_cpi_rcdc=np.zeros(len(data0)), freq_rcdmor=np.zeros(len(data0), dtype=int), sev_rcdmor=np.zeros(len(data0)), sev_cpi_rcdmor=np.zeros(len(data0)), freq_app=np.zeros(len(data0), dtype=int), freq_app_ma=np.zeros(len(data0), dtype=int), sev_app_ma=np.zeros(len(data0)), sev_cpi_app_ma=np.zeros(len(data0)), freq_app_ipa=np.zeros(len(data0), dtype=int), sev_app_ipa=np.zeros(len(data0)), sev_cpi_app_ipa=np.zeros(len(data0)), freq_app_dmh=np.zeros(len(data0), dtype=int), sev_app_dmh=np.zeros(len(data0)), sev_cpi_app_dmh=np.zeros(len(data0)), freq_outros=np.zeros(len(data0), dtype=int), sev_outros=np.zeros(len(data0)), sev_cpi_outros=np.zeros(len(data0)))
+    data = dict(exposure=np.empty(len(data0)), pol_type=np.empty(len(data0), dtype=int), veh_age=np.empty(len(data0), dtype=int), veh_type=np.empty(len(data0), dtype=int), region=np.empty(len(data0), dtype=int), sex=np.empty(len(data0), dtype=int), age=np.empty(len(data0)), bonus_c=np.empty(len(data0), dtype=int), bonus_d=np.empty(len(data0), dtype=int), deduct_type=np.empty(len(data0), dtype=int), deduct=np.empty(len(data0)), cov_casco=np.empty(len(data0)), cov_rcdmat=np.empty(len(data0)), cov_rcdc=np.empty(len(data0)), cov_rcdmor=np.empty(len(data0)), cov_app_ma=np.empty(len(data0)), cov_app_ipa=np.empty(len(data0)), cov_app_dmh=np.empty(len(data0)), pre_casco=np.empty(len(data0)), pre_rcdmat=np.empty(len(data0)), pre_rcdc=np.empty(len(data0)), pre_rcdmor=np.empty(len(data0)), pre_app_ma=np.empty(len(data0)), pre_app_ipa=np.empty(len(data0)), pre_app_dmh=np.empty(len(data0)), pre_outros=np.empty(len(data0)),freq_casco=np.zeros(len(data0), dtype=int), sev_casco=np.zeros(len(data0)), freq_rcd=np.zeros(len(data0), dtype=int), sev_rcd=np.zeros(len(data0)), freq_rcdmat=np.zeros(len(data0), dtype=int), sev_rcdmat=np.zeros(len(data0)), freq_rcdc=np.zeros(len(data0), dtype=int), sev_rcdc=np.zeros(len(data0)), freq_rcdmor=np.zeros(len(data0), dtype=int), sev_rcdmor=np.zeros(len(data0)), freq_app=np.zeros(len(data0), dtype=int), sev_app=np.zeros(len(data0)), freq_app_ma=np.zeros(len(data0), dtype=int), sev_app_ma=np.zeros(len(data0)), freq_app_ipa=np.zeros(len(data0), dtype=int), sev_app_ipa=np.zeros(len(data0)), freq_app_dmh=np.zeros(len(data0), dtype=int), sev_app_dmh=np.zeros(len(data0)), freq_outros=np.zeros(len(data0), dtype=int), sev_outros=np.zeros(len(data0)))
 
     for k, x in enumerate(data0):
         if x[0] == '1':
@@ -152,7 +152,7 @@ def data_transf(data0, aa):
         elif x[0] == '2':
             data['pol_type'][k] = 1
         
-        data['veh_age'][k] = max(0, 2000 + int(aa) - x[1])
+        data['veh_age'][k] = max(0, int(str(x[4])[:4]) - x[1])
 
         if x[2].strip() == '10':
             data['veh_type'][k] = 0
@@ -310,24 +310,24 @@ def data_transf(data0, aa):
         elif x[11] == '9':
             data['deduct_type'][k] = 4
 
-        data['deduct'][k] = x[12]
+        data['deduct'][k] = (x[12] / cpi[str(x[4])[:-3]]) / 1000
 
-        data['cov_casco'][k] = x[13]
-        data['cov_rcdmat'][k] = x[14]
-        data['cov_rcdc'][k] = x[15]
-        data['cov_rcdmor'][k] = x[16]
-        data['cov_app_ma'][k] = x[17]
-        data['cov_app_ipa'][k] = x[18]
-        data['cov_app_dmh'][k] = x[19]
+        data['cov_casco'][k] = (x[13] / cpi[str(x[4])[:-3]]) / 1000
+        data['cov_rcdmat'][k] = (x[14] / cpi[str(x[4])[:-3]]) / 1000
+        data['cov_rcdc'][k] = (x[15] / cpi[str(x[4])[:-3]]) / 1000
+        data['cov_rcdmor'][k] = (x[16] / cpi[str(x[4])[:-3]]) / 1000
+        data['cov_app_ma'][k] = (x[17] / cpi[str(x[4])[:-3]]) / 1000
+        data['cov_app_ipa'][k] = (x[18] / cpi[str(x[4])[:-3]]) / 1000
+        data['cov_app_dmh'][k] = (x[19] / cpi[str(x[4])[:-3]]) / 1000
 
-        data['pre_casco'][k] = x[20]
-        data['pre_rcdmat'][k] = x[21]
-        data['pre_rcdc'][k] = x[22]
-        data['pre_rcdmor'][k] = x[23]
-        data['pre_app_ma'][k] = x[24]
-        data['pre_app_ipa'][k] = x[25]
-        data['pre_app_dmh'][k] = x[26]
-        data['pre_outros'][k] = x[27]
+        data['pre_casco'][k] = (x[20] / cpi[str(x[4])[:-3]]) / 1000
+        data['pre_rcdmat'][k] = (x[21] / cpi[str(x[4])[:-3]]) / 1000
+        data['pre_rcdc'][k] = (x[22] / cpi[str(x[4])[:-3]]) / 1000
+        data['pre_rcdmor'][k] = (x[23] / cpi[str(x[4])[:-3]]) / 1000
+        data['pre_app_ma'][k] = (x[24] / cpi[str(x[4])[:-3]]) / 1000
+        data['pre_app_ipa'][k] = (x[25] / cpi[str(x[4])[:-3]]) / 1000
+        data['pre_app_dmh'][k] = (x[26] / cpi[str(x[4])[:-3]]) / 1000
+        data['pre_outros'][k] = (x[27] / cpi[str(x[4])[:-3]]) / 1000
 
         if x[8] != None:
             aux8 = list(zip(re.findall(r' "(\d)" ', x[8]), re.findall(r'"f1":(\d+)', x[8]), re.findall(r'"f2":"(\d+-\d+-\d+)"', x[8])))
@@ -360,23 +360,15 @@ def data_transf(data0, aa):
             data['exposure'][k] = delta_years
 
             aux_dict_casco = {}
-            aux_dict2_casco = {}
             aux_dict_rcd = {}
             aux_dict_rcdmat = {}
-            aux_dict2_rcdmat = {}
             aux_dict_rcdc = {}
-            aux_dict2_rcdc = {}
             aux_dict_rcdmor = {}
-            aux_dict2_rcdmor = {}
             aux_dict_app = {}
             aux_dict_app_ma = {}
-            aux_dict2_app_ma = {}
             aux_dict_app_ipa = {}
-            aux_dict2_app_ipa = {}
             aux_dict_app_dmh = {}
-            aux_dict2_app_dmh = {}
             aux_dict_outros = {}
-            aux_dict2_outros = {}
             for i in aux8:
                 # remove claims where year is bellow inicio_vig:
                 if int(i[2][:4]) < int(str(x[4])[:4]):
@@ -385,100 +377,78 @@ def data_transf(data0, aa):
                 if i[0] in {'1'}:
                     if float(i[1]) >= 10:
                         if i[2] not in aux_dict_casco.keys():
-                            aux_dict_casco[i[2]] = float(i[1])
-                            aux_dict2_casco[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                            aux_dict_casco[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                         else:
-                            aux_dict_casco[i[2]] += float(i[1])
-                            aux_dict2_casco[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                            aux_dict_casco[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'2', '3', '4'}:
                     if float(i[1]) >= 10:
                         if i[2] not in aux_dict_rcd.keys():
-                            aux_dict_rcd[i[2]] = float(i[1])
+                            aux_dict_rcd[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                         else:
-                            aux_dict_rcd[i[2]] += float(i[1])
+                            aux_dict_rcd[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '2':
                             if i[2] not in aux_dict_rcdmat.keys():
-                                aux_dict_rcdmat[i[2]] = float(i[1])
-                                aux_dict2_rcdmat[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdmat[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_rcdmat[i[2]] += float(i[1])
-                                aux_dict2_rcdmat[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdmat[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '3':
                             if i[2] not in aux_dict_rcdc.keys():
-                                aux_dict_rcdc[i[2]] = float(i[1])
-                                aux_dict2_rcdc[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdc[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_rcdc[i[2]] += float(i[1])
-                                aux_dict2_rcdc[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdc[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '4':
                             if i[2] not in aux_dict_rcdmor.keys():
-                                aux_dict_rcdmor[i[2]] = float(i[1])
-                                aux_dict2_rcdmor[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdmor[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_rcdmor[i[2]] += float(i[1])
-                                aux_dict2_rcdmor[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdmor[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'5', '6', '7'}:
                     if float(i[1]) >= 10:
                         if i[2] not in aux_dict_app.keys():
-                            aux_dict_app[i[2]] = float(i[1])
+                            aux_dict_app[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                         else:
-                            aux_dict_app[i[2]] += float(i[1])
+                            aux_dict_app[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '5':
                             if i[2] not in aux_dict_app_ma.keys():
-                                aux_dict_app_ma[i[2]] = float(i[1])
-                                aux_dict2_app_ma[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_ma[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_app_ma[i[2]] += float(i[1])
-                                aux_dict2_app_ma[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_ma[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '6':
                             if i[2] not in aux_dict_app_ipa.keys():
-                                aux_dict_app_ipa[i[2]] = float(i[1])
-                                aux_dict2_app_ipa[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_ipa[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_app_ipa[i[2]] += float(i[1])
-                                aux_dict2_app_ipa[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_ipa[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '7':
                             if i[2] not in aux_dict_app_dmh.keys():
-                                aux_dict_app_dmh[i[2]] = float(i[1])
-                                aux_dict2_app_dmh[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_dmh[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_app_dmh[i[2]] += float(i[1])
-                                aux_dict2_app_dmh[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_dmh[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'8'}:
                     if float(i[1]) >= 5:
                         if i[2] not in aux_dict_outros.keys():
-                            aux_dict_outros[i[2]] = float(i[1])
-                            aux_dict2_outros[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                            aux_dict_outros[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                         else:
-                            aux_dict_outros[i[2]] += float(i[1])
-                            aux_dict2_outros[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                            aux_dict_outros[i[2]] += float(i[1]) / cpi[i[2][:-3]]
 
             data['freq_casco'][k] = len(aux_dict_casco.values())
-            data['sev_casco'][k] = sum(aux_dict_casco.values())
-            data['sev_cpi_casco'][k] = sum(aux_dict2_casco.values())
+            data['sev_casco'][k] = sum(aux_dict_casco.values()) / 1000
             data['freq_rcd'][k] = len(aux_dict_rcd.values())
+            data['sev_rcd'][k] = sum(aux_dict_rcd.values()) / 1000
             data['freq_rcdmat'][k] = len(aux_dict_rcdmat.values())
-            data['sev_rcdmat'][k] = sum(aux_dict_rcdmat.values())
-            data['sev_cpi_rcdmat'][k] = sum(aux_dict2_rcdmat.values())
+            data['sev_rcdmat'][k] = sum(aux_dict_rcdmat.values()) / 1000
             data['freq_rcdc'][k] = len(aux_dict_rcdc.values())
-            data['sev_rcdc'][k] = sum(aux_dict_rcdc.values())
-            data['sev_cpi_rcdc'][k] = sum(aux_dict2_rcdc.values())
+            data['sev_rcdc'][k] = sum(aux_dict_rcdc.values()) / 1000
             data['freq_rcdmor'][k] = len(aux_dict_rcdmor.values())
-            data['sev_rcdmor'][k] = sum(aux_dict_rcdmor.values())
-            data['sev_cpi_rcdmor'][k] = sum(aux_dict2_rcdmor.values())
+            data['sev_rcdmor'][k] = sum(aux_dict_rcdmor.values()) / 1000
             data['freq_app'][k] = len(aux_dict_app.values())
+            data['sev_app'][k] = sum(aux_dict_app.values()) / 1000
             data['freq_app_ma'][k] = len(aux_dict_app_ma.values())
-            data['sev_app_ma'][k] = sum(aux_dict_app_ma.values())
-            data['sev_cpi_app_ma'][k] = sum(aux_dict2_app_ma.values())
+            data['sev_app_ma'][k] = sum(aux_dict_app_ma.values()) / 1000
             data['freq_app_ipa'][k] = len(aux_dict_app_ipa.values())
-            data['sev_app_ipa'][k] = sum(aux_dict_app_ipa.values())
-            data['sev_cpi_app_ipa'][k] = sum(aux_dict2_app_ipa.values())
+            data['sev_app_ipa'][k] = sum(aux_dict_app_ipa.values()) / 1000
             data['freq_app_dmh'][k] = len(aux_dict_app_dmh.values())
-            data['sev_app_dmh'][k] = sum(aux_dict_app_dmh.values())
-            data['sev_cpi_app_dmh'][k] = sum(aux_dict2_app_dmh.values())
+            data['sev_app_dmh'][k] = sum(aux_dict_app_dmh.values()) / 1000
             data['freq_outros'][k] = len(aux_dict_outros.values())
-            data['sev_outros'][k] = sum(aux_dict_outros.values())
-            data['sev_cpi_outros'][k] = sum(aux_dict2_outros.values())
+            data['sev_outros'][k] = sum(aux_dict_outros.values()) / 1000
         else:
             fim_vig = x[5]
             for i in aux9:
@@ -495,23 +465,15 @@ def data_transf(data0, aa):
             data['exposure'][k] = delta_years
 
             aux_dict_casco = {}
-            aux_dict2_casco = {}
             aux_dict_rcd = {}
             aux_dict_rcdmat = {}
-            aux_dict2_rcdmat = {}
             aux_dict_rcdc = {}
-            aux_dict2_rcdc = {}
             aux_dict_rcdmor = {}
-            aux_dict2_rcdmor = {}
             aux_dict_app = {}
             aux_dict_app_ma = {}
-            aux_dict2_app_ma = {}
             aux_dict_app_ipa = {}
-            aux_dict2_app_ipa = {}
             aux_dict_app_dmh = {}
-            aux_dict2_app_dmh = {}
             aux_dict_outros = {}
-            aux_dict2_outros = {}
             for i in aux8:
                 # remove claims where year is bellow inicio_vig:
                 if int(i[2][:4]) < int(str(x[4])[:4]):
@@ -520,121 +482,107 @@ def data_transf(data0, aa):
                 if i[0] in {'1'}:
                     if float(i[1]) >= 10 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days >= 0:
                         if i[2] not in aux_dict_casco.keys():
-                            aux_dict_casco[i[2]] = float(i[1])
-                            aux_dict2_casco[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                            aux_dict_casco[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                         else:
-                            aux_dict_casco[i[2]] += float(i[1])
-                            aux_dict2_casco[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                            aux_dict_casco[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'2', '3', '4'}:
                     if float(i[1]) >= 10 and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days >= 0:
                         if i[2] not in aux_dict_rcd.keys():
-                            aux_dict_rcd[i[2]] = float(i[1])
+                            aux_dict_rcd[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                         else:
-                            aux_dict_rcd[i[2]] += float(i[1])
+                            aux_dict_rcd[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '2':
                             if i[2] not in aux_dict_rcdmat.keys():
-                                aux_dict_rcdmat[i[2]] = float(i[1])
-                                aux_dict2_rcdmat[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdmat[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_rcdmat[i[2]] += float(i[1])
-                                aux_dict2_rcdmat[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdmat[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '3':
                             if i[2] not in aux_dict_rcdc.keys():
-                                aux_dict_rcdc[i[2]] = float(i[1])
-                                aux_dict2_rcdc[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdc[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_rcdc[i[2]] += float(i[1])
-                                aux_dict2_rcdc[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdc[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '4':
                             if i[2] not in aux_dict_rcdmor.keys():
-                                aux_dict_rcdmor[i[2]] = float(i[1])
-                                aux_dict2_rcdmor[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdmor[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_rcdmor[i[2]] += float(i[1])
-                                aux_dict2_rcdmor[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_rcdmor[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'5', '6', '7'} and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days >= 0:
                     if float(i[1]) >= 10:
                         if i[2] not in aux_dict_app.keys():
-                            aux_dict_app[i[2]] = float(i[1])
+                            aux_dict_app[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                         else:
-                            aux_dict_app[i[2]] += float(i[1])
+                            aux_dict_app[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '5':
                             if i[2] not in aux_dict_app_ma.keys():
-                                aux_dict_app_ma[i[2]] = float(i[1])
-                                aux_dict2_app_ma[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_ma[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_app_ma[i[2]] += float(i[1])
-                                aux_dict2_app_ma[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_ma[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '6':
                             if i[2] not in aux_dict_app_ipa.keys():
-                                aux_dict_app_ipa[i[2]] = float(i[1])
-                                aux_dict2_app_ipa[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_ipa[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_app_ipa[i[2]] += float(i[1])
-                                aux_dict2_app_ipa[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_ipa[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                         if i[0] == '7':
                             if i[2] not in aux_dict_app_dmh.keys():
-                                aux_dict_app_dmh[i[2]] = float(i[1])
-                                aux_dict2_app_dmh[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_dmh[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                             else:
-                                aux_dict_app_dmh[i[2]] += float(i[1])
-                                aux_dict2_app_dmh[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                                aux_dict_app_dmh[i[2]] += float(i[1]) / cpi[i[2][:-3]]
                 elif i[0] in {'8'} and (fim_vig-datetime.strptime(i[2], '%Y-%m-%d').date()).days >= 0:
                     if float(i[1]) >= 5:
                         if i[2] not in aux_dict_outros.keys():
-                            aux_dict_outros[i[2]] = float(i[1])
-                            aux_dict2_outros[i[2]] = float(i[1]) / cpi[i[2][:-3]]
+                            aux_dict_outros[i[2]] = float(i[1]) / cpi[i[2][:-3]]
                         else:
-                            aux_dict_outros[i[2]] += float(i[1])
-                            aux_dict2_outros[i[2]] += float(i[1]) / cpi[i[2][:-3]]
+                            aux_dict_outros[i[2]] += float(i[1]) / cpi[i[2][:-3]]
 
             data['freq_casco'][k] = len(aux_dict_casco.values())
-            data['sev_casco'][k] = sum(aux_dict_casco.values())
-            data['sev_cpi_casco'][k] = sum(aux_dict2_casco.values())
+            data['sev_casco'][k] = sum(aux_dict_casco.values()) / 1000
             data['freq_rcd'][k] = len(aux_dict_rcd.values())
+            data['sev_rcd'][k] = sum(aux_dict_rcd.values()) / 1000
             data['freq_rcdmat'][k] = len(aux_dict_rcdmat.values())
-            data['sev_rcdmat'][k] = sum(aux_dict_rcdmat.values())
-            data['sev_cpi_rcdmat'][k] = sum(aux_dict2_rcdmat.values())
+            data['sev_rcdmat'][k] = sum(aux_dict_rcdmat.values()) / 1000
             data['freq_rcdc'][k] = len(aux_dict_rcdc.values())
-            data['sev_rcdc'][k] = sum(aux_dict_rcdc.values())
-            data['sev_cpi_rcdc'][k] = sum(aux_dict2_rcdc.values())
+            data['sev_rcdc'][k] = sum(aux_dict_rcdc.values()) / 1000
             data['freq_rcdmor'][k] = len(aux_dict_rcdmor.values())
-            data['sev_rcdmor'][k] = sum(aux_dict_rcdmor.values())
-            data['sev_cpi_rcdmor'][k] = sum(aux_dict2_rcdmor.values())
+            data['sev_rcdmor'][k] = sum(aux_dict_rcdmor.values()) / 1000
             data['freq_app'][k] = len(aux_dict_app.values())
+            data['sev_app'][k] = sum(aux_dict_app.values()) / 1000
             data['freq_app_ma'][k] = len(aux_dict_app_ma.values())
-            data['sev_app_ma'][k] = sum(aux_dict_app_ma.values())
-            data['sev_cpi_app_ma'][k] = sum(aux_dict2_app_ma.values())
+            data['sev_app_ma'][k] = sum(aux_dict_app_ma.values()) / 1000
             data['freq_app_ipa'][k] = len(aux_dict_app_ipa.values())
-            data['sev_app_ipa'][k] = sum(aux_dict_app_ipa.values())
-            data['sev_cpi_app_ipa'][k] = sum(aux_dict2_app_ipa.values())
+            data['sev_app_ipa'][k] = sum(aux_dict_app_ipa.values()) / 1000
             data['freq_app_dmh'][k] = len(aux_dict_app_dmh.values())
-            data['sev_app_dmh'][k] = sum(aux_dict_app_dmh.values())
-            data['sev_cpi_app_dmh'][k] = sum(aux_dict2_app_dmh.values())
+            data['sev_app_dmh'][k] = sum(aux_dict_app_dmh.values()) / 1000
             data['freq_outros'][k] = len(aux_dict_outros.values())
-            data['sev_outros'][k] = sum(aux_dict_outros.values())
-            data['sev_cpi_outros'][k] = sum(aux_dict2_outros.values())
+            data['sev_outros'][k] = sum(aux_dict_outros.values()) / 1000
+    return data
+
+def elim_zeroexp(data):
+    '''Eliminates obs for which length of exposure is less than a week'''
+
+    index = np.where(data['exposure'] > 0.25/12)[0]
+    for key in data.keys():
+        data[key] = data[key][index]
+
     return data
 
 def save_results(data, mmm, aa):
     try:
-        os.remove(data_directory + 'data_' + mmm + aa + '.pkl')
+        os.remove(data_dir + 'data_' + mmm + aa + '.pkl')
     except OSError:
         pass
 
-    with open(data_directory + 'data__' + mmm + aa + '.pkl', 'wb') as filename:
+    with open(data_dir + 'data_' + mmm + aa + '.pkl', 'wb') as filename:
         pickle.dump(data, filename)
 
     print('Data saved for period ' + mmm + aa) 
+    return
 
 
 sql_code = '''SELECT cod_cont, ano_modelo, cod_tarif, regiao, inicio_vig, fim_vig, sexo, data_nasc, sinistro::text, endosso::text, clas_bonus, tipo_franq, val_franq, is_casco, is_rcdmat, is_rcdc, is_rcdmor, is_app_ma, is_app_ipa, is_app_dmh, pre_casco, pre_rcdmat, pre_rcdc, pre_rcdmor, pre_app_ma, pre_app_ia, pre_app_dm, pre_outros, perc_bonus FROM rs_:mmm:aa WHERE tipo_pes = 'F' AND cobertura = '1' AND cod_cont in ('1', '2') AND ano_modelo > 1900 AND ano_modelo < 2018 AND cod_tarif in (' 10', '10 ', ' 11', '11 ', '14A', '14B', '14C', ' 15', '15 ', ' 16', '16 ', ' 17', '17 ', ' 18', '18 ', ' 19', '19 ', ' 20', '20 ', ' 21', '21 ', ' 22', '22 ', ' 23', '23 ') AND regiao in ('01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41') AND sexo in ('F', 'M') AND data_nasc > '1900-01-01' AND date_part('year', data_nasc) < date_part('year', inicio_vig) - 16 AND clas_bonus in ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9') AND tipo_franq in ('1', '2', '3', '4', '9') AND val_franq >= 0 AND val_franq < 1e6 AND is_casco >= 0 AND is_casco < 1e7 AND is_rcdmat >= 0 AND is_rcdmat < 5e7 AND is_rcdc >= 0 AND is_rcdc < 5e7 AND is_rcdmor >= 0 AND is_rcdmor < 5e7 AND is_app_ma >= 0 AND is_app_ma < 5e7 AND is_app_ipa >= 0 AND is_app_ipa < 5e7 AND is_app_dmh >= 0 AND is_app_dmh < 5e7 AND pre_casco >= 0 AND pre_casco < 1e6 AND pre_rcdmat >= 0 AND pre_rcdmat < 1e6 AND pre_rcdc >= 0 AND pre_rcdc < 1e6 AND pre_rcdmor >= 0 AND pre_rcdmor < 1e6 AND pre_app_ma >= 0 AND pre_app_ma < 1e6 AND pre_app_ia >= 0 AND pre_app_ia < 1e6 AND pre_app_dm >= 0 AND pre_app_dm < 1e6 AND pre_outros >= 0 AND pre_outros < 1e6 AND perc_bonus >= 0 AND perc_bonus < 99;'''
 
 if __name__ == '__main__':
-#    years = ('08', '09', '10', '11')
-    years = ('08',)
-#    months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
-    months = ('jan',)
+    years = ('08', '09', '10', '11')
+    months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     for aa in years:
         for mmm in months:
             sql_code2 = sql_code.replace(':aa', aa)
@@ -646,5 +594,6 @@ if __name__ == '__main__':
             conn.commit()
             cur.close()
             conn.close()
-            data = data_transf(data0, aa)
+            data = data_transf(data0)
+            data = elim_zeroexp(data)
             save_results(data, mmm, aa)
