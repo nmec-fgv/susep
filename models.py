@@ -37,6 +37,10 @@ def file_load(filename):
 
     return x
 
+def perc_categ(x_array):
+    res = [(0, np.percentile(x_array, 20)), (np.percentile(x_array, 20), np.percentile(x_array, 40)), (np.percentile(x_array, 60), np.percentile(x_array, 80)), (np.percentile(x_array, 80), np.percentile(x_array, 100))]
+    return res
+
 
 # Classes:
 
@@ -112,29 +116,49 @@ class Data:
                 self.X = np.hstack((self.X, data[key][:, np.newaxis]))
 
         for factor, levels in data_dict['factors'].items():
-            aux_arr = np.zeros((len(self.X), len(levels)))
+            if levels == 'percentiles':
+                levels = perc_categ(data[factor])
+            
             for level in levels:
-                for i in level:
-                    aux_arr[np.where(data[factor] == i)] = 1
+                aux_arr = np.zeros(len(self.X))
+                if data[factor].dtype == 'float':
+                    if level != levels[-1]:
+                        aux_arr[np.where(np.logical_and(data[factor] >= level[0], data[factor] < level[1]))] = 1
+                    else:
+                        aux_arr[np.where(np.logical_and(data[factor] >= level[0], data[factor] <= level[1]))] = 1
+                else:
+                    for i in level:
+                        aux_arr[np.where(data[factor] == i)] = 1
 
-            self.X = np.hstack((self.X, aux_arr))
+                self.X = np.hstack((self.X, aux_arr[:, np.newaxis]))
 
 
 
-# Factors and levels determination:
-#### insert base levels (by omission) 
-pol_type_levels = [[i] for i in range(3)]
-veh_age_levels = [range(3), range(3,6), range(6,9), range(9,12), range(12,15), range(15,100)]
-veh_type_levels = [[i] for i in range(14)]
-region_levels = [[i] for i in range(41)]
-age_levels = [range(17,22), range(22, 25), range(25,30), range(30,35), range(35,40), range(40,50), range(50,60), range(60,150)]
-bonus_c_levels = [[i] for i in range(10)]
-deduct_type_levels = [[i] for i in range(5)]
+## Factors and levels determination:
 
-factors = {'pol_type': pol_type_levels, 'veh_age': veh_age_levels, 'veh_type': veh_type_levels, 'age': age_levels, 'bonus_c': bonus_c_levels, 'deduct_type': deduct_type_levels}
-cont_vars = {'exposure', 'age', 'deduct'}
+# discrete levels
+pol_type_levels = [[i] for i in range(2) if i != 0]
+veh_age_levels = [range(3,6), range(6,9), range(9,12), range(12,15), range(15,100)] # base-level = range(0,3)
+veh_type_levels = [[i] for i in range(14) if i not in {0, 8, 9}]
+region_levels = [[i] for i in range(41) if i != 10]
+sex = [[i] for i in range(2) if i != 0]
+bonus_c_levels = [[i] for i in range(10) if i != 0]
+deduct_type_levels = [[i] for i in range(5) if i != 1]
 
+# continuous levels
+age_levels = [(.17, .22), (.22, .25), (.25, .30), (.30, .35), (.35, .40), (.50, .60), (.60, 1.50)] # base-level = (.40, .50)
+deduct_levels = [(0, .5), (.5, 1), (1.5, 2), (2, 1e5)] # base-level = (1, 1.5)
+cov_casco_levels = [(0, 15), (15, 30), (45, 60), (60, 1e5)] # base-level = (30, 45)
+cov_rcd_levels = [(0, 30), (30, 60), (90, 120), (120, 1e5)] # base-level = (60, 90)
+cov_app_levels = [(0, 0.01), (0.01, 10), (30, 60), (60, 1e5)] # base-level = (10, 30)
+
+# factors
+factors = {'pol_type': pol_type_levels, 'veh_age': veh_age_levels, 'veh_type': veh_type_levels, 'region': region_levels, 'bonus_c': bonus_c_levels, 'deduct_type': deduct_type_levels, 'age': age_levels, 'deduct': deduct_levels, 'cov_casco': cov_casco_levels, 'cov_rcd': cov_rcd_levels, 'cov_app': cov_app_levels}
+cont_vars = {'exposure'}
+
+##
 
 if __name__ == '__main__':
     data_dict = {'dependent': 'freq_rcd', 'factors': factors, 'cont_vars': cont_vars, 'binary': 'no', 'offset': 'log_exposure'}
     x = Data('1tr', '08', data_dict) 
+    pdb.set_trace()

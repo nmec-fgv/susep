@@ -83,6 +83,8 @@ def data_transf(data0):
     region=38 -> GO - Goiás
     region=39 -> TO - Tocantins
     region=40 -> GO - Sudeste de Goiás
+    sex=0 -> male
+    sex=1 -> female
     age -> real, in years/100
     bonus_c=0 -> bonus class '0' (sem bônus)
     bonus_c=1 -> bonus class '1'
@@ -144,7 +146,7 @@ def data_transf(data0):
     sev_cpi_outros -> real, claim severity others (total) cpi adjusted
     '''
 
-    data = dict(exposure=np.empty(len(data0)), pol_type=np.empty(len(data0), dtype=int), veh_age=np.empty(len(data0), dtype=int), veh_type=np.empty(len(data0), dtype=int), region=np.empty(len(data0), dtype=int), sex=np.empty(len(data0), dtype=int), age=np.empty(len(data0)), bonus_c=np.empty(len(data0), dtype=int), bonus_d=np.empty(len(data0), dtype=int), deduct_type=np.empty(len(data0), dtype=int), deduct=np.empty(len(data0)), cov_casco=np.empty(len(data0)), cov_rcdmat=np.empty(len(data0)), cov_rcdc=np.empty(len(data0)), cov_rcdmor=np.empty(len(data0)), cov_app_ma=np.empty(len(data0)), cov_app_ipa=np.empty(len(data0)), cov_app_dmh=np.empty(len(data0)), pre_casco=np.empty(len(data0)), pre_rcdmat=np.empty(len(data0)), pre_rcdc=np.empty(len(data0)), pre_rcdmor=np.empty(len(data0)), pre_app_ma=np.empty(len(data0)), pre_app_ipa=np.empty(len(data0)), pre_app_dmh=np.empty(len(data0)), pre_outros=np.empty(len(data0)),freq_casco=np.zeros(len(data0), dtype=int), sev_casco=np.zeros(len(data0)), freq_rcd=np.zeros(len(data0), dtype=int), sev_rcd=np.zeros(len(data0)), freq_rcdmat=np.zeros(len(data0), dtype=int), sev_rcdmat=np.zeros(len(data0)), freq_rcdc=np.zeros(len(data0), dtype=int), sev_rcdc=np.zeros(len(data0)), freq_rcdmor=np.zeros(len(data0), dtype=int), sev_rcdmor=np.zeros(len(data0)), freq_app=np.zeros(len(data0), dtype=int), sev_app=np.zeros(len(data0)), freq_app_ma=np.zeros(len(data0), dtype=int), sev_app_ma=np.zeros(len(data0)), freq_app_ipa=np.zeros(len(data0), dtype=int), sev_app_ipa=np.zeros(len(data0)), freq_app_dmh=np.zeros(len(data0), dtype=int), sev_app_dmh=np.zeros(len(data0)), freq_outros=np.zeros(len(data0), dtype=int), sev_outros=np.zeros(len(data0)))
+    data = dict(exposure=np.empty(len(data0)), pol_type=np.empty(len(data0), dtype=int), veh_age=np.empty(len(data0), dtype=int), veh_type=np.empty(len(data0), dtype=int), region=np.empty(len(data0), dtype=int), sex=np.empty(len(data0), dtype=int), age=np.empty(len(data0)), bonus_c=np.empty(len(data0), dtype=int), bonus_d=np.empty(len(data0), dtype=int), deduct_type=np.empty(len(data0), dtype=int), deduct=np.empty(len(data0)), cov_casco=np.empty(len(data0)), cov_rcd=np.empty(len(data0)), cov_rcdmat=np.empty(len(data0)), cov_rcdc=np.empty(len(data0)), cov_rcdmor=np.empty(len(data0)), cov_app=np.empty(len(data0)), cov_app_ma=np.empty(len(data0)), cov_app_ipa=np.empty(len(data0)), cov_app_dmh=np.empty(len(data0)), pre_casco=np.empty(len(data0)), pre_rcdmat=np.empty(len(data0)), pre_rcdc=np.empty(len(data0)), pre_rcdmor=np.empty(len(data0)), pre_app_ma=np.empty(len(data0)), pre_app_ipa=np.empty(len(data0)), pre_app_dmh=np.empty(len(data0)), pre_outros=np.empty(len(data0)),freq_casco=np.zeros(len(data0), dtype=int), sev_casco=np.zeros(len(data0)), freq_rcd=np.zeros(len(data0), dtype=int), sev_rcd=np.zeros(len(data0)), freq_rcdmat=np.zeros(len(data0), dtype=int), sev_rcdmat=np.zeros(len(data0)), freq_rcdc=np.zeros(len(data0), dtype=int), sev_rcdc=np.zeros(len(data0)), freq_rcdmor=np.zeros(len(data0), dtype=int), sev_rcdmor=np.zeros(len(data0)), freq_app=np.zeros(len(data0), dtype=int), sev_app=np.zeros(len(data0)), freq_app_ma=np.zeros(len(data0), dtype=int), sev_app_ma=np.zeros(len(data0)), freq_app_ipa=np.zeros(len(data0), dtype=int), sev_app_ipa=np.zeros(len(data0)), freq_app_dmh=np.zeros(len(data0), dtype=int), sev_app_dmh=np.zeros(len(data0)), freq_outros=np.zeros(len(data0), dtype=int), sev_outros=np.zeros(len(data0)))
 
     for k, x in enumerate(data0):
         if x[0] == '1':
@@ -316,10 +318,11 @@ def data_transf(data0):
         data['cov_rcdmat'][k] = (x[14] / cpi[str(x[4])[:-3]]) / 1000
         data['cov_rcdc'][k] = (x[15] / cpi[str(x[4])[:-3]]) / 1000
         data['cov_rcdmor'][k] = (x[16] / cpi[str(x[4])[:-3]]) / 1000
+        data['cov_rcd'][k] = ((x[14] + x[15] + x[16]) / cpi[str(x[4])[:-3]]) / 1000
         data['cov_app_ma'][k] = (x[17] / cpi[str(x[4])[:-3]]) / 1000
         data['cov_app_ipa'][k] = (x[18] / cpi[str(x[4])[:-3]]) / 1000
         data['cov_app_dmh'][k] = (x[19] / cpi[str(x[4])[:-3]]) / 1000
-
+        data['cov_app'][k] = ((x[17] + x[18] + x[19]) / cpi[str(x[4])[:-3]]) / 1000
         data['pre_casco'][k] = (x[20] / cpi[str(x[4])[:-3]]) / 1000
         data['pre_rcdmat'][k] = (x[21] / cpi[str(x[4])[:-3]]) / 1000
         data['pre_rcdc'][k] = (x[22] / cpi[str(x[4])[:-3]]) / 1000
@@ -565,6 +568,15 @@ def elim_zeroexp(data):
 
     return data
 
+def elim_specialmods(data):
+    '''Eliminates obs for which vehicle type is special models (too few obs)'''
+
+    index = np.where(np.logical_and(data['veh_type'] != 8, data['veh_type'] != 9))[0]
+    for key in data.keys():
+        data[key] = data[key][index]
+
+    return data
+
 def save_results(data, mmm, aa):
     try:
         os.remove(data_dir + 'data_' + mmm + aa + '.pkl')
@@ -596,4 +608,5 @@ if __name__ == '__main__':
             conn.close()
             data = data_transf(data0)
             data = elim_zeroexp(data)
+            data = elim_specialmods(data) 
             save_results(data, mmm, aa)
