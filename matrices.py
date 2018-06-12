@@ -10,9 +10,10 @@ import numpy as np
 import pdb
 
 
-# Data directory:
+# Data directories:
 
 data_dir = '/home/pgsqldata/Susep/'
+data_dir2 = 'persistent/'
 
 
 # IPCA (cpi) for adjustment of factor levels expressed in monetary values:
@@ -47,8 +48,8 @@ def data(data_dict):
 
     months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     years = ('08', '09', '10', '11')
-    for mmm in months:
-        for aa in years:
+    for aa in years:
+        for mmm in months:
             filename = 'data_' + mmm + aa + '.pkl'
             data = file_load(filename)
             data = {k: v for k, v in data.items() if k in set(('freq_' + data_dict['dependent'], 'sev_' + data_dict['dependent'])) | set(data_dict['factors'].keys()) | set((data_dict['weight'],))}
@@ -75,39 +76,69 @@ def data(data_dict):
                         X = aux_arr[:, np.newaxis]
 
             freq_rows = np.unique(X, axis=0)
-            period = int(aa) - 8
             if mmm == 'jan' and aa == '08':
                 freq_matrix = {}
+                sev_matrix = {}
 
-            aux_mat = np.empty([len(freq_rows), 2 + np.shape(X)[1]])
+            aux_fmat = np.empty([len(freq_rows), 2 + np.shape(X)[1]])
             for i, row in enumerate(freq_rows):
                 index = np.where((X==row).all(-1))[0]
-                aux_mat[i, [0]] = sum(data['freq_'+data_dict['dependent']][index])
-                aux_mat[i, [1]] = sum(data['exposure'][index])
-                aux_mat[i, 2:] = row
+                aux_fmat[i, [0]] = sum(data['freq_'+data_dict['dependent']][index])
+                aux_fmat[i, [1]] = sum(data['exposure'][index])
+                aux_fmat[i, 2:] = row
+
+            aux_smat = np.hstack((data['sev_'+data_dict['dependent']][:, np.newaxis], X))
+            aux_smat = aux_smat[np.where(aux_smat[:, [0]]>0)[0]]
 
             if mmm == 'jan':
-                freq_matrix[aa]  = aux_mat
+                freq_matrix[aa]  = aux_fmat
+                sev_matrix[aa] = aux_smat
             else:
-                for row in aux_mat:
+                for row in aux_fmat:
                     index2 = np.where((freq_matrix[aa][:, 2:]==row[2:]).all(-1))[0]
-                    if index2:
-                        freq_matrix[aa][index2][0] += row[0] 
-                        freq_matrix[aa][index2][1] += row[1] 
+                    if len(index2) != 0:
+                        freq_matrix[aa][index2[0]][0] += row[0] 
+                        freq_matrix[aa][index2[0]][1] += row[1] 
                     else:
-                        freq_matrix[aa] = np.vstack(freq_matrix[aa], row)
+                        freq_matrix[aa] = np.vstack((freq_matrix[aa], row))
+
+                sev_matrix[aa] = np.vstack((sev_matrix[aa], aux_smat))
+
 
             if  mmm == 'dez':
-                if aa == '11': #remove
-                    pdb.set_trace()
-                period_arr = np.zeros((len(X), 4))
-                period_arr[:, [period]] = np.ones(len(X))[:, np.newaxis]
-                freq_matrix[aa] = np.hstack((freq_matrix[aa], period_arr))
+                period = int(aa) - 8
+                aux_farr = np.zeros((len(freq_matrix[aa]), 4))
+                aux_sarr = np.zeros((len(sev_matrix[aa]), 4))
+                aux_farr[:, [period]] = np.ones(len(aux_farr))[:, np.newaxis]
+                aux_sarr[:, [period]] = np.ones(len(aux_sarr))[:, np.newaxis]
+                freq_matrix[aa] = np.hstack((freq_matrix[aa], aux_farr))
+                sev_matrix[aa] = np.hstack((sev_matrix[aa], aux_sarr))
 
-            print('Frequency matrix loaded w/ ' + mmm + aa + ' data')
+            print('Frequency and severity matrices loaded w/ ' + mmm + aa + ' data')
 
     freq_matrix = np.vstack((freq_matrix['08'], freq_matrix['09'], freq_matrix['10'], freq_matrix['11']))
+    sev_matrix = np.vstack((sev_matrix['08'], sev_matrix['09'], sev_matrix['10'], sev_matrix['11']))
     freq_matrix = np.insert(freq_matrix, 2, 1, axis=1)
+    sev_matrix = np.insert(sev_matrix, 1, 1, axis=1)
+    try:
+        os.remove(data_dir2 + 'freq_matrix.pkl')
+    except OSError:
+        pass
+
+    with open(data_dir2 + 'freq_matrix.pkl', 'wb') as filename:
+        pickle.dump(freq_matrix, filename)
+
+    print('Frequency matrix made persistent in file')
+    try:
+        os.remove(data_dir2 + 'sev_matrix.pkl')
+    except OSError:
+        pass
+
+    with open(data_dir2 + 'sev_matrix.pkl', 'wb') as filename:
+        pickle.dump(sev_matrix, filename)
+
+    print('Severity matrix made persistent in file')
+
 
 
 ## Factors and levels determination:
