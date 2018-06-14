@@ -63,7 +63,7 @@ def grab_results(model, coverage, period, aa, keys=None):
 
 # Classes:
 
-class Poisson:
+class Estimation:
     '''
     Provides estimated parameters of Poisson regression model.
 
@@ -82,7 +82,13 @@ class Poisson:
             dependent = 'sev'
 
         X = file_load(dependent + '_' + claim_type + '_matrix.pkl')
-        X = np.delete(X, -4, 1) #### remove later
+
+        if model == 'Poisson':#### remove later
+            X = np.delete(X, -4, 1) 
+        elif model == 'Gamma':#### remove later
+            X = np.delete(X, np.s_[-4:], 1)
+#            X = np.delete(X, np.s_[10000:], axis=0)
+            X = np.insert(X, 2, 1, axis=1)
 
         if model == 'Poisson':
             def LL_func(beta):
@@ -107,12 +113,13 @@ class Poisson:
             def hess_ninv(beta):
                 '''
                 Inverse of negative Hessian of Poisson loglikelihood
+                mu_i * x_i * x_i'
                 '''
     
                 res = np.linalg.inv(X[:, 2:].T @ (X[:, [1]] * np.exp(X[:, 2:] @ beta) * X[:, 2:]))
                 return res
 
-        if model == 'Gamma':
+        elif model == 'Gamma':
             def LL_func(beta):
                 '''
                 Log-likelihood for Gamma regression model, nu excluded, constant term excluded
@@ -135,6 +142,7 @@ class Poisson:
             def hess_ninv(beta):
                 '''
                 Inverse of negative Hessian of Gamma loglikelihood
+                (sum c_ik / mu_i) * x_i * x_i'
                 '''
     
                 res = np.linalg.inv(X[:, 2:].T @ (X[:, [0]] * np.exp(-1 * X[:, 2:] @ beta) * X[:, 2:]))
@@ -153,8 +161,8 @@ class Poisson:
         epsilon = 1e-8
 
         # Estimation algorithm:
-        def beta_update(beta, step, A, grad):
-            beta_prime = beta + step * A @ grad
+        def beta_update(beta, lda_step, A, grad):
+            beta_prime = beta + lda_step * A @ grad
             return beta_prime
 
         while True:
@@ -162,26 +170,14 @@ class Poisson:
                     print('convergence successful')
                     break
                     
-            step = .1
-            beta_prime = beta_update(beta, step, A, grad)
+            lda_step = .1
+            beta_prime = beta_update(beta, lda_step, A, grad)
             LL_prime = LL_func(beta_prime)
-            if LL_prime > LL:
-                while LL_prime > LL:
-                    LL = LL_prime
-                    step *= 2
-                    beta_prime = beta_update(beta, step, A, grad)
-                    LL_prime = LL_func(beta_prime)
-
-            elif LL > LL_prime:
-                while LL > LL_prime:
-                    step *= .5
-                    beta_prime = beta_update(beta, step, A, grad)
-                    LL_prime = LL_func(beta_prime)
-
             beta = beta_prime
             grad = grad_func(beta)
             A = hess_ninv(beta)
             LL = LL_prime
+            print('Current grad eval: ', grad)
 
         self.beta = beta
         self.LL = LL
@@ -189,4 +185,4 @@ class Poisson:
 
 
 if __name__ == '__main__':
-    fcasco = Estimation('Gamma', 'casco')
+    fcasco = Estimation('Gamma', 'rcd')
