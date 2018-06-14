@@ -82,14 +82,6 @@ class Estimation:
             dependent = 'sev'
 
         X = file_load(dependent + '_' + claim_type + '_matrix.pkl')
-
-        if model == 'Poisson':#### remove later
-            X = np.delete(X, -4, 1) 
-        elif model == 'Gamma':#### remove later
-            X = np.delete(X, np.s_[-4:], 1)
-#            X = np.delete(X, np.s_[10000:], axis=0)
-            X = np.insert(X, 2, 1, axis=1)
-
         if model == 'Poisson':
             def LL_func(beta):
                 '''
