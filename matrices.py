@@ -43,7 +43,6 @@ def file_load(filename):
 def data(data_dict):
     ''' 
     Data preparation for subsequently running models
-
     '''
 
     months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
@@ -87,7 +86,7 @@ def data(data_dict):
                 aux_fmat[i, [1]] = sum(data['exposure'][index])
                 aux_fmat[i, 2:] = row
 
-            aux_smat = np.hstack((data['sev_'+data_dict['dependent']][:, np.newaxis], X))
+            aux_smat = np.hstack((data['sev_'+data_dict['dependent']][:, np.newaxis], data['freq_'+data_dict['dependent']][:, np.newaxis], X))
             aux_smat = aux_smat[np.where(aux_smat[:, [0]]>0)[0]]
 
             if mmm == 'jan':
@@ -106,35 +105,37 @@ def data(data_dict):
 
 
             if  mmm == 'dez':
-                period = int(aa) - 8
-                aux_farr = np.zeros((len(freq_matrix[aa]), 4))
-                aux_sarr = np.zeros((len(sev_matrix[aa]), 4))
-                aux_farr[:, [period]] = np.ones(len(aux_farr))[:, np.newaxis]
-                aux_sarr[:, [period]] = np.ones(len(aux_sarr))[:, np.newaxis]
+                aux_farr = np.zeros((len(freq_matrix[aa]), 3))
+                aux_sarr = np.zeros((len(sev_matrix[aa]), 3))
+                if aa != '08':
+                    period = int(aa) - 9
+                    aux_farr[:, [period]] = np.ones(len(aux_farr))[:, np.newaxis]
+                    aux_sarr[:, [period]] = np.ones(len(aux_sarr))[:, np.newaxis]
+
                 freq_matrix[aa] = np.hstack((freq_matrix[aa], aux_farr))
                 sev_matrix[aa] = np.hstack((sev_matrix[aa], aux_sarr))
 
-            print('Frequency and severity matrices loaded w/ ' + mmm + aa + ' data')
+            print('Frequency and severity matrices loaded w/ ' + data_dict['dependent'] + mmm + aa + ' data')
 
     freq_matrix = np.vstack((freq_matrix['08'], freq_matrix['09'], freq_matrix['10'], freq_matrix['11']))
     sev_matrix = np.vstack((sev_matrix['08'], sev_matrix['09'], sev_matrix['10'], sev_matrix['11']))
     freq_matrix = np.insert(freq_matrix, 2, 1, axis=1)
     sev_matrix = np.insert(sev_matrix, 1, 1, axis=1)
     try:
-        os.remove(data_dir2 + 'freq_matrix.pkl')
+        os.remove(data_dir2 + 'freq_' + data_dict['dependent'] + '_matrix.pkl')
     except OSError:
         pass
 
-    with open(data_dir2 + 'freq_matrix.pkl', 'wb') as filename:
+    with open(data_dir2 + 'freq_' + data_dict['dependent'] + '_matrix.pkl', 'wb') as filename:
         pickle.dump(freq_matrix, filename)
 
     print('Frequency matrix made persistent in file')
     try:
-        os.remove(data_dir2 + 'sev_matrix.pkl')
+        os.remove(data_dir2 + 'sev_' + data_dict['dependent'] + '_matrix.pkl')
     except OSError:
         pass
 
-    with open(data_dir2 + 'sev_matrix.pkl', 'wb') as filename:
+    with open(data_dir2 + 'sev_' + data_dict['dependent'] + '_matrix.pkl', 'wb') as filename:
         pickle.dump(sev_matrix, filename)
 
     print('Severity matrix made persistent in file')
@@ -160,8 +161,8 @@ cov_rcd_levels = [(0, 60), (60, 80), (120, 1e5)] # base-level = (80, 120)
 cov_app_levels = [(0, 0.01), (0.01, 10), (30, 60), (60, 1e5)] # base-level = (10, 30)
 
 # factors
-factors = {'veh_age': veh_age_levels, 'region': region_levels, 'sex': sex_levels, 'bonus_c': bonus_c_levels, 'age': age_levels, 'cov_rcd': cov_rcd_levels}
-data_dict = {'dependent': 'rcd', 'factors': factors, 'weight': 'exposure'}
+factors = {'veh_age': veh_age_levels, 'region': region_levels, 'sex': sex_levels, 'bonus_c': bonus_c_levels, 'age': age_levels, 'cov_casco': cov_casco_levels}
+data_dict = {'dependent': 'casco', 'factors': factors, 'weight': 'exposure'}
 
 ##
 

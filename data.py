@@ -125,6 +125,7 @@ def data_transf(data0):
     sev_casco -> real, claim severity vehicle (total)
     sev_cpi_casco -> real, claim severity vehicle (total) cpi adjusted
     freq_rcd -> integer, claim frequency all liabilities
+    sev_rcd -> real, claim severity liability (total)
     freq_rcdmat -> integer, claim frequency liability
     sev_rcdmat -> real, claim severity liability (total)
     sev_cpi_rcdmat -> real, claim severity liability (total) cpi adjusted
@@ -135,6 +136,7 @@ def data_transf(data0):
     sev_rcdmor -> real, claim severity liability (total)
     sev_cpi_rcdmor -> real, claim severity liability (total) cpi adjusted
     freq_app -> integer, claim frequency all injuries
+    sev_app -> real, claim severity injuty (total)
     freq_app_ma -> integer, claim frequency injury
     sev_app_ma -> real, claim severity injuty (total)
     sev_cpi_app_ma -> real, claim severity injuty (total) cpi adjusted
