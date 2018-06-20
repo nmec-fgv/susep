@@ -78,6 +78,7 @@ def data(data_dict):
             if mmm == 'jan' and aa == '08':
                 freq_matrix = {}
                 sev_matrix = {}
+                dictionary = {}
 
             aux_fmat = np.empty([len(freq_rows), 2 + np.shape(X)[1]])
             for i, row in enumerate(freq_rows):
@@ -85,6 +86,23 @@ def data(data_dict):
                 aux_fmat[i, [0]] = sum(data['freq_'+data_dict['dependent']][index])
                 aux_fmat[i, [1]] = sum(data['exposure'][index])
                 aux_fmat[i, 2:] = row
+                if aa == '08':
+                    aux_dummy = '000'
+                elif aa == '09':
+                    aux_dummy = '100'
+                elif aa == '10':
+                    aux_dummy = '010'
+                elif aa == '11':
+                    aux_dummy = '001'
+
+                key = ''.join([str(int(i)) for i in row.tolist()] + [aux_dummy])
+                if mmm == 'jan':
+                    dictionary[key] = np.hstack((data['sev_'+data_dict['dependent']][index][:, np.newaxis], data['freq_'+data_dict['dependent']][index][:, np.newaxis], data['exposure'][index][:, np.newaxis]))
+                else:
+                    if key in dictionary.keys():
+                        dictionary[key] = np.vstack((dictionary[key], np.hstack((data['sev_'+data_dict['dependent']][index][:, np.newaxis], data['freq_'+data_dict['dependent']][index][:, np.newaxis], data['exposure'][index][:, np.newaxis]))))
+                    else:
+                        dictionary[key] = np.hstack((data['sev_'+data_dict['dependent']][index][:, np.newaxis], data['freq_'+data_dict['dependent']][index][:, np.newaxis], data['exposure'][index][:, np.newaxis]))
 
             aux_smat = np.hstack((data['sev_'+data_dict['dependent']][:, np.newaxis], data['freq_'+data_dict['dependent']][:, np.newaxis], X))
             aux_smat = aux_smat[np.where(aux_smat[:, [0]]>0)[0]]
@@ -115,12 +133,12 @@ def data(data_dict):
                 freq_matrix[aa] = np.hstack((freq_matrix[aa], aux_farr))
                 sev_matrix[aa] = np.hstack((sev_matrix[aa], aux_sarr))
 
-            print('Frequency and severity matrices loaded w/ ' + data_dict['dependent'] + mmm + aa + ' data')
+            print('Matrices and dictionary loaded w/ ' + data_dict['dependent'] + mmm + aa + ' data')
 
     freq_matrix = np.vstack((freq_matrix['08'], freq_matrix['09'], freq_matrix['10'], freq_matrix['11']))
     sev_matrix = np.vstack((sev_matrix['08'], sev_matrix['09'], sev_matrix['10'], sev_matrix['11']))
     freq_matrix = np.insert(freq_matrix, 2, 1, axis=1)
-    sev_matrix = np.insert(sev_matrix, 1, 1, axis=1)
+    sev_matrix = np.insert(sev_matrix, 2, 1, axis=1)
     try:
         os.remove(data_dir2 + 'freq_' + data_dict['dependent'] + '_matrix.pkl')
     except OSError:
@@ -139,6 +157,15 @@ def data(data_dict):
         pickle.dump(sev_matrix, filename)
 
     print('Severity matrix made persistent in file')
+    try:
+        os.remove(data_dir2 + data_dict['dependent'] + '_dictionary.pkl')
+    except OSError:
+        pass
+
+    with open(data_dir2 + data_dict['dependent'] + '_dictionary.pkl', 'wb') as filename:
+        pickle.dump(dictionary, filename)
+
+    print('Dictionary made persistent in file')
 
 
 
