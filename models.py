@@ -17,6 +17,7 @@ import time
 
 lb_log = 1e-323
 lb_ratio = 1e-308
+lb_alpha = 1e-77
 prec_param = 1e-4
 
 
@@ -78,10 +79,10 @@ class Estimation:
     save_results
     '''
     def __init__(self, model, claim_type):
-        if claim_type not in {'casco', 'rcd'} or model not in {'Poisson', 'Gamma', 'InvGaussian'}:
+        if claim_type not in {'casco', 'rcd'} or model not in {'Poisson', 'NB2', 'Gamma', 'InvGaussian'}:
             raise Exception('Model or claim_type provided not in permissible set')
 
-        if model in {'Poisson'}:
+        if model in {'Poisson', 'NB2'}:
             dependent = 'freq'
         elif model in {'Gamma', 'InvGaussian'}:
             dependent = 'sev'
@@ -114,6 +115,46 @@ class Estimation:
                 '''
     
                 res = np.linalg.inv(X[:, 2:].T @ (X[:, [1]] * np.exp(X[:, 2:] @ beta) * X[:, 2:]))
+                return res
+
+        elif model == 'NB2':
+            def LL_func(beta):
+                '''
+                Log-likelihood for NB2 regression model, constant term excluded
+                '''
+            
+                res = 0 #### write function
+                return res
+            
+            def grad_func(beta):
+                '''
+                Gradient of Log-likelihood for NB2 regression model
+                ((y_i - mu_i)/(1+alpha*mu_i)] * x_i
+                (1/alpha^2)*(ln(1+alpha*mu_i)-sum_{j=0}^{y_i-1}1/(j+alpha^-1)+(y_i-mu_i)/(alpha*(1+alpha*mu_i)
+                '''
+            
+                beta[-1] = np.maximum(beta[-1], lb_alpha)
+                mu = X[:, [1]] * np.exp(X[:, 2:] @ beta[:-1])
+                aux_vec = (X[:, [0]] - mu) / (1 + beta[-1] * mu)
+                aux_beta = (aux_vec.T @ X[:, 2:]).T
+                aux_jsum = np.array([np.sum((np.arange(X[i, [0]])+beta[-1]**(-1))**(-1)) for i in range(len(X))])[:, np.newaxis]
+                aux_alpha = np.sum(beta[-1]**(-2) * (np.log(1 + beta[-1] * mu) - aux_jsum) + (X[:, [0]] - mu) / (beta[-1] * (1 + beta[-1] * mu))) 
+                res = np.vstack((aux_beta, aux_alpha))
+                return res
+    
+            def hess_ninv(beta):
+                '''
+                Inverse of negative Hessian of NB2 loglikelihood
+                mu_i * x_i * x_i'
+                '''
+    
+                beta[-1] = np.maximum(beta[-1], lb_alpha)
+                mu = X[:, [1]] * np.exp(X[:, 2:] @ beta[:-1])
+                aux_beta = np.linalg.inv(X[:, 2:].T @ ((mu / (1 + beta[-1] * mu)) * X[:, 2:]))
+                aux_jsum = np.array([np.sum((np.arange(X[i, [0]])+beta[-1]**(-1))**(-1)) for i in range(len(X))])[:, np.newaxis]
+                aux_alpha = (np.sum(beta[-1]**(-4) * (np.log(1 + beta[-1] * mu) - aux_jsum)**2 + mu / (beta[-1]**2 * (1 + beta[-1] * mu))))**(-1)
+                res = np.hstack((aux_beta, np.zeros(np.shape(aux_beta)[0])[:, np.newaxis]))
+                res = np.vstack((res, np.concatenate((np.zeros(np.shape(res)[1]-1), [aux_alpha]))))
                 return res
 
         elif model == 'Gamma':
@@ -176,16 +217,21 @@ class Estimation:
 
         # Initial guesses and stoping parameter:
         beta = np.zeros(np.shape(X)[1] - 2)[:, np.newaxis]
+        if model == 'NB2':
+            beta = np.vstack((beta, np.array([.5])))
+
         if dependent == 'freq':
             beta[0] = np.log(X[0, [0]] / X[0, [1]])
         elif dependent == 'sev':
             beta[0] = np.log(np.sum(X[:, [0]]) / np.sum(X[:, [1]]))
 
         grad = grad_func(beta)
-        LL = LL_func(beta)
         A = hess_ninv(beta)
         epsilon = 1e-8
-        lda_step = .1
+        if model != 'NB2':
+            lda_step = .1
+        else:
+            lda_step = 1
 
         # Estimation algorithm:
         def beta_update(beta, lda_step, A, grad):
@@ -226,6 +272,7 @@ class Estimation:
 
 class Testing:
     def __init__(self, model, claim_type):
+        self.model = model
         X_dict = file_load(claim_type + '_dictionary.pkl')
         res = grab_results(model, claim_type)
         self.beta = res['beta']
@@ -235,23 +282,39 @@ class Testing:
         self.z_stat = res['z_stat']
         self.X = X_dict
 
-    def phi(self):
-        numerator = 0
+    def dispersion(self):
+        if self.model != 'Poisson':
+            print('Method only available for Poisson model')
+            return
+
+        aux_phi = 0
+        aux_alpha = 0
+        aux_dscore1 = 0
+        aux_dscore2 = 0
+        aux_dscore3 = 0
         n = 0 
         for key in self.X.keys():
-            mu = np.exp(np.array([1] + [float(i) for i in list(key)]) @ self.beta)
+            aux_mu = np.exp(np.array([1] + [float(i) for i in list(key)]) @ self.beta)
+            mu = self.X[key][:, [2]] * aux_mu
             n += np.shape(self.X[key])[0]
-            numerator += np.sum((self.X[key][:, [1]] - mu)**2 / mu)
+            aux_phi += np.sum((self.X[key][:, [1]] - mu)**2 / mu)
+            aux_alpha += np.sum(((self.X[key][:, [1]] - mu)**2 - mu)/ mu**2)
+            aux_dscore1 += np.sum((self.X[key][:, [1]] - mu)**2 - mu) / (2 * np.sum(mu**2))**.5
+            aux_dscore2 += np.sum((self.X[key][:, [1]] - mu)**2 - self.X[key][:, [1]]) / (2 * np.sum(mu**2))**.5
+            aux_dscore3 += np.sum(((self.X[key][:, [1]] - mu)**2 - self.X[key][:, [1]])/ mu)
 
         df = n - len(self.beta)
-        self.phi = numerator / df
+        self.phi = aux_phi / df
+        self.alpha = aux_alpha / df
+        self.dscore1 = aux_dscore1
+        self.dscore2 = aux_dscore2
+        self.dscore3 = aux_dscore3 / (2*n)**.5
 
 
 
 if __name__ == '__main__':
-#    for model in {'Poisson', 'Gamma'}:
-    for model in {'InvGaussian'}:
-        for claim_type in {'casco', 'rcd'}:
+    for model in {'NB2'}:
+        for claim_type in ('rcd',):
             print('Estimation: ' + model + ' ' + claim_type)
             x = Estimation(model, claim_type)
             x.save_results()
