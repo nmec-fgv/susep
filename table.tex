@@ -1,0 +1,67 @@
+{\scriptsize
+\begin{center}
+\begin{table}
+    \begin{threeparttable}
+        \caption{\small{Modelos GLM com distribuições Poisson p/ frequência, Gamma e Inverse Gaussian p/ montante, todos c/ \textit{link} logarítmico; período 2008-2011.}}
+        \begin{tabular}{lcccccc} \toprule
+        & \multicolumn{3}{c}{seguro veículo} & \multicolumn{3}{c}{seguro terceiros} \\
+        \cmidrule(l{.75em}){2-4} \cmidrule(l{.75em}){5-7}
+        & Poisson & Gamma & InvGaussian & Poisson & Gamma & InvGaussian \\ \midrule
+        Const. & -3.48811 &  1.63374 &  1.65793 & -4.37279 &  0.99721 &  0.99781 \\
+        & \tiny{( 0.00214)} & \tiny{( 0.00212)} & \tiny{( 0.00482)} & \tiny{( 0.00333)} & \tiny{( 0.00333)} & \tiny{( 0.00555)} \\
+        IDV1 & -0.13335 &  0.16183 &  0.13671 & -0.01206 &  0.00611 &  0.00538 \\
+        & \tiny{( 0.00152)} & \tiny{( 0.00149)} & \tiny{( 0.00334)} & \tiny{( 0.00217)} & \tiny{( 0.00217)} & \tiny{( 0.00364)} \\
+        IDV2 & -0.21230 &  0.25866 &  0.22408 & -0.08238 &  0.00859 &  0.00827 \\
+        & \tiny{( 0.00206)} & \tiny{( 0.00200)} & \tiny{( 0.00445)} & \tiny{( 0.00269)} & \tiny{( 0.00269)} & \tiny{( 0.00450)} \\
+        IDV3 & -0.39986 &  0.20270 &  0.16746 & -0.23197 & -0.04042 & -0.04126 \\
+        & \tiny{( 0.00296)} & \tiny{( 0.00291)} & \tiny{( 0.00628)} & \tiny{( 0.00381)} & \tiny{( 0.00381)} & \tiny{( 0.00623)} \\
+        REG1 &  0.00620 & -0.05890 & -0.07674 &  0.14137 &  0.03853 &  0.03881 \\
+        & \tiny{( 0.00172)} & \tiny{( 0.00172)} & \tiny{( 0.00395)} & \tiny{( 0.00250)} & \tiny{( 0.00251)} & \tiny{( 0.00416)} \\
+        REG2 &  0.00900 &  0.20370 &  0.19222 & -0.46785 &  0.26858 &  0.26732 \\
+        & \tiny{( 0.00225)} & \tiny{( 0.00225)} & \tiny{( 0.00569)} & \tiny{( 0.00403)} & \tiny{( 0.00403)} & \tiny{( 0.00742)} \\
+        REG3 &  0.18314 & -0.20015 & -0.21641 &  0.01350 &  0.02782 &  0.02736 \\
+        & \tiny{( 0.00201)} & \tiny{( 0.00201)} & \tiny{( 0.00434)} & \tiny{( 0.00315)} & \tiny{( 0.00316)} & \tiny{( 0.00523)} \\
+        REG4 &  0.23933 & -0.13397 & -0.15949 &  0.01341 &  0.08924 &  0.08725 \\
+        & \tiny{( 0.00178)} & \tiny{( 0.00178)} & \tiny{( 0.00394)} & \tiny{( 0.00288)} & \tiny{( 0.00287)} & \tiny{( 0.00484)} \\
+        REG5 &  0.34980 & -0.24213 & -0.26991 &  0.21864 &  0.10037 &  0.09964 \\
+        & \tiny{( 0.00202)} & \tiny{( 0.00202)} & \tiny{( 0.00432)} & \tiny{( 0.00313)} & \tiny{( 0.00313)} & \tiny{( 0.00531)} \\
+        SEX & -0.03912 & -0.12618 & -0.11950 &  0.07212 & -0.12533 & -0.12422 \\
+        & \tiny{( 0.00119)} & \tiny{( 0.00119)} & \tiny{( 0.00266)} & \tiny{( 0.00180)} & \tiny{( 0.00180)} & \tiny{( 0.00301)} \\
+        BON &  0.08864 &  0.03782 &  0.02828 &  0.09550 &  0.04751 &  0.04602 \\
+        & \tiny{( 0.00122)} & \tiny{( 0.00122)} & \tiny{( 0.00275)} & \tiny{( 0.00186)} & \tiny{( 0.00186)} & \tiny{( 0.00314)} \\
+        IDA1 &  0.32256 &  0.04966 &  0.03961 &  0.39436 &  0.03178 &  0.03080 \\
+        & \tiny{( 0.00212)} & \tiny{( 0.00211)} & \tiny{( 0.00474)} & \tiny{( 0.00313)} & \tiny{( 0.00313)} & \tiny{( 0.00527)} \\
+        IDA2 &  0.05163 &  0.05203 &  0.04078 &  0.04634 &  0.00705 &  0.00591 \\
+        & \tiny{( 0.00160)} & \tiny{( 0.00160)} & \tiny{( 0.00363)} & \tiny{( 0.00245)} & \tiny{( 0.00245)} & \tiny{( 0.00408)} \\
+        IDA3 &  0.01340 & -0.02010 & -0.01452 &  0.01456 &  0.00382 &  0.00479 \\
+        & \tiny{( 0.00168)} & \tiny{( 0.00168)} & \tiny{( 0.00377)} & \tiny{( 0.00257)} & \tiny{( 0.00257)} & \tiny{( 0.00430)} \\
+        IDA4 & -0.08169 & -0.08817 & -0.07731 & -0.02656 & -0.00919 & -0.00885 \\
+        & \tiny{( 0.00190)} & \tiny{( 0.00189)} & \tiny{( 0.00419)} & \tiny{( 0.00286)} & \tiny{( 0.00286)} & \tiny{( 0.00479)} \\
+        ISC1 & -0.08668 & -0.18972 & -0.16369 & \textit{ND} & \textit{ND} & \textit{ND} \\
+        & \tiny{( 0.00158)} & \tiny{( 0.00154)} & \tiny{( 0.00321)} & \tiny{\textit{ND}} & \tiny{\textit{ND}} & \tiny{\textit{ND}} \\
+        ISC2 &  0.01542 &  0.27921 &  0.27720 & \textit{ND} & \textit{ND} & \textit{ND} \\
+        & \tiny{( 0.00166)} & \tiny{( 0.00165)} & \tiny{( 0.00392)} & \tiny{\textit{ND}} & \tiny{\textit{ND}} & \tiny{\textit{ND}} \\
+        ISC3 & -0.04837 &  0.83959 &  0.84301 & \textit{ND} & \textit{ND} & \textit{ND} \\
+        & \tiny{( 0.00219)} & \tiny{( 0.00219)} & \tiny{( 0.00668)} & \tiny{\textit{ND}} & \tiny{\textit{ND}} & \tiny{\textit{ND}} \\
+        IST1 & \textit{ND} & \textit{ND} & \textit{ND} & -0.06773 &  0.00496 &  0.00576 \\
+        & \tiny{\textit{ND}} & \tiny{\textit{ND}} & \tiny{\textit{ND}} & \tiny{( 0.00253)} & \tiny{( 0.00254)} & \tiny{( 0.00423)} \\
+        IST2 & \textit{ND} & \textit{ND} & \textit{ND} & -0.00289 &  0.00556 &  0.00584 \\
+        & \tiny{\textit{ND}} & \tiny{\textit{ND}} & \tiny{\textit{ND}} & \tiny{( 0.00264)} & \tiny{( 0.00265)} & \tiny{( 0.00442)} \\
+        IST3 & \textit{ND} & \textit{ND} & \textit{ND} &  0.05042 &  0.03415 &  0.03278 \\
+        & \tiny{\textit{ND}} & \tiny{\textit{ND}} & \tiny{\textit{ND}} & \tiny{( 0.00266)} & \tiny{( 0.00266)} & \tiny{( 0.00445)} \\
+        ANO1 & -0.02101 & -0.03708 & -0.04113 & -0.02934 &  0.01499 &  0.01538 \\
+        & \tiny{( 0.00173)} & \tiny{( 0.00173)} & \tiny{( 0.00398)} & \tiny{( 0.00258)} & \tiny{( 0.00258)} & \tiny{( 0.00431)} \\
+        ANO2 &  0.01877 & -0.05604 & -0.06132 & -0.05618 &  0.02749 &  0.02823 \\
+        & \tiny{( 0.00168)} & \tiny{( 0.00168)} & \tiny{( 0.00384)} & \tiny{( 0.00256)} & \tiny{( 0.00257)} & \tiny{( 0.00430)} \\
+        ANO3 & -0.18806 &  0.06681 &  0.04969 & -0.20700 &  0.02317 &  0.02275 \\
+        & \tiny{( 0.00176)} & \tiny{( 0.00176)} & \tiny{( 0.00408)} & \tiny{( 0.00263)} & \tiny{( 0.00264)} & \tiny{( 0.00440)} \\
+        \bottomrule
+        \end{tabular}
+        \begin{tablenotes}
+        \scriptsize
+        \item Níveis em itálico indicam nível utilizado como base, sendo os mais frequentes de cada fator.
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+\end{center}
+}

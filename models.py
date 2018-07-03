@@ -14,6 +14,7 @@ import time
 # Lower bound and precision parameter:
 
 lb_alpha = 1e-77
+lb_sigma2 = 1e-102
 prec_param = 1e-8
 
 # Data directory:
@@ -181,6 +182,7 @@ class Estimation:
                 -n_i/2sigma^2 + 1/sigma^4*[sum c_ik*exp(-2x_i'beta)/2 - n_i*exp(-x_i'beta) + 1/2*sum c_ik]
                 '''
             
+                beta[-1] = np.maximum(beta[-1], lb_sigma2)
                 aux_beta = X[:, [0]] * np.exp(-2 * X[:, 2:] @ beta[:-1]) - X[:, [1]] * np.exp(-1 * X[:, 2:] @ beta[:-1])
                 aux_beta = (aux_beta.T @ X[:, 2:]).T
                 aux_sigma2 = np.sum(-X[:, [1]]/(2 * beta[-1]) + beta[-1]**(-2) * (.5 * X[:, [0]] * np.exp(-2 * X[:, 2:] @ beta[:-1]) - X[:, [1]] * np.exp(-1 * X[:, 2:] @ beta[:-1]) + (2 * X[:, [0]])**(-1)))
@@ -194,6 +196,7 @@ class Estimation:
                 -n_i/2sigma^4 + 2/sigma^6*[sum c_ik*exp(-2x_i'beta)/2 - n_i*exp(-x_i'beta) + 1/2*sum c_ik]
                 '''
     
+                beta[-1] = np.maximum(beta[-1], lb_sigma2)
                 aux_beta = np.linalg.inv(X[:, 2:].T @ ((2 * X[:, [0]] * np.exp(-2 * X[:, 2:] @ beta[:-1]) - X[:, [1]] * np.exp(-1 * X[:, 2:] @ beta[:-1])) * X[:, 2:]))
                 aux_sigma2 = (np.sum(-X[:, [1]]/(2 * beta[-1]**2) + (2/beta[-1]**(3)) * (.5 * X[:, [0]] * np.exp(-2 * X[:, 2:] @ beta[:-1]) - X[:, [1]] * np.exp(-1 * X[:, 2:] @ beta[:-1]) + (2 * X[:, [0]])**(-1))))**(-1)
                 res = np.hstack((aux_beta, np.zeros(np.shape(aux_beta)[0])[:, np.newaxis]))
@@ -207,7 +210,7 @@ class Estimation:
         elif model == 'Gamma':
             beta = np.vstack((beta, np.array([2])))
         elif model == 'InvGaussian':
-            beta = np.vstack((beta, np.array([2])))
+            beta = np.vstack((beta, np.array([.5])))
 
         if dependent == 'freq':
             beta[0] = np.log(X[0, [0]] / X[0, [1]])
@@ -217,10 +220,7 @@ class Estimation:
         grad = grad_func(beta)
         A = hess_ninv(beta)
         epsilon = prec_param
-        if model not in {'NB2'}:
-            lda_step = .1
-        else:
-            lda_step = 1
+        lda_step = 1
 
         # Newton-Raphson algorithm:
         def beta_update(beta, lda_step, A, grad):
@@ -262,78 +262,122 @@ class Estimation:
 class Stdout:
     '''
     Provides standard output for GLMs.
+    Reads <claim_type>_dictionary.pkl, where keys index vector of dummies and:
+    column 0 = total cost, sum c_ik
+    column 1 = claims count, y_i
+    column 2 = total exposure, exposure_i
 
-    Three presistent files w/ following statistics:
+    Three persistent files w/ following statistics:
     individual_results_xxx.pkl: deviances and chis
-    cell_results_xxx.db: exposure, y_bar, mu_hat, D^L
-    overall_results_xxx.db: LL, D, Chi^2
+    cell_results_xxx.db: # obs, exposure, y_bar, mu_hat, D^L
+    overall_results_xxx.db: LL, D, Pearson, Chi^2
     '''
 
     def __init__(self, model, claim_type):
         self.model = model
         self.claim_type = claim_type
+        if model in {'Poisson', 'NB2'}:
+            model_type = 'frequency'
+        elif model in {'Gamma', 'InvGaussian'}:
+            model_type = 'severity'
+
         X_dict = file_load(claim_type + '_dictionary.pkl')
         prefix = 'overall'
         keys = ('beta',)
         res = grab_results_db(prefix, model, claim_type, keys)
         beta = res['beta']
-        cell_res = np.empty([len(X_dict), 3])
+        ind_res = {}
+        cell_res = np.empty([len(X_dict), 5])
         if model == 'Poisson':
-            def LL_func(X, std_mu, extra_param):
+            def LL_func(X, mu, extra_param):
                 '''
                 Log-likelihood: sum_i -exposure_i * exp(x_i'beta) + y_i * ln(exposure_i * exp(x_i'beta)) - ln y_i!
                 '''
 
-                res = np.sum(- X[:, [2]] * std_mu + X[:, [1]] * np.log(X[:, [2]] * std_mu) - np.log(ss.factorial(X[:, [1]])))
+                res = np.sum(- X[:, [2]] * mu + X[:, [1]] * np.log(X[:, [2]] * mu) - np.log(ss.factorial(X[:, [1]])))
                 return res
 
+            def deviance(X, mu):
+                '''
+                deviance = y_i * ln(y_i/mu_i) - (y_i - mu_i)
+                '''
+
+                aux_dev = np.zeros(np.shape(X[:, [1]]))
+                index = np.where(X[:, [1]] > 0)[0]
+                aux_dev[index] = X[:, [1]][index] * np.log(X[:, [1]][index] / (X[:, [2]][index] * mu))
+                aux2_dev = X[:, [1]] - X[:, [2]] * mu
+                dev_local_stat = np.sum(aux_dev - aux2_dev)
+                index2 = np.where(X[:, [1]] - X[:, [2]] * mu < 0)[0]
+                dev_is = (2*(aux_dev - aux2_dev))**.5
+                dev_is[index2] = -1 * dev_is[index2]
+                return (dev_is, dev_local_stat)
+
         elif model == 'NB2':
-            def LL_func(X, std_mu, extra_param):
+            def LL_func(X, mu, extra_param):
                 '''
                 Log-likelihood: sum_i ln(gamma(y_i + alpha^(-1))/gamma(alpha^(-1))) -ln y_i! -(y_i + alpha^(-1))*ln(alpha^(-1) + exposure_i*exp(x_i'beta)) + alpha^(-1)*ln(alpha^(-1)) + y_i*ln(exposure_i*exp(x_i'beta)) 
                 '''
             
                 inv_alpha = extra_param**(-1)
-                res = np.sum(np.log(ss.gamma(X[:, [1]] + inv_alpha) / ss.gamma(inv_alpha)) - np.log(ss.factorial(X[:, [1]])) - (X[:, [1]] + inv_alpha) * np.log(inv_alpha + X[:, [2]] * std_mu) + inv_alpha * np.log(inv_alpha) + X[:, [1]] * np.log(X[:, [2]] * std_mu))
+                res = np.sum(np.log(ss.gamma(X[:, [1]] + inv_alpha) / ss.gamma(inv_alpha)) - np.log(ss.factorial(X[:, [1]])) - (X[:, [1]] + inv_alpha) * np.log(inv_alpha + X[:, [2]] * mu) + inv_alpha * np.log(inv_alpha) + X[:, [1]] * np.log(X[:, [2]] * mu))
                 return res
 
         elif model == 'Gamma':
-            def LL_func(beta):
+            def LL_func(X, mu, extra_param):
                 '''
-                Log-likelihood for Gamma regression model, nu excluded, constant term excluded
-                -n_i * x_i'beta -sum c_ik * exp(-x_i'beta) 
+                Log-likelihood: sum_i y_i * [-ln(gamma(nu))+nu*ln(nu)-nu*ln(mu_i)+(nu-1)*ln(c^bar_i)] - nu*(sum c_ik/mu_i) 
                 '''
             
-                res = np.sum(- X[:, [1]] * X[:, 2:] @ beta - X[:, [0]] * np.exp(X[:, 2:] @ beta))
+                nu = extra_param
+                res = np.sum(X[:, [1]] * (-np.log(ss.gamma(nu)) + nu * np.log(nu) - nu * np.log(mu) + (nu - 1) * np.log(X[:, [0]] / X[:, [1]])) - nu * (X[:, [0]] / mu))
                 return res
 
         elif model == 'InvGaussian':
-            def LL_func(beta):
+            def LL_func(X, mu, extra_param):
                 '''
-                Log-likelihood for InvGaussian regression model, sigma excluded, constant term excluded
-                -(sum c_ik/2) * exp(-2*x_i'beta) + n_i * exp(-x_i'beta) 
+                Log-likelihood: sum_i -.5*y_i*ln(2*pi*sigma2)-.5*y_i*ln(c^bar_i^3)-(sum c_ik/2*sigma2*mu^2)+(y_i/sigma2*mu_i)-(1/2*sigma2*sum c_ik)
                 '''
             
-                res = np.sum(- (X[:, [0]] / 2) * np.exp(-2 * X[:, 2:] @ beta) + X[:, [1]] * np.exp(-1 * X[:, 2:] @ beta))
+                sigma2 = extra_param
+                res = np.sum(- .5 * X[:, [1]] * np.log(2 * np.pi * sigma2) - .5 * X[:, [1]] * np.log((X[:, [0]] / X[:, [1]])**3) - X[:, [0]] / (2 * sigma2 * mu**2) + X[:, [1]] / (sigma2 * mu) - (2 * sigma2 * X[:, [0]])**(-1))
                 return res
             
         LL_sum = 0
+        dev_stat_sum = 0
         for i, key in enumerate(X_dict.keys()):
             X = X_dict[key]
-            # Except for Poisson, other models have two parameters in beta vector:
+            # Eliminate zero counts for severity models:
+            if model_type == 'severity':
+                X = X[np.where(X[:, [1]] > 0)[0]]
+
+            # Except for Poisson, other models have additional parameter in beta vector:
             if model == 'Poisson':
-                std_mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ beta)
+                mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ beta)
                 extra_param = None
             else:
-                std_mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ beta[:-1])
+                mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ beta[:-1])
                 extra_param = beta[-1]
 
-            LL_sum += LL_func(X, std_mu, extra_param)
-            cell_res[i, 0] = np.sum(X[:, [2]])
-            cell_res[i, 1] = np.average(X[:, [1]])
-            cell_res[i, 2] = std_mu
+            if np.shape(X)[0] > 0:
+                LL_sum += LL_func(X, mu, extra_param)
+                (dev_is, dev_local_stat) = deviance(X, mu)
+                ind_res[key] = dev_is
+                if model_type == 'frequency':
+                    cell_res[i, 2] = np.average(X[:, [1]])
+                elif model_type == 'severity':
+                    cell_res[i, 2] = np.average(X[:, [0]])
+            else:
+                cell_res[i, 2] = 0
+                ind_res[key] = np.array([])
+
+            cell_res[i, 0] = len(X)
+            cell_res[i, 1] = np.sum(X[:, [2]])
+            cell_res[i, 3] = mu
+            cell_res[i, 4] = dev_local_stat
+            dev_stat_sum += dev_local_stat
 
         self.LL = LL_sum
+        self.D = dev_stat_sum
 
 
     def dispersion(self):
@@ -367,8 +411,8 @@ class Stdout:
 
 
 if __name__ == '__main__':
-    for model in ('Gamma',):
-        for claim_type in ('rcd', 'casco'):
+    for model in ('InvGaussian',):
+        for claim_type in ('rcd',):
             print('Estimation: ' + model + ' ' + claim_type)
             x = Estimation(model, claim_type)
             x.save_estimation_results()

@@ -11,14 +11,14 @@ try:
 except OSError:
     pass
 
-db_file = 'persistent/results_casco.db'
+db_file = 'persistent/overall_results_casco.db'
 db = shelve.open(db_file)
 casco_dict = {}
 for key in db.keys():
     casco_dict[key] = db[key]
 
 db.close()
-db_file = 'persistent/results_rcd.db'
+db_file = 'persistent/overall_results_rcd.db'
 db = shelve.open(db_file)
 rcd_dict = {}
 for key in db.keys():

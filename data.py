@@ -573,8 +573,19 @@ def elim_zeroexp(data):
 
     return data
 
+def elim_toomanyclaims(data):
+    '''Eliminates obs for which number of claims is greater than 15'''
+
+    for aux in ('casco', 'rcd', 'app'):
+        index = np.where(data['freq_' + aux] > 15)[0]
+        for key in data.keys():
+            data[key] = data[key][index]
+
+    return data
+
+## function elim_specialmods currently not in use
 def elim_specialmods(data):
-    '''Eliminates obs for which vehicle type is special models (too few obs)'''
+    '''Eliminates obs for which vehicle type is special model (too few obs)'''
 
     index = np.where(np.logical_and(data['veh_type'] != 8, data['veh_type'] != 9))[0]
     for key in data.keys():
@@ -613,5 +624,5 @@ if __name__ == '__main__':
             conn.close()
             data = data_transf(data0)
             data = elim_zeroexp(data)
-            data = elim_specialmods(data) 
+            data = elim_toomanyclaims(data) 
             save_results(data, mmm, aa)

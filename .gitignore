@@ -7,4 +7,5 @@ old_data/
 old_results/
 oldest_results/
 plots/
+persistent/
 __pycache__/
