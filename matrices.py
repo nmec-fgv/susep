@@ -74,15 +74,26 @@ def data(data_dict):
                     except:
                         X = aux_arr[:, np.newaxis]
 
-            freq_rows = np.unique(X, axis=0)
             if mmm == 'jan' and aa == '08':
                 freq_matrix = {}
                 sev_matrix = {}
-                dictionary = {}
+                freq_dict = {}
+                sev_dict = {}
 
-            aux_fmat = np.empty([len(freq_rows), 2 + np.shape(X)[1]])
-            for i, row in enumerate(freq_rows):
+            index = np.where(data['sev_'+data_dict['dependent']][:, [0]]>0)[0]
+            aux_smat = data['sev_'+data_dict['dependent']][index]
+            aux2_smat = np.hstack((aux_smat[:, [0]], X[index]))
+            for i in range(1, np.shape(data['sev_'+data_dict['dependent']])[1]):
+                index2 = np.where(aux_smat[:, [i]]>0)[0]
+                aux3_smat = np.hstack((aux_smat[:, [i]][index2], X[index][index2]))
+                aux2_smat = np.vstack((aux2_smat, aux3_smat))
+
+            aux_smat = aux2_smat
+            unique_rows = np.unique(X, axis=0)
+            aux_fmat = np.empty([len(unique_rows), 2 + np.shape(X)[1]])
+            for i, row in enumerate(unique_rows):
                 index = np.where((X==row).all(-1))[0]
+                index2 = np.where((aux_smat[:, 1:]==row).all(-1))[0]
                 aux_fmat[i, [0]] = sum(data['freq_'+data_dict['dependent']][index])
                 aux_fmat[i, [1]] = sum(data['exposure'][index])
                 aux_fmat[i, 2:] = row
@@ -97,15 +108,18 @@ def data(data_dict):
 
                 key = ''.join([str(int(i)) for i in row.tolist()] + [aux_dummy])
                 if mmm == 'jan':
-                    dictionary[key] = np.hstack((data['sev_'+data_dict['dependent']][index][:, np.newaxis], data['freq_'+data_dict['dependent']][index][:, np.newaxis], data['exposure'][index][:, np.newaxis]))
+                    freq_dict[key] = np.hstack((data['freq_'+data_dict['dependent']][index][:, np.newaxis], data['exposure'][index][:, np.newaxis]))
+                    sev_dict[key] = aux_smat[:, [0]][index2]
                 else:
-                    if key in dictionary.keys():
-                        dictionary[key] = np.vstack((dictionary[key], np.hstack((data['sev_'+data_dict['dependent']][index][:, np.newaxis], data['freq_'+data_dict['dependent']][index][:, np.newaxis], data['exposure'][index][:, np.newaxis]))))
+                    if key in freq_dict.keys():
+                        freq_dict[key] = np.vstack((freq_dict[key], np.hstack((data['freq_'+data_dict['dependent']][index][:, np.newaxis], data['exposure'][index][:, np.newaxis]))))
                     else:
-                        dictionary[key] = np.hstack((data['sev_'+data_dict['dependent']][index][:, np.newaxis], data['freq_'+data_dict['dependent']][index][:, np.newaxis], data['exposure'][index][:, np.newaxis]))
+                        freq_dict[key] = np.hstack((data['freq_'+data_dict['dependent']][index][:, np.newaxis], data['exposure'][index][:, np.newaxis]))
 
-            aux_smat = np.hstack((data['sev_'+data_dict['dependent']][:, np.newaxis], data['freq_'+data_dict['dependent']][:, np.newaxis], X))
-            aux_smat = aux_smat[np.where(aux_smat[:, [0]]>0)[0]]
+                    if key in sev_dict.keys():
+                        sev_dict[key] = np.vstack((sev_dict[key], aux_smat[:, [0]][index2]))
+                    else:
+                        sev_dict[key] = aux_smat[:, [0]][index2]
 
             if mmm == 'jan':
                 freq_matrix[aa]  = aux_fmat
@@ -133,12 +147,12 @@ def data(data_dict):
                 freq_matrix[aa] = np.hstack((freq_matrix[aa], aux_farr))
                 sev_matrix[aa] = np.hstack((sev_matrix[aa], aux_sarr))
 
-            print('Matrices and dictionary loaded w/ ' + data_dict['dependent'] + mmm + aa + ' data')
+            print('Matrices and dictionaries loaded w/ ' + data_dict['dependent'] + mmm + aa + ' data')
 
     freq_matrix = np.vstack((freq_matrix['08'], freq_matrix['09'], freq_matrix['10'], freq_matrix['11']))
     sev_matrix = np.vstack((sev_matrix['08'], sev_matrix['09'], sev_matrix['10'], sev_matrix['11']))
     freq_matrix = np.insert(freq_matrix, 2, 1, axis=1)
-    sev_matrix = np.insert(sev_matrix, 2, 1, axis=1)
+    sev_matrix = np.insert(sev_matrix, 1, 1, axis=1)
     try:
         os.remove(data_dir2 + 'freq_' + data_dict['dependent'] + '_matrix.pkl')
     except OSError:
@@ -158,14 +172,24 @@ def data(data_dict):
 
     print('Severity matrix made persistent in file')
     try:
-        os.remove(data_dir2 + data_dict['dependent'] + '_dictionary.pkl')
+        os.remove(data_dir2 + 'freq_' + data_dict['dependent'] + '_dict.pkl')
     except OSError:
         pass
 
-    with open(data_dir2 + data_dict['dependent'] + '_dictionary.pkl', 'wb') as filename:
-        pickle.dump(dictionary, filename)
+    with open(data_dir2 + 'freq_' + data_dict['dependent'] + '_dict.pkl', 'wb') as filename:
+        pickle.dump(freq_dict, filename)
 
-    print('Dictionary made persistent in file')
+    print('Frequency dictionary made persistent in file')
+
+    try:
+        os.remove(data_dir2 + 'sev_' + data_dict['dependent'] + '_dict.pkl')
+    except OSError:
+        pass
+
+    with open(data_dir2 + 'sev_' + data_dict['dependent'] + '_dict.pkl', 'wb') as filename:
+        pickle.dump(sev_dict, filename)
+
+    print('Severity dictionary made persistent in file')
 
 
 
@@ -190,8 +214,11 @@ cov_app_levels = [(0, 0.01), (0.01, 10), (30, 60), (60, 1e5)] # base-level = (10
 # factors
 factors = {'veh_age': veh_age_levels, 'region': region_levels, 'sex': sex_levels, 'bonus_c': bonus_c_levels, 'age': age_levels, 'cov_casco': cov_casco_levels}
 data_dict = {'dependent': 'casco', 'factors': factors, 'weight': 'exposure'}
+factors2 = {'veh_age': veh_age_levels, 'region': region_levels, 'sex': sex_levels, 'bonus_c': bonus_c_levels, 'age': age_levels, 'cov_rcd': cov_rcd_levels}
+data_dict2 = {'dependent': 'rcd', 'factors': factors2, 'weight': 'exposure'}
 
 ##
 
 if __name__ == '__main__':
-    x = data(data_dict) 
+    data(data_dict) 
+    data(data_dict2) 

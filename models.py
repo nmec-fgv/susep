@@ -14,6 +14,8 @@ import time
 
 # Lower bound and precision parameter:
 
+lb_log = 1e-323
+lb_ratio = 1e-308
 lb_alpha = 1e-77
 lb_sigma2 = 1e-102
 prec_param = 1e-8
@@ -156,6 +158,7 @@ class Estimation:
                 -y*exp(-x_i'beta)-x_i'beta+ln(y)+ln(nu)+1-digamma(nu)
                 '''
             
+                beta[-1] = np.maximum(beta[-1], lb_log)
                 aux_beta = X[:, [0]] * np.exp(-1 * X[:, 1:] @ beta[:-1]) - 1 
                 aux_beta = (aux_beta.T @ X[:, 1:]).T
                 aux_nu = np.sum(- X[:, [0]] * np.exp(-1 * X[:, 1:] @ beta[:-1]) - (X[:, 1:] @ beta[:-1]) + np.log(X[:, [0]]) + np.log(beta[-1]) + 1 - sp.digamma(beta[-1]))
@@ -169,8 +172,9 @@ class Estimation:
                 inv [polygamma(1,nu)-nu^(-1)]
                 '''
     
+                beta[-1] = np.maximum(beta[-1], lb_ratio)
                 aux_beta = np.linalg.inv(X[:, 1:].T @ (X[:, [0]] * np.exp(-1 * X[:, 1:] @ beta[:-1]) * X[:, 1:]))
-                aux_nu = (np.sum(sp.polygamma(1, beta[-1]) - beta[-1]**(-1)))**(-1)
+                aux_nu = (np.sum(np.ones(len(X))[:, np.newaxis] * sp.polygamma(1, beta[-1]) - beta[-1]**(-1)))**(-1)
                 res = np.hstack((aux_beta, np.zeros(np.shape(aux_beta)[0])[:, np.newaxis]))
                 res = np.vstack((res, np.concatenate((np.zeros(np.shape(res)[1]-1), [aux_nu]))))
                 return res
@@ -205,18 +209,18 @@ class Estimation:
                 return res
 
         # Initial guesses and stoping parameter:
-        beta = np.zeros(np.shape(X)[1] - 2)[:, np.newaxis]
-        if model == 'NB2':
-            beta = np.vstack((beta, np.array([.5])))
-        elif model == 'Gamma':
-            beta = np.vstack((beta, np.array([2])))
-        elif model == 'InvGaussian':
+        if dependent == 'freq':
+            beta = np.zeros(np.shape(X)[1] - 2)[:, np.newaxis]
+        elif dependent == 'sev':
+            beta = np.zeros(np.shape(X)[1] - 1)[:, np.newaxis]
+
+        if model in {'NB2', 'Gamma', 'InvGaussian'}:
             beta = np.vstack((beta, np.array([.5])))
 
         if dependent == 'freq':
             beta[0] = np.log(X[0, [0]] / X[0, [1]])
         elif dependent == 'sev':
-            beta[0] = np.log(np.sum(X[:, [0]]) / np.sum(X[:, [1]]))
+            beta[0] = 1
 
         grad = grad_func(X, beta)
         A = hess_ninv(X, beta)
@@ -289,8 +293,8 @@ class Stdout:
         keys = ('beta',)
         res = grab_results_db(prefix, model, claim_type, keys)
         beta = res['beta']
-        ind_res = {}
         pdb.set_trace()
+        ind_res = {}
         cell_res = np.empty([len(X_dict), 5])
         if model == 'Poisson':
             def LL_func(X, mu, extra_param):
@@ -415,7 +419,7 @@ class Stdout:
                 ind_res[key] = np.array([])
 
             cell_res[i, 0] = len(X)
-            cell_res[i, 1] = np.sum(X[:, [2]])
+            cell_res[i, 1] = np.sum(X[:, [1]])
             cell_res[i, 3] = mu
             cell_res[i, 4] = dev_local_stat
             dev_stat_sum += dev_local_stat
@@ -428,8 +432,8 @@ class Stdout:
 
 
 if __name__ == '__main__':
-    for model in ('Poisson', 'NB2', 'Gamma', 'InvGaussian'):
-        for claim_type in ('rcd',):
+    for model in ('Gamma', 'InvGaussian', 'Poisson', 'NB2'):
+        for claim_type in ('casco', 'rcd'):
             print('Estimation: ' + model + ' ' + claim_type)
             x = Estimation(model, claim_type)
             x.save_estimation_results()
