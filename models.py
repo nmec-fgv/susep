@@ -36,21 +36,26 @@ def file_load(filename):
 
     return x
 
-def save_results_db(res, prefix, model, claim_type):
+def save_results_db(res_dict, prefix, model, claim_type):
     db_file = data_dir + prefix + '_results_' + claim_type + '.db'
     db = shelve.open(db_file)
-    db[model] = res
+    if model in db.keys():
+        for key in res_dict.keys():
+            db[model][key] = res_dict[key]
+    else:
+        db[model] = res_dict
+
     db.close()
     print(prefix + ' results from ' + model + ' ' + claim_type + ', saved in db file')
     return
 
 def save_results_pkl(res, prefix, model, claim_type):
     try:
-        os.remove(data_dir + prefix + '_results_' + claim_type + '.pkl')
+        os.remove(data_dir + prefix + '_results_' + model + '_' + claim_type + '.pkl')
     except OSError:
         pass
 
-    with open(data_dir + prefix + '_results_' + claim_type + '.pkl') as filename:
+    with open(data_dir + prefix + '_results_' + model + '_' + claim_type + '.pkl', 'wb') as filename:
         pickle.dump(res, filename)
 
     print(prefix + ' results from ' + model + ' ' + claim_type + ', saved in pkl file')
@@ -233,6 +238,7 @@ class Estimation:
             return beta_prime
 
         start_time = time.perf_counter()
+        print('Estimation: ' + model + ' ' + claim_type)
         while True:
             if np.all(np.absolute(grad) < np.ones(np.shape(grad)) * epsilon):
                 print('Convergence attained, model ' + model + ', claim type ' + claim_type)
@@ -252,13 +258,17 @@ class Estimation:
         self.var = A
         self.std = np.sqrt(np.diag(A))[:, np.newaxis]
         self.z_stat = beta / self.std
+        if dependent == 'freq':
+            self.y_bar = np.sum(X[:, [0]]) / np.sum(X[:, [1]])
+        elif dependent == 'sev':
+            self.y_bar = np.average(X[:, [0]])
 
     def save_estimation_results(self, keys=None):
         if keys != None:
             for key in keys:
                 res_dict[key] = self.key
         else:
-            res_dict = {'beta': self.beta, 'var': self.var, 'std': self.std, 'z_stat': self.z_stat}
+            res_dict = {'beta': self.beta, 'var': self.var, 'std': self.std, 'z_stat': self.z_stat, 'y_bar': self.y_bar}
 
         prefix = 'overall'
         save_results_db(res_dict, prefix, self.model, self.claim_type)
@@ -276,7 +286,7 @@ class Stdout:
 
     Three persistent files w/ following statistics:
     individual_results_xxx.pkl: deviances and chis
-    cell_results_xxx.db: # obs, exposure, y_bar, mu_hat, D^L
+    cell_results_xxx.db: # obs, y_bar, mu_hat, D^L, exposure (freq only)
     overall_results_xxx.db: LL, D, Pearson, Chi^2
     '''
 
@@ -288,14 +298,19 @@ class Stdout:
         elif model in {'Gamma', 'InvGaussian'}:
             model_type = 'sev'
 
+        self.model_type = model_type
         X_dict = file_load(model_type + '_' + claim_type + '_dict.pkl')
         prefix = 'overall'
-        keys = ('beta',)
+        keys = ('beta', 'y_bar')
         res = grab_results_db(prefix, model, claim_type, keys)
-        beta = res['beta']
-        pdb.set_trace()
+        self.beta = res['beta']
+        self.y_bar = res['y_bar']
         ind_res = {}
-        cell_res = np.empty([len(X_dict), 5])
+        if model_type == 'freq':
+            cell_res = np.empty([len(X_dict), 6])
+        elif model_type == 'sev':
+            cell_res = np.empty([len(X_dict), 5])
+
         if model == 'Poisson':
             def LL_func(X, mu, extra_param):
                 '''
@@ -305,20 +320,31 @@ class Stdout:
                 res = np.sum(- X[:, [1]] * mu + X[:, [0]] * np.log(X[:, [1]] * mu) - np.log(sp.factorial(X[:, [0]])))
                 return res
 
-            def deviance(X, mu, extra_param):
+            def deviance(X, mu, extra_param, y_bar):
                 '''
                 deviance^2 = y_i * ln(y_i/mu_i) - (y_i - mu_i)
                 '''
 
                 aux_dev = np.zeros(np.shape(X[:, [0]]))
+                aux_dev_y_bar = np.zeros(np.shape(X[:, [0]]))
                 index = np.where(X[:, [0]] > 0)[0]
                 aux_dev[index] = X[:, [0]][index] * np.log(X[:, [0]][index] / (X[:, [1]][index] * mu))
+                aux_dev_y_bar[index] = X[:, [0]][index] * np.log(X[:, [0]][index] / (X[:, [1]][index] * y_bar))
                 aux2_dev = X[:, [0]] - X[:, [1]] * mu
-                dev_local_stat = 2 * np.sum(aux_dev - aux2_dev)
+                aux2_dev_y_bar = X[:, [0]] - X[:, [1]] * y_bar
+                dev_local = 2 * np.sum(aux_dev - aux2_dev)
+                dev_y_bar_local = 2 * np.sum(aux_dev_y_bar - aux2_dev_y_bar)
                 index2 = np.where(X[:, [0]] - X[:, [1]] * mu < 0)[0]
                 dev_is = (2*(aux_dev - aux2_dev))**.5
                 dev_is[index2] = -1 * dev_is[index2]
-                return (dev_is, dev_local_stat)
+                return (dev_is, dev_local, dev_y_bar_local)
+
+            def Pearson(X, mu, extra_param):
+                '''(y_i-mu_i) / mu_i^.5'''
+
+                Pearson_is = (X[:, [0]] - X[:, [1]] * mu) / (X[:, [1]] * mu)**.5
+                Pearson_local = np.sum(Pearson_is**2)
+                return (Pearson_is, Pearson_local)
 
         elif model == 'NB2':
             def LL_func(X, mu, extra_param):
@@ -330,21 +356,32 @@ class Stdout:
                 res = np.sum(np.log(sp.gamma(X[:, [0]] + inv_alpha) / sp.gamma(inv_alpha)) - np.log(sp.factorial(X[:, [0]])) - (X[:, [0]] + inv_alpha) * np.log(inv_alpha + X[:, [1]] * mu) + inv_alpha * np.log(inv_alpha) + X[:, [0]] * np.log(X[:, [1]] * mu))
                 return res
 
-            def deviance(X, mu, extra_param):
+            def deviance(X, mu, extra_param, y_bar):
                 '''
                 deviance^2 = y_i * ln(y_i/mu_i) - (y_i + alpha^(-1))*ln((y_i + alpha^(-1))/(mu_i + alpha^(-1)))
                 '''
 
                 inv_alpha = extra_param**(-1)
                 aux_dev = np.zeros(np.shape(X[:, [0]]))
+                aux_dev_y_bar = np.zeros(np.shape(X[:, [0]]))
                 index = np.where(X[:, [0]] > 0)[0]
                 aux_dev[index] = X[:, [0]][index] * np.log(X[:, [0]][index] / (X[:, [1]][index] * mu))
+                aux_dev_y_bar[index] = X[:, [0]][index] * np.log(X[:, [0]][index] / (X[:, [1]][index] * y_bar))
                 aux2_dev = (X[:, [0]] + inv_alpha) * np.log((X[:, [0]] + inv_alpha) / (X[:, [1]] * mu + inv_alpha))
-                dev_local_stat = 2 * np.sum(aux_dev - aux2_dev)
+                aux2_dev_y_bar = (X[:, [0]] + inv_alpha) * np.log((X[:, [0]] + inv_alpha) / (X[:, [1]] * y_bar + inv_alpha))
+                dev_local = 2 * np.sum(aux_dev - aux2_dev)
+                dev_y_bar_local = 2 * np.sum(aux_dev_y_bar - aux2_dev_y_bar)
                 index2 = np.where(X[:, [0]] - X[:, [1]] * mu < 0)[0]
                 dev_is = (2*(aux_dev - aux2_dev))**.5
                 dev_is[index2] = -1 * dev_is[index2]
-                return (dev_is, dev_local_stat)
+                return (dev_is, dev_local, dev_y_bar_local)
+
+            def Pearson(X, mu, extra_param):
+                '''(y_i-mu_i) / (mu_i+alpha*mu_i^2)^.5'''
+
+                Pearson_is = (X[:, [0]] - X[:, [1]] * mu) / (X[:, [1]] * mu + extra_param * (X[:, [1]] * mu)**2)**.5
+                Pearson_local = np.sum(Pearson_is**2)
+                return (Pearson_is, Pearson_local)
 
         elif model == 'Gamma':
             def LL_func(X, mu, extra_param):
@@ -356,17 +393,26 @@ class Stdout:
                 res = np.sum(- nu * (X[:, [0]] / mu) - nu * np.log(mu) + nu * np.log(X[:, [0]]) + nu * np.log(nu) - np.log(X[:, [0]]) - np.log(sp.gamma(nu)))
                 return res
 
-            def deviance(X, mu, extra_param):
+            def deviance(X, mu, extra_param, y_bar):
                 '''
                 deviance^2 = -ln(y_i/mu_i) + (y_i - mu_i) / mu_i
                 '''
 
                 aux_dev = - np.log(X / mu) + (X - mu) / mu
-                dev_local_stat = 2 * np.sum(aux_dev)
+                aux_dev_y_bar = - np.log(X / y_bar) + (X - y_bar) / y_bar
+                dev_local = 2 * np.sum(aux_dev)
+                dev_y_bar_local = 2 * np.sum(aux_dev_y_bar)
                 index = np.where(X - mu < 0)[0]
                 dev_is = (2*aux_dev)**.5
                 dev_is[index] = -1 * dev_is[index]
-                return (dev_is, dev_local_stat)
+                return (dev_is, dev_local, dev_y_bar_local)
+
+            def Pearson(X, mu, extra_param):
+                '''(y_i-mu_i) / (mu_i^2)^.5'''
+
+                Pearson_is = (X - mu) / mu
+                Pearson_local = np.sum(Pearson_is**2)
+                return (Pearson_is, Pearson_local)
 
         elif model == 'InvGaussian':
             def LL_func(X, mu, extra_param):
@@ -378,62 +424,97 @@ class Stdout:
                 res = np.sum(- .5 * np.log(2 * np.pi * sigma2) - .5 * np.log(X**3) - X / (2 * sigma2 * mu**2) + (sigma2 * mu)**(-1) - (2 * sigma2 * X)**(-1))
                 return res
             
-            def deviance(X, mu, extra_param):
+            def deviance(X, mu, extra_param, y_bar):
                 '''
                 deviance^2 = (y_i-mu_i)^2/(mu_i^2*y_i)
                 '''
 
                 aux_dev = (X - mu)**2 / (mu**2*X)
-                dev_local_stat = 2 * np.sum(aux_dev)
+                aux_dev_y_bar = (X - y_bar)**2 / (y_bar**2*X)
+                dev_local = 2 * np.sum(aux_dev)
+                dev_y_bar_local = 2 * np.sum(aux_dev_y_bar)
                 index = np.where(X - mu < 0)[0]
                 dev_is = (2*aux_dev)**.5
                 dev_is[index] = -1 * dev_is[index]
-                return (dev_is, dev_local_stat)
+                return (dev_is, dev_local, dev_y_bar_local)
+
+            def Pearson(X, mu, extra_param):
+                '''(y_i-mu_i) / (mu_i^3)^.5'''
+
+                Pearson_is = (X - mu) / mu**1.5
+                Pearson_local = np.sum(Pearson_is**2)
+                return (Pearson_is, Pearson_local)
 
         LL_sum = 0
         dev_stat_sum = 0
+        dev_y_bar_stat_sum = 0
+        Pearson_stat_sum = 0
         for i, key in enumerate(X_dict.keys()):
             X = X_dict[key]
-            # Eliminate zero counts for severity models:
-            if model_type == 'sev':
-                X = X[np.where(X[:, [1]] > 0)[0]]
-
             # Except for Poisson, other models have additional parameter in beta vector:
             if model == 'Poisson':
-                mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ beta)
+                mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ self.beta)
                 extra_param = None
             else:
-                mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ beta[:-1])
-                extra_param = beta[-1]
+                mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ self.beta[:-1])
+                extra_param = self.beta[-1]
 
             if np.shape(X)[0] > 0:
                 LL_sum += LL_func(X, mu, extra_param)
-                (dev_is, dev_local_stat) = deviance(X, mu, extra_param)
-                ind_res[key] = dev_is
-                if model_type == 'freq':
-                    cell_res[i, 2] = np.average(X[:, [0]])
-                elif model_type == 'sev':
-                    cell_res[i, 2] = np.average(X)
+                (dev_is, dev_local, dev_y_bar_local) = deviance(X, mu, extra_param, self.y_bar)
+                (Pearson_is, Pearson_local) = Pearson(X, mu, extra_param)
+                ind_res[key] = np.hstack((dev_is, Pearson_is))
+                cell_res[i, 1] = np.average(X[:, [0]])
             else:
-                cell_res[i, 2] = 0
                 ind_res[key] = np.array([])
+                cell_res[i, 1] = 0
 
             cell_res[i, 0] = len(X)
-            cell_res[i, 1] = np.sum(X[:, [1]])
-            cell_res[i, 3] = mu
-            cell_res[i, 4] = dev_local_stat
-            dev_stat_sum += dev_local_stat
+            cell_res[i, 2] = mu
+            cell_res[i, 3] = dev_local
+            cell_res[i, 4] = Pearson_local
+            if model_type == 'freq':
+                cell_res[i, 5] = np.sum(X[:, [1]])
 
+            dev_stat_sum += dev_local
+            dev_y_bar_stat_sum += dev_y_bar_local
+            Pearson_stat_sum += Pearson_local
+
+        self.ind_res = ind_res
+        self.cell_res = cell_res
+        self.n = np.sum(cell_res[:, [0]])
         self.LL = LL_sum
         self.D = dev_stat_sum
-        self.n = np.sum(cell_res[:, [0]])
-        self.D_chi2 = 1 - st.chi2.cdf(self.D/self.n, 1)
+        self.D_Chi2 = 1 - st.chi2.cdf(self.D/self.n, 1)
+        self.Pearson = Pearson_stat_sum
+        self.pseudo_R2 = 1 - self.D / dev_y_bar_stat_sum
+        self.Chi2_GF = np.sum((cell_res[:, [0]] * (cell_res[:, [1]] - cell_res[:, [2]])**2) / cell_res[:, [2]])
+
+    def save_stdout_results(self, keys=None):
+        # Overall results:
+        if keys != None:
+            for key in keys:
+                res_dict[key] = self.key
+        else:
+            res_dict = {'n': self.n, 'LL': self.LL, 'D': self.D, 'D_Chi2': self.D_Chi2, 'Pearson': self.Pearson, 'pseudo_R2': self.pseudo_R2, 'Chi2_GF': self.Chi2_GF}
+
+        prefix = 'overall'
+        save_results_db(res_dict, prefix, self.model, self.claim_type)
+
+        # Cell results:
+        prefix = 'grouped'
+        save_results_pkl(self.cell_res, prefix, self.model, self.claim_type)
+
+        # Individual results:
+        prefix = 'individual'
+        save_results_pkl(self.ind_res, prefix, self.model, self.claim_type)
 
 
 
 if __name__ == '__main__':
-    for model in ('Gamma', 'InvGaussian', 'Poisson', 'NB2'):
+    for model in ('Poisson', 'NB2', 'Gamma', 'InvGaussian'):
         for claim_type in ('casco', 'rcd'):
-            print('Estimation: ' + model + ' ' + claim_type)
             x = Estimation(model, claim_type)
             x.save_estimation_results()
+            y = Stdout(model, claim_type)
+            y.save_stdout_results()

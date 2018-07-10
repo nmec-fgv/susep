@@ -14,7 +14,7 @@ from dateutil.relativedelta import relativedelta
 # Data directory:
 data_dir = '/home/pgsqldata/Susep/'
 
-# Parameters for numbers of claims values to be retained, k_param for all types of claims except 'outros' (k2_param):
+# Parameters for cap on number of claims, k_param for all types of claims except 'outros', k2_param for 'outros':
 k_param = 5
 k2_param = 10
 
@@ -436,7 +436,11 @@ def data_transf(data0):
                             aux_dict['outros'][i[2]] += float(i[1]) / cpi[i[2][:-3]]
 
             for claim_type in ('casco', 'rcd', 'rcdmat', 'rcdc', 'rcdmor', 'app', 'app_ma', 'app_ipa', 'app_dmh', 'outros'):
-                data['freq_'+claim_type][k] = len(aux_dict[claim_type].values())
+                if claim_type != 'outros':
+                    data['freq_'+claim_type][k] = min(len(aux_dict[claim_type].values()), k_param)
+                elif claim_type == 'outros':
+                    data['freq_'+claim_type][k] = min(len(aux_dict[claim_type].values()), k2_param)
+
                 if len(aux_dict[claim_type].values()) > 0:
                     for i, item in enumerate(aux_dict[claim_type].values()):
                         if claim_type != 'outros':
@@ -532,7 +536,11 @@ def data_transf(data0):
                             aux_dict['outros'][i[2]] += float(i[1]) / cpi[i[2][:-3]]
 
             for claim_type in ('casco', 'rcd', 'rcdmat', 'rcdc', 'rcdmor', 'app', 'app_ma', 'app_ipa', 'app_dmh', 'outros'):
-                data['freq_'+claim_type][k] = len(aux_dict[claim_type].values())
+                if claim_type != 'outros':
+                    data['freq_'+claim_type][k] = min(len(aux_dict[claim_type].values()), k_param)
+                elif claim_type == 'outros':
+                    data['freq_'+claim_type][k] = min(len(aux_dict[claim_type].values()), k2_param)
+
                 if len(aux_dict[claim_type].values()) > 0:
                     for i, item in enumerate(aux_dict[claim_type].values()):
                         if claim_type != 'outros':
