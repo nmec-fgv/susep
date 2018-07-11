@@ -301,9 +301,12 @@ class Stdout:
         self.model_type = model_type
         X_dict = file_load(model_type + '_' + claim_type + '_dict.pkl')
         prefix = 'overall'
-        keys = ('beta', 'y_bar')
-        res = grab_results_db(prefix, model, claim_type, keys)
+#        keys = ('beta', 'y_bar')
+        res = grab_results_db(prefix, model, claim_type)#, keys)
         self.beta = res['beta']
+        self.var = res['var']
+        self.std = res['std']
+        self.z_stat = res['z_stat']
         self.y_bar = res['y_bar']
         ind_res = {}
         if model_type == 'freq':
