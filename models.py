@@ -29,8 +29,8 @@ data_dir = 'persistent/'
 def file_load(filename):
     try:
         os.path.exists(data_dir + filename)
-        with open(data_dir + filename, 'rb') as file:
-            x = pickle.load(file)
+        with open(data_dir + filename, 'rb') as cfile:
+            x = pickle.load(cfile)
     except:
         print('File ' + filename + ' not found')
 
@@ -512,7 +512,7 @@ class Stdout:
 
 
 if __name__ == '__main__':
-    for model in ('Poisson', 'NB2', 'Gamma', 'InvGaussian'):
+    for model in ('Poisson', 'Gamma', 'InvGaussian', 'NB2'):
         for claim_type in ('casco', 'rcd'):
             x = Estimation(model, claim_type)
             x.save_estimation_results()
