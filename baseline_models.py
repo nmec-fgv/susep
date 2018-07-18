@@ -38,14 +38,13 @@ def file_load(filename):
 
 def save_results_db(res_dict, prefix, model, claim_type):
     db_file = data_dir + prefix + '_results_' + claim_type + '.db'
-    db = shelve.open(db_file)
-    if model in db.keys():
-        for key in res_dict.keys():
-            db[model][key] = res_dict[key]
-    else:
-        db[model] = res_dict
+    with shelve.open(db_file, writeback=True) as db:
+        if model in db.keys():
+            for key in res_dict.keys():
+                db[model][key] = res_dict[key]
+        else:
+            db[model] = res_dict
 
-    db.close()
     print(prefix + ' results from ' + model + ' ' + claim_type + ', saved in db file')
     return
 
@@ -301,8 +300,7 @@ class Stdout:
         self.model_type = model_type
         X_dict = file_load(model_type + '_' + claim_type + '_dict.pkl')
         prefix = 'overall'
-#        keys = ('beta', 'y_bar')
-        res = grab_results_db(prefix, model, claim_type)#, keys)
+        res = grab_results_db(prefix, model, claim_type)
         self.beta = res['beta']
         self.var = res['var']
         self.std = res['std']
@@ -485,13 +483,17 @@ class Stdout:
 
         self.ind_res = ind_res
         self.cell_res = cell_res
+        self.p_value = st.norm.cdf(abs(self.z_stat))
         self.n = np.sum(cell_res[:, [0]])
+        self.k = len(self.beta)
+        self.J = len(self.cell_res)
         self.LL = LL_sum
         self.D = dev_stat_sum
-        self.D_Chi2 = 1 - st.chi2.cdf(self.D/self.n, 1)
+        self.D_Chi2 = st.chi2.isf(0.95, self.n)
         self.Pearson = Pearson_stat_sum
         self.pseudo_R2 = 1 - self.D / dev_y_bar_stat_sum
-        self.Chi2_GF = np.sum((cell_res[:, [0]] * (cell_res[:, [1]] - cell_res[:, [2]])**2) / cell_res[:, [2]])
+        self.GF = np.sum((cell_res[:, [0]] * (cell_res[:, [1]] - cell_res[:, [2]])**2) / cell_res[:, [2]])
+        self.GF_Chi2 = st.chi2.isf(0.95, self.J - 1)
 
     def save_stdout_results(self, keys=None):
         # Overall results:
@@ -499,7 +501,7 @@ class Stdout:
             for key in keys:
                 res_dict[key] = self.key
         else:
-            res_dict = {'n': self.n, 'LL': self.LL, 'D': self.D, 'D_Chi2': self.D_Chi2, 'Pearson': self.Pearson, 'pseudo_R2': self.pseudo_R2, 'Chi2_GF': self.Chi2_GF}
+            res_dict = {'p_value': self.p_value, 'n': self.n, 'k': self.k, 'J': self.J, 'LL': self.LL, 'D': self.D, 'D_Chi2': self.D_Chi2, 'Pearson': self.Pearson, 'pseudo_R2': self.pseudo_R2, 'GF': self.GF, 'GF_Chi2': self.GF_Chi2}
 
         prefix = 'overall'
         save_results_db(res_dict, prefix, self.model, self.claim_type)
@@ -517,7 +519,7 @@ class Stdout:
 if __name__ == '__main__':
     for model in ('Poisson', 'Gamma', 'InvGaussian', 'NB2'):
         for claim_type in ('casco', 'rcd'):
-            x = Estimation(model, claim_type)
-            x.save_estimation_results()
+#            x = Estimation(model, claim_type)
+#            x.save_estimation_results()
             y = Stdout(model, claim_type)
             y.save_stdout_results()

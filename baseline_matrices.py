@@ -98,13 +98,13 @@ def data(data_dict):
                 aux_fmat[i, [1]] = sum(data['exposure'][index])
                 aux_fmat[i, 2:] = row
                 if aa == '08':
-                    aux_dummy = '000'
-                elif aa == '09':
                     aux_dummy = '100'
-                elif aa == '10':
+                elif aa == '09':
                     aux_dummy = '010'
-                elif aa == '11':
+                elif aa == '10':
                     aux_dummy = '001'
+                elif aa == '11':
+                    aux_dummy = '000'
 
                 key = ''.join([str(int(i)) for i in row.tolist()] + [aux_dummy])
                 if mmm == 'jan':
@@ -207,8 +207,8 @@ deduct_type_levels = [[i] for i in range(5) if i != 1]
 # continuous levels
 age_levels = [(0, .28), (.28, .38), (.50, .60), (.60, 1.50)] # base-level = (.38, .50)
 deduct_levels = [(0, .5), (.5, 1), (1.5, 2), (2, 1e5)] # base-level = (1, 1.5)
-cov_casco_levels = [(0, 20), (30, 45), (45, 1e5)] # base-level = (20, 30)
-cov_rcd_levels = [(0, 60), (60, 80), (120, 1e5)] # base-level = (80, 120)
+cov_casco_levels = [(20, 30), (30, 45), (45, 1e5)] # base-level = (0, 20)
+cov_rcd_levels = [(60, 80), (80, 120), (120, 1e5)] # base-level = (0, 60)
 cov_app_levels = [(0, 0.01), (0.01, 10), (30, 60), (60, 1e5)] # base-level = (10, 30)
 
 # factors

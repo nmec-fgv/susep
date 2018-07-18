@@ -49,7 +49,6 @@ class Diagnostics:
         color = np.hstack((color, color, color))
         color = color**2 * .1
         plt.scatter(x, y, s=1, c=color, alpha=.3)
-        plt.title('Raw residuals vs fitted values, \'' + self.claim_type + '\' grouped data, ' + self.model + ' GLM')        
         plt.savefig(plot_dir + self.model + self.claim_type + 'plot01.png')
         plt.close()
 

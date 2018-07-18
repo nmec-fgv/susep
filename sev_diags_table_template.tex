@@ -1,0 +1,22 @@
+\begin{table}
+    \small
+    \centering
+    \begin{threeparttable}
+    \caption{\large{Diagnostics for models of severity data}}
+    \begin{tabular}{lcccc} \toprule
+    & \multicolumn{2}{c}{own vehicle damage} & \multicolumn{2}{c}{third party liability} \\
+    \cmidrule(l{.75em}){2-3} \cmidrule(l{.75em}){4-5}
+    Statistic & Gamma & Inverse Gaussian & Gamma & Inverse Gaussian \\ \midrule
+    \textbf{n - k} & %(CGn-k)8.2f & %(CIn-k)8.2f & %(RGn-k)8.2f & %(RIn-k)8.2f \\
+    \textbf{Pearson} & %(CGPearson)8.2f & %(CIPearson)8.2f & %(RGPearson)8.2f & %(RIPearson)8.2f \\
+    \textbf{Pearson/(n - k)} & %(CGPearson/n-k)8.4f & %(CIPearson/n-k)8.4f & %(RGPearson/n-k)8.4f & %(RIPearson/n-k)8.4f \\
+    \textbf{Deviance} & %(CGD)8.2f & %(CID)8.2f & %(RGD)8.2f & %(RID)8.2f \\
+    \textbf{$\bm{\chi^{2}_{n-k}(5\@)}$} & %(CGD_Chi2)8.2f & %(CID_Chi2)8.2f & %(RGD_Chi2)8.2f & %(RID_Chi2)8.2f \\
+    \textbf{Deviance/$\bm{\chi^{2}_{n-k}(5\@)}$} & %(CGD/D_Chi2)8.4f & %(CID/D_Chi2)8.4f & %(RGD/D_Chi2)8.4f & %(RID/D_Chi2)8.4f \\
+    \textbf{pseudo $\bm{R^{2}}$} & %(CGpseudo_R2)8.4f & %(CIpseudo_R2)8.4f & %(RGpseudo_R2)8.4f & %(RIpseudo_R2)8.4f \\
+    \textbf{Goodness of fit} & %(CGGF)8.2f & %(CIGF)8.2f & %(RGGF)8.2f & %(RIGF)8.2f \\
+    \textbf{$\bm{\chi^{2}_{J-1}(5\@)}$} & %(CGGF_Chi2)8.2f & %(CIGF_Chi2)8.2f & %(RGGF_Chi2)8.2f & %(RIGF_Chi2)8.2f \\
+    \bottomrule
+    \end{tabular}
+    \end{threeparttable}
+\end{table}
