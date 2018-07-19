@@ -85,17 +85,17 @@ class Estimation:
     Parameters:
     -----------
     claim_type - type of claim to be analyzed
-    model - specification of density of random component, currently Poisson or Gamma
+    model - specification of density of random component
 
     Methods:
     --------
     save_results
     '''
     def __init__(self, model, claim_type):
-        if claim_type not in {'casco', 'rcd'} or model not in {'Poisson', 'NB2', 'Gamma', 'InvGaussian'}:
+        if claim_type not in {'casco', 'rcd'} or model not in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog', 'Gamma', 'InvGaussian'}:
             raise Exception('Model or claim_type provided not in permissible set')
 
-        if model in {'Poisson', 'NB2'}:
+        if model in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog'}:
             dependent = 'freq'
         elif model in {'Gamma', 'InvGaussian'}:
             dependent = 'sev'
@@ -152,6 +152,72 @@ class Estimation:
                 aux_alpha = (np.sum(beta[-1]**(-4) * (np.log(1 + beta[-1] * mu) - aux_jsum)**2 + mu / (beta[-1]**2 * (1 + beta[-1] * mu))))**(-1)
                 res = np.hstack((aux_beta, np.zeros(np.shape(aux_beta)[0])[:, np.newaxis]))
                 res = np.vstack((res, np.concatenate((np.zeros(np.shape(res)[1]-1), [aux_alpha]))))
+                return res
+
+        if model == 'Logit':
+            def grad_func(X, beta):
+                '''
+                Gradient of Log-likelihood for Logit regression model
+                [y_i - m_i * exp(x_i'beta)/(1+exp(x_i'beta)] * x_i
+                '''
+            
+                aux_vec = X[:, [0]] - X[:, [1]] * np.exp(X[:, 2:] @ beta) / (1 + np.exp(X[:, 2:] @ beta))
+                res = (aux_vec.T @ X[:, 2:]).T
+                return res
+    
+            def hess_ninv(X, beta):
+                '''
+                Inverse of negative expected Hessian of Logit loglikelihood
+                inv m_i * exp(x_i'beta)/(1+exp(x_i'beta)**2 * x_i * x_i'
+                '''
+    
+                res = np.linalg.inv(X[:, 2:].T @ (X[:, [1]] * np.exp(X[:, 2:] @ beta) / (1 + np.exp(X[:, 2:] @ beta))**2 * X[:, 2:]))
+                return res
+
+        if model == 'Probit':
+            def grad_func(X, beta):
+                '''
+                Gradient of Log-likelihood for Probit regression model
+                [((y_i - m_i * Phi(x_i'beta))/(Phi(x_i'beta)(1-Phi(x_i'beta)) * phi(x_i'beta)] * x_i
+                '''
+            
+                Phi = st.norm.cdf(X[:, 2:] @ beta)
+                phi = st.norm.pdf(X[:, 2:] @ beta)
+                aux_vec = ((X[:, [0]] - X[:, [1]] * Phi) / (Phi * (1 - Phi))) * phi
+                res = (aux_vec.T @ X[:, 2:]).T
+                return res
+    
+            def hess_ninv(X, beta):
+                '''
+                Inverse of negative expected Hessian of Probit loglikelihood
+                inv m_i * phi(x_i'beta)**2 / (Phi(x_i'beta)(1-Phi(x_i'beta)) * x_i * x_i'
+                '''
+    
+                Phi = st.norm.cdf(X[:, 2:] @ beta)
+                phi = st.norm.pdf(X[:, 2:] @ beta)
+                aux_vec = (X[:, [1]] * phi**2) / (Phi * (1 - Phi))
+                res = np.linalg.inv(X[:, 2:].T @ (aux_vec * X[:, 2:]))
+                return res
+
+        if model == 'C-loglog':
+            def grad_func(X, beta):
+                '''
+                Gradient of Log-likelihood for Complementary log-log regression model
+                {[y_i * (1 - exp(-exp(x_i'beta)))^(-1) - m_i] * exp(x_i'beta)} * x_i
+                '''
+            
+                aux_vec = X[:, [0]] - X[:, [1]] * np.exp(X[:, 2:] @ beta)
+                res = (aux_vec.T @ X[:, 2:]).T
+                return res
+    
+            def hess_ninv(X, beta):
+                '''
+                Inverse of negative Hessian of Poisson loglikelihood
+                inv {m_i * exp(x_i'beta)^2*exp(-exp(x_i'beta))*[1-exp(-exp(x_i'beta))]^(-1)} * x_i * x_i'
+                '''
+    
+                aux_vec = X[:, [1]] * np.exp(X[:, 2:] @ beta)**2 * np.exp(-np.exp(X[:, 2:] @ beta)) * (1 - np.exp(-np.exp(X[:, 2:] @ beta)))**(-1)
+                res = np.linalg.inv(X[:, 2:].T @ (aux_vec * X[:, 2:]))
                 return res
 
         elif model == 'Gamma':
@@ -222,7 +288,10 @@ class Estimation:
             beta = np.vstack((beta, np.array([.5])))
 
         if dependent == 'freq':
-            beta[0] = np.log(X[0, [0]] / X[0, [1]])
+            if model in {'Poisson', 'NB2'}:
+                beta[0] = np.log(X[0, [0]] / X[0, [1]])
+            elif model in {'Logit', 'Probit', 'C-loglog'}:
+                beta[0] = .2
         elif dependent == 'sev':
             beta[0] = 1
 
@@ -287,20 +356,22 @@ class Stdout:
     individual_results_xxx.pkl: deviances and chis
     cell_results_xxx.db: # obs, y_bar, mu_hat, D^L, exposure (freq only)
     overall_results_xxx.db: LL, D, Pearson, Chi^2
+    
+    Standard outpu is different for models w/ Binomial distribution:
+    counts and exposure are aggregated within cells before computation of likelihood and residuals
     '''
 
     def __init__(self, model, claim_type):
         self.model = model
         self.claim_type = claim_type
-        if model in {'Poisson', 'NB2'}:
+        if model in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog'}:
             model_type = 'freq'
         elif model in {'Gamma', 'InvGaussian'}:
             model_type = 'sev'
 
         self.model_type = model_type
         X_dict = file_load(model_type + '_' + claim_type + '_dict.pkl')
-        prefix = 'overall'
-        res = grab_results_db(prefix, model, claim_type)
+        res = grab_results_db('overall', model, claim_type)
         self.beta = res['beta']
         self.var = res['var']
         self.std = res['std']
@@ -384,6 +455,51 @@ class Stdout:
                 Pearson_local = np.sum(Pearson_is**2)
                 return (Pearson_is, Pearson_local)
 
+        elif model in {'Logit', 'Probit', 'C-loglog'}:
+            def LL_func(X, mu, extra_param):
+                '''
+                Log-likelihood: sum_i y_i * ln(mui_i/(1-mu_i)) + m_i * ln(1-mu_i)
+                '''
+
+                y = np.sum(X[:, [0]])
+                m = np.sum(X[:, [1]])
+                res = np.sum(y * np.log(mu / (1 - mu)) + m * np.log(1 - mu))
+                return res
+
+            def deviance(X, mu, extra_param, y_bar):
+                '''
+                deviance^2 = y_i * ln(y_i/mu_i) + (m_i - y_i) * ln((m_i - y_i)/(m_i-mu_i))
+                '''
+
+                y = np.sum(X[:, [0]])
+                m = np.sum(X[:, [1]])
+                if m < mu:  ## check possibility of negative log
+                    pdb.set_trace()
+
+                if y > 0:
+                    dev_local = 2 * (y * np.log(y / mu) + (m - y) * np.log((m - y) / (m - mu)))
+                    dev_y_bar_local = 2 * (y * np.log(y / y_bar) + (m - y) * np.log((m - y) / (m - y_bar)))
+
+                else:
+                    dev_local = 2 * (m * np.log(m / (m - mu)))
+                    dev_y_bar_local = 0
+
+                if y >= mu:
+                    dev_is = dev_local**.5
+                else:
+                    dev_is = - dev_local**.5
+
+                return (dev_is, dev_local, dev_y_bar_local)
+
+            def Pearson(X, mu, extra_param):
+                '''(y_i/m_i - mu_i)^2 / mu_i*(1-mu_i)'''
+
+                y = np.sum(X[:, [0]])
+                m = np.sum(X[:, [1]])
+                Pearson_is = (y / m - mu) / (mu * (1 - mu))**.5
+                Pearson_local = Pearson_is**2
+                return (Pearson_is, Pearson_local)
+
         elif model == 'Gamma':
             def LL_func(X, mu, extra_param):
                 '''
@@ -452,9 +568,19 @@ class Stdout:
         Pearson_stat_sum = 0
         for i, key in enumerate(X_dict.keys()):
             X = X_dict[key]
-            # Except for Poisson, other models have additional parameter in beta vector:
             if model == 'Poisson':
                 mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ self.beta)
+                extra_param = None
+            elif model == 'Logit':
+                aux_mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ self.beta)
+                mu = aux_mu / (1 + aux_mu)
+                extra_param = None
+            elif model == 'Probit':
+                aux_mu = np.array([1] + [float(j) for j in list(key)]) @ self.beta
+                mu = st.norm.cdf(aux_mu)
+                extra_param = None
+            elif model == 'C-loglog':
+                mu = 1 - np.exp(- np.exp(np.array([1] + [float(j) for j in list(key)]) @ self.beta))
                 extra_param = None
             else:
                 mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ self.beta[:-1])
@@ -465,7 +591,10 @@ class Stdout:
                 (dev_is, dev_local, dev_y_bar_local) = deviance(X, mu, extra_param, self.y_bar)
                 (Pearson_is, Pearson_local) = Pearson(X, mu, extra_param)
                 ind_res[key] = np.hstack((dev_is, Pearson_is))
-                cell_res[i, 1] = np.average(X[:, [0]])
+                if model_type == 'freq':
+                    cell_res[i, 1] = np.average(X[:, [0]] * X[:, [1]])
+                elif model_type == 'sev':
+                    cell_res[i, 1] = np.average(X[:, [0]])
             else:
                 ind_res[key] = np.array([])
                 cell_res[i, 1] = 0
@@ -517,7 +646,8 @@ class Stdout:
 
 
 if __name__ == '__main__':
-    for model in ('Poisson', 'Gamma', 'InvGaussian', 'NB2'):
+#    for model in ('Poisson', 'Gamma', 'InvGaussian', 'NB2'):
+    for model in ('Logit', 'Probit', 'C-loglog'):
         for claim_type in ('casco', 'rcd'):
 #            x = Estimation(model, claim_type)
 #            x.save_estimation_results()

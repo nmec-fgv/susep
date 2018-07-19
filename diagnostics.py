@@ -33,7 +33,7 @@ class Diagnostics:
     def __init__(self, model, claim_type):
         self.model = model
         self.claim_type = claim_type
-        if self.model in {'Poisson', 'NB2'}:
+        if self.model in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog'}:
             self.model_type = 'freq'
         elif self.model in {'Gamma', 'InvGaussian'}:
             self.model_type = 'sev'
@@ -54,7 +54,8 @@ class Diagnostics:
 
 
 if __name__ == '__main__':
-    for model in ('Poisson', 'NB2', 'Gamma', 'InvGaussian'):
+#    for model in ('Poisson', 'NB2', 'Gamma', 'InvGaussian'):
+    for model in ('Logit', 'Probit', 'C-loglog'):
         for claim_type in ('casco', 'rcd'):
             x = Diagnostics(model, claim_type)
             x.plot01()
