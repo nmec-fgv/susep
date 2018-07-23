@@ -473,9 +473,6 @@ class Stdout:
 
                 y = np.sum(X[:, [0]])
                 m = np.sum(X[:, [1]])
-                if m < mu:  ## check possibility of negative log
-                    pdb.set_trace()
-
                 if y > 0:
                     dev_local = 2 * (y * np.log(y / mu) + (m - y) * np.log((m - y) / (m - mu)))
                     dev_y_bar_local = 2 * (y * np.log(y / y_bar) + (m - y) * np.log((m - y) / (m - y_bar)))
@@ -618,11 +615,9 @@ class Stdout:
         self.J = len(self.cell_res)
         self.LL = LL_sum
         self.D = dev_stat_sum
-        self.D_Chi2 = st.chi2.isf(0.95, self.n)
         self.Pearson = Pearson_stat_sum
         self.pseudo_R2 = 1 - self.D / dev_y_bar_stat_sum
         self.GF = np.sum((cell_res[:, [0]] * (cell_res[:, [1]] - cell_res[:, [2]])**2) / cell_res[:, [2]])
-        self.GF_Chi2 = st.chi2.isf(0.95, self.J - 1)
 
     def save_stdout_results(self, keys=None):
         # Overall results:
@@ -630,7 +625,7 @@ class Stdout:
             for key in keys:
                 res_dict[key] = self.key
         else:
-            res_dict = {'p_value': self.p_value, 'n': self.n, 'k': self.k, 'J': self.J, 'LL': self.LL, 'D': self.D, 'D_Chi2': self.D_Chi2, 'Pearson': self.Pearson, 'pseudo_R2': self.pseudo_R2, 'GF': self.GF, 'GF_Chi2': self.GF_Chi2}
+            res_dict = {'p_value': self.p_value, 'n': self.n, 'k': self.k, 'J': self.J, 'LL': self.LL, 'D': self.D, 'Pearson': self.Pearson, 'pseudo_R2': self.pseudo_R2, 'GF': self.GF}
 
         prefix = 'overall'
         save_results_db(res_dict, prefix, self.model, self.claim_type)
@@ -646,10 +641,9 @@ class Stdout:
 
 
 if __name__ == '__main__':
-#    for model in ('Poisson', 'Gamma', 'InvGaussian', 'NB2'):
-    for model in ('Logit', 'Probit', 'C-loglog'):
+    for model in ('Poisson', 'Logit', 'Probit', 'C-loglog', 'Gamma', 'InvGaussian', 'NB2'):
         for claim_type in ('casco', 'rcd'):
-#            x = Estimation(model, claim_type)
-#            x.save_estimation_results()
+            x = Estimation(model, claim_type)
+            x.save_estimation_results()
             y = Stdout(model, claim_type)
             y.save_stdout_results()
