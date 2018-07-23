@@ -1,0 +1,86 @@
+{\small
+\begin{ThreePartTable}
+    \begin{TableNotes}
+    \item[\dag] Significant at 5\@ level, not significant at 1\@.
+    \item[\dag\dag] Significant at 10\@ level, not significant at 5\@.
+    \item[\dag\dag\dag] Not significant at 10\@ level.
+    \end{TableNotes}
+\begin{longtable}{lcccc}
+    \caption{\large{Severity data, estimates of parameters in baseline main effects models}} \label{sev_estimates_table}\\
+    \toprule
+    & \multicolumn{2}{c}{own vehicle damage} & \multicolumn{2}{c}{third party liability} \\
+    \cmidrule(l{.75em}){2-3} \cmidrule(l{.75em}){4-5}
+    Variable & Gamma & Inverse Gaussian & Gamma & Inverse Gaussian \\ \midrule
+    \endfirsthead
+    
+    \multicolumn{5}{c}{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+    \toprule
+    & \multicolumn{2}{c}{own vehicle damage} & \multicolumn{2}{c}{third party liability} \\
+    \cmidrule(l{.75em}){2-3} \cmidrule(l{.75em}){4-5}
+    Variable & Gamma & Inverse Gaussian & Gamma & Inverse Gaussian \\ \midrule
+    \endhead
+
+    \midrule
+    \multicolumn{5}{r}{\textit{continued on next page}} \\
+    \endfoot
+    \bottomrule
+    \insertTableNotes
+    \endlastfoot
+
+    \textit{constant} & %(CGabeta0)8.5f & %(CInbeta0)8.5f & %(RGabeta0)8.5f & %(RInbeta0)8.5f \\
+    & \scriptsize{(%(CGastd0)8.5f)} & \scriptsize{(%(CInstd0)8.5f)} & \scriptsize{(%(RGastd0)8.5f)} & \scriptsize{(%(RInstd0)8.5f)} \\
+    \textit{veh\_age 3-5} & %(CGabeta1)8.5f & %(CInbeta1)8.5f & %(RGabeta1)8.5f & %(RInbeta1)8.5f \\
+    & \scriptsize{(%(CGastd1)8.5f)} & \scriptsize{(%(CInstd1)8.5f)} & \scriptsize{(%(RGastd1)8.5f)} & \scriptsize{(%(RInstd1)8.5f)} \\
+    \textit{veh\_age 6-9} & %(CGabeta2)8.5f & %(CInbeta2)8.5f & %(RGabeta2)8.5f & %(RInbeta2)8.5f \\
+    & \scriptsize{(%(CGastd2)8.5f)} & \scriptsize{(%(CInstd2)8.5f)} & \scriptsize{(%(RGastd2)8.5f)} & \scriptsize{(%(RInstd2)8.5f)} \\
+    \textit{veh\_age 10+} & %(CGabeta3)8.5f & %(CInbeta3)8.5f & %(RGabeta3)8.5f & %(RInbeta3)8.5f \\
+    & \scriptsize{(%(CGastd3)8.5f)} & \scriptsize{(%(CInstd3)8.5f)} & \scriptsize{(%(RGastd3)8.5f)} & \scriptsize{(%(RInstd3)8.5f)} \\
+    \textit{region S} & %(CGabeta4)8.5f & %(CInbeta4)8.5f & %(RGabeta4)8.5f & %(RInbeta4)8.5f \\
+    & \scriptsize{(%(CGastd4)8.5f)} & \scriptsize{(%(CInstd4)8.5f)} & \scriptsize{(%(RGastd4)8.5f)} & \scriptsize{(%(RInstd4)8.5f)} \\
+    \textit{region RJ} & %(CGabeta5)8.5f & %(CInbeta5)8.5f & %(RGabeta5)8.5f & %(RInbeta5)8.5f \\
+    & \scriptsize{(%(CGastd5)8.5f)} & \scriptsize{(%(CInstd5)8.5f)} & \scriptsize{(%(RGastd5)8.5f)} & \scriptsize{(%(RInstd5)8.5f)} \\
+    \textit{region ES/MG} & %(CGabeta6)8.5f & %(CInbeta6)8.5f & %(RGabeta6)8.5f & %(RInbeta6)8.5f \\
+    & \scriptsize{(%(CGastd6)8.5f)} & \scriptsize{(%(CInstd6)8.5f)} & \scriptsize{(%(RGastd6)8.5f)} & \scriptsize{(%(RInstd6)8.5f)} \\
+    \textit{region N/NE} & %(CGabeta7)8.5f & %(CInbeta7)8.5f & %(RGabeta7)8.5f & %(RInbeta7)8.5f \\
+    & \scriptsize{(%(CGastd7)8.5f)} & \scriptsize{(%(CInstd7)8.5f)} & \scriptsize{(%(RGastd7)8.5f)} & \scriptsize{(%(RInstd7)8.5f)} \\
+    \textit{region CW} & %(CGabeta8)8.5f & %(CInbeta8)8.5f & %(RGabeta8)8.5f & %(RInbeta8)8.5f \\
+    & \scriptsize{(%(CGastd8)8.5f)} & \scriptsize{(%(CInstd8)8.5f)} & \scriptsize{(%(RGastd8)8.5f)} & \scriptsize{(%(RInstd8)8.5f)} \\
+    \textit{gender female} & %(CGabeta9)8.5f & %(CInbeta9)8.5f & %(RGabeta9)8.5f & %(RInbeta9)8.5f \\
+    & \scriptsize{(%(CGastd9)8.5f)} & \scriptsize{(%(CInstd9)8.5f)} & \scriptsize{(%(RGastd9)8.5f)} & \scriptsize{(%(RInstd9)8.5f)} \\
+    \textit{bonus no} & %(CGabeta10)8.5f & %(CInbeta10)8.5f & %(RGabeta10)8.5f & %(RInbeta10)8.5f \\
+    & \scriptsize{(%(CGastd10)8.5f)} & \scriptsize{(%(CInstd10)8.5f)} & \scriptsize{(%(RGastd10)8.5f)} & \scriptsize{(%(RInstd10)8.5f)} \\
+    \textit{age 0-27} & %(CGabeta11)8.5f & %(CInbeta11)8.5f & %(RGabeta11)8.5f & %(RInbeta11)8.5f \\
+    & \scriptsize{(%(CGastd11)8.5f)} & \scriptsize{(%(CInstd11)8.5f)} & \scriptsize{(%(RGastd11)8.5f)} & \scriptsize{(%(RInstd11)8.5f)} \\
+    \textit{age 28-37} & %(CGabeta12)8.5f & %(CInbeta12)8.5f & %(RGabeta12)8.5f & %(RInbeta12)8.5f \\
+    & \scriptsize{(%(CGastd12)8.5f)} & \scriptsize{(%(CInstd12)8.5f)} & \scriptsize{(%(RGastd12)8.5f)} & \scriptsize{(%(RInstd12)8.5f)} \\
+    \textit{age 50-59} & %(CGabeta13)8.5f & %(CInbeta13)8.5f & %(RGabeta13)8.5f & %(RInbeta13)8.5f \\
+    & \scriptsize{(%(CGastd13)8.5f)} & \scriptsize{(%(CInstd13)8.5f)} & \scriptsize{(%(RGastd13)8.5f)} & \scriptsize{(%(RInstd13)8.5f)} \\
+    \textit{age 60+} & %(CGabeta14)8.5f & %(CInbeta14)8.5f & %(RGabeta14)8.5f & %(RInbeta14)8.5f \\
+    & \scriptsize{(%(CGastd14)8.5f)} & \scriptsize{(%(CInstd14)8.5f)} & \scriptsize{(%(RGastd14)8.5f)} & \scriptsize{(%(RInstd14)8.5f)} \\
+    \textit{cov\_veh 20-30} & %(CGabeta15)8.5f & %(CInbeta15)8.5f & \textit{---} & \textit{---} \\
+    & \scriptsize{(%(CGastd15)8.5f)} & \scriptsize{(%(CInstd15)8.5f)} & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} \\
+    \textit{cov\_veh 30-45} & %(CGabeta16)8.5f & %(CInbeta16)8.5f & \textit{---} & \textit{---} \\
+    & \scriptsize{(%(CGastd16)8.5f)} & \scriptsize{(%(CInstd16)8.5f)} & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} \\
+    \textit{cov\_veh 45+} & %(CGabeta17)8.5f & %(CInbeta17)8.5f & \textit{---} & \textit{---} \\
+    & \scriptsize{(%(CGastd17)8.5f)} & \scriptsize{(%(CInstd17)8.5f)} & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} \\
+    \textit{cov\_lia 60-79} & \textit{---} & \textit{---} & %(RGabeta15)8.5f & %(RInbeta15)8.5f \\
+    & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} & \scriptsize{(%(RGastd15)8.5f)} & \scriptsize{(%(RInstd15)8.5f)} \\
+    \textit{cov\_lia 80-119} & \textit{---} & \textit{---} & %(RGabeta16)8.5f & %(RInbeta16)8.5f \\
+    & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} & \scriptsize{(%(RGastd16)8.5f)} & \scriptsize{(%(RInstd16)8.5f)} \\
+    \textit{cov\_lia 120+} & \textit{---} & \textit{---} & %(RGabeta17)8.5f & %(RInbeta17)8.5f \\
+    & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} & \scriptsize{(%(RGastd17)8.5f)} & \scriptsize{(%(RInstd17)8.5f)} \\
+    \textit{year 2008} & %(CGabeta18)8.5f & %(CInbeta18)8.5f & %(RGabeta18)8.5f & %(RInbeta18)8.5f \\
+    & \scriptsize{(%(CGastd18)8.5f)} & \scriptsize{(%(CInstd18)8.5f)} & \scriptsize{(%(RGastd18)8.5f)} & \scriptsize{(%(RInstd18)8.5f)} \\
+    \textit{year 2009} & %(CGabeta19)8.5f & %(CInbeta19)8.5f & %(RGabeta19)8.5f & %(RInbeta19)8.5f \\
+    & \scriptsize{(%(CGastd19)8.5f)} & \scriptsize{(%(CInstd19)8.5f)} & \scriptsize{(%(RGastd19)8.5f)} & \scriptsize{(%(RInstd19)8.5f)} \\
+    \textit{year 2010} & %(CGabeta20)8.5f & %(CInbeta20)8.5f & %(RGabeta20)8.5f & %(RInbeta20)8.5f \\
+    & \scriptsize{(%(CGastd20)8.5f)} & \scriptsize{(%(CInstd20)8.5f)} & \scriptsize{(%(RGastd20)8.5f)} & \scriptsize{(%(RInstd20)8.5f)} \\
+    $\nu$ & %(CGabeta21)8.5f & \textit{---} & %(RGabeta21)8.5f & \textit{---} \\
+    & \scriptsize{(%(CGastd21)8.5f)} & \scriptsize{\textit{---}} & \scriptsize{(%(RGastd21)8.5f)} & \scriptsize{\textit{---}} \\
+    $\sigma^{2}$ & \textit{---} & %(CInbeta21)8.5f & \textit{---} & %(RInbeta21)8.5f & \textit{---} \\
+    & \scriptsize{\textit{---}} & \scriptsize{(%(CInstd21)8.5f)} & \scriptsize{\textit{---}} & \scriptsize{(%(RInstd21)8.5f)} \\
+    $-\ln L$ & %(CGaLL)8.2f & %(CInLL)8.2f & %(RGaLL)8.2f & %(RInLL)8.2f \\
+
+\end{longtable}
+\end{ThreePartTable}
+}

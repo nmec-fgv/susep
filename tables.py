@@ -18,31 +18,31 @@ for key in db.keys():
     rcd_dict[key] = db[key]
 
 db.close()
-aux_dict = {'percent': '%'}
-for model in {'Poisson', 'NB2', 'Gamma', 'InvGaussian'}:
+aux_dict = {}
+for model in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog', 'Gamma', 'InvGaussian'}:
     for var in {'beta', 'std'}:
         for i, item in enumerate(casco_dict[model][var]):
-            aux_dict['C' + model[0] + var + str(i)] = item[0]
+            aux_dict['C' + model[:2] + var + str(i)] = item[0]
 
         for i, item in enumerate(rcd_dict[model][var]):
-            aux_dict['R' + model[0] + var + str(i)] = item[0]
+            aux_dict['R' + model[:2] + var + str(i)] = item[0]
 
     for var2 in {'LL', 'D', 'D_Chi2', 'Pearson', 'pseudo_R2', 'GF', 'GF_Chi2'}:
         if var2 == 'LL':
-            aux_dict['C' + model[0] + var2] = - casco_dict[model][var2]
-            aux_dict['R' + model[0] + var2] = - rcd_dict[model][var2]
+            aux_dict['C' + model[:2] + var2] = - casco_dict[model][var2]
+            aux_dict['R' + model[:2] + var2] = - rcd_dict[model][var2]
         else:
-            aux_dict['C' + model[0] + var2] = casco_dict[model][var2]
-            aux_dict['R' + model[0] + var2] = rcd_dict[model][var2]
+            aux_dict['C' + model[:2] + var2] = casco_dict[model][var2]
+            aux_dict['R' + model[:2] + var2] = rcd_dict[model][var2]
 
-    aux_dict['C' + model[0] + 'n-k'] = casco_dict[model]['n'] - casco_dict[model]['k']
-    aux_dict['R' + model[0] + 'n-k'] = rcd_dict[model]['n'] - rcd_dict[model]['k']
-    aux_dict['C' + model[0] + 'Pearson/n-k'] = casco_dict[model]['Pearson'] / (casco_dict[model]['n'] - casco_dict[model]['k'])
-    aux_dict['R' + model[0] + 'Pearson/n-k'] = rcd_dict[model]['Pearson'] / (rcd_dict[model]['n'] - rcd_dict[model]['k'])
-    aux_dict['C' + model[0] + 'D/D_Chi2'] = casco_dict[model]['D'] / casco_dict[model]['D_Chi2']
-    aux_dict['R' + model[0] + 'D/D_Chi2'] = rcd_dict[model]['D'] / rcd_dict[model]['D_Chi2']
+    aux_dict['C' + model[:2] + 'n-k'] = casco_dict[model]['n'] - casco_dict[model]['k']
+    aux_dict['R' + model[:2] + 'n-k'] = rcd_dict[model]['n'] - rcd_dict[model]['k']
+    aux_dict['C' + model[:2] + 'Pearson/n-k'] = casco_dict[model]['Pearson'] / (casco_dict[model]['n'] - casco_dict[model]['k'])
+    aux_dict['R' + model[:2] + 'Pearson/n-k'] = rcd_dict[model]['Pearson'] / (rcd_dict[model]['n'] - rcd_dict[model]['k'])
+    aux_dict['C' + model[:2] + 'D/D_Chi2'] = casco_dict[model]['D'] / casco_dict[model]['D_Chi2']
+    aux_dict['R' + model[:2] + 'D/D_Chi2'] = rcd_dict[model]['D'] / rcd_dict[model]['D_Chi2']
 
-for aux in ('freq', 'sev'):
+for aux in ('freq', 'sev'):#, 'bin_freq'):
     for aux2 in ('coeffs', 'diags'):
         try:
             with open(aux + '_' + aux2 + '_table_template.tex', 'r') as cfile:

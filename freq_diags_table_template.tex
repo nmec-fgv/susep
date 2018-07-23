@@ -1,0 +1,22 @@
+\begin{table}
+    \small
+    \centering
+    \begin{threeparttable}
+    \caption{\large{Diagnostics for models of frequency data}}
+    \begin{tabular}{lcccc} \toprule
+    & \multicolumn{2}{c}{own vehicle damage} & \multicolumn{2}{c}{third party liability} \\
+    \cmidrule(l{.75em}){2-3} \cmidrule(l{.75em}){4-5}
+    Statistic & Poisson & NB2 & Poisson & NB2 \\ \midrule
+    \textbf{n - k} & %(CPon-k)8.2f & %(CNBn-k)8.2f & %(RPon-k)8.2f & %(RNBn-k)8.2f \\
+    \textbf{Pearson} & %(CPoPearson)8.2f & %(CNBPearson)8.2f & %(RPoPearson)8.2f & %(RNBPearson)8.2f \\
+    \textbf{Pearson/(n - k)} & %(CPoPearson/n-k)8.4f & %(CNBPearson/n-k)8.4f & %(RPoPearson/n-k)8.4f & %(RNBPearson/n-k)8.4f \\
+    \textbf{Deviance} & %(CPoD)8.2f & %(CNBD)8.2f & %(RPoD)8.2f & %(RNBD)8.2f \\
+    \textbf{$\bm{\chi^{2}_{n-k}(5\@)}$} & %(CPoD_Chi2)8.2f & %(CNBD_Chi2)8.2f & %(RPoD_Chi2)8.2f & %(RNBD_Chi2)8.2f \\
+    \textbf{Deviance/$\bm{\chi^{2}_{n-k}(5\@)}$} & %(CPoD/D_Chi2)8.4f & %(CNBD/D_Chi2)8.4f & %(RPoD/D_Chi2)8.4f & %(RNBD/D_Chi2)8.4f \\
+    \textbf{pseudo $\bm{R^{2}}$} & %(CPopseudo_R2)8.4f & %(CNBpseudo_R2)8.4f & %(RPopseudo_R2)8.4f & %(RNBpseudo_R2)8.4f \\
+    \textbf{Goodness of fit} & %(CPoGF)8.2f & %(CNBGF)8.2f & %(RPoGF)8.2f & %(RNBGF)8.2f \\
+    \textbf{$\bm{\chi^{2}_{J-1}(5\@)}$} & %(CPoGF_Chi2)8.2f & %(CNBGF_Chi2)8.2f & %(RPoGF_Chi2)8.2f & %(RNBGF_Chi2)8.2f \\
+    \bottomrule
+    \end{tabular}
+    \end{threeparttable}
+\end{table}

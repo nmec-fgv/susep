@@ -1,0 +1,83 @@
+{\small
+\begin{ThreePartTable}
+    \begin{TableNotes}
+    \item[\dag] Significant at 5\@ level, not significant at 1\@.
+    \item[\dag\dag] Not significant at 10\@ level.
+    \end{TableNotes}
+\begin{longtable}{lcccc}
+    \caption{\large{Frequency data, estimates of parameters in baseline main effects models}} \label{freq_estimates_table}\\
+    \toprule
+    & \multicolumn{2}{c}{own vehicle damage} & \multicolumn{2}{c}{third party liability} \\
+    \cmidrule(l{.75em}){2-3} \cmidrule(l{.75em}){4-5}
+    Variable & Poisson & NB2 & Poisson & NB2 \\ \midrule
+    \endfirsthead
+    
+    \multicolumn{5}{c}{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+    \toprule
+    & \multicolumn{2}{c}{own vehicle damage} & \multicolumn{2}{c}{third party liability} \\
+    \cmidrule(l{.75em}){2-3} \cmidrule(l{.75em}){4-5}
+    Variable & Poisson & NB2 & Poisson & NB2 \\ \midrule
+    \endhead
+
+    \midrule
+    \multicolumn{5}{r}{\textit{continued on next page}} \\
+    \endfoot
+    \bottomrule
+    \insertTableNotes
+    \endlastfoot
+
+    \textit{constant} & %(CPobeta0)8.5f & %(CNBbeta0)8.5f & %(RPobeta0)8.5f & %(RNBbeta0)8.5f \\
+    & \scriptsize{(%(CPostd0)8.5f)} & \scriptsize{(%(CNBstd0)8.5f)} & \scriptsize{(%(RPostd0)8.5f)} & \scriptsize{(%(RNBstd0)8.5f)} \\
+    \textit{veh\_age 3-5} & %(CPobeta1)8.5f & %(CNBbeta1)8.5f & %(RPobeta1)8.5f & %(RNBbeta1)8.5f \\
+    & \scriptsize{(%(CPostd1)8.5f)} & \scriptsize{(%(CNBstd1)8.5f)} & \scriptsize{(%(RPostd1)8.5f)} & \scriptsize{(%(RNBstd1)8.5f)} \\
+    \textit{veh\_age 6-9} & %(CPobeta2)8.5f & %(CNBbeta2)8.5f & %(RPobeta2)8.5f & %(RNBbeta2)8.5f \\
+    & \scriptsize{(%(CPostd2)8.5f)} & \scriptsize{(%(CNBstd2)8.5f)} & \scriptsize{(%(RPostd2)8.5f)} & \scriptsize{(%(RNBstd2)8.5f)} \\
+    \textit{veh\_age 10+} & %(CPobeta3)8.5f & %(CNBbeta3)8.5f & %(RPobeta3)8.5f & %(RNBbeta3)8.5f \\
+    & \scriptsize{(%(CPostd3)8.5f)} & \scriptsize{(%(CNBstd3)8.5f)} & \scriptsize{(%(RPostd3)8.5f)} & \scriptsize{(%(RNBstd3)8.5f)} \\
+    \textit{region S} & %(CPobeta4)8.5f & %(CNBbeta4)8.5f & %(RPobeta4)8.5f & %(RNBbeta4)8.5f \\
+    & \scriptsize{(%(CPostd4)8.5f)} & \scriptsize{(%(CNBstd4)8.5f)} & \scriptsize{(%(RPostd4)8.5f)} & \scriptsize{(%(RNBstd4)8.5f)} \\
+    \textit{region RJ} & %(CPobeta5)8.5f & %(CNBbeta5)8.5f & %(RPobeta5)8.5f & %(RNBbeta5)8.5f \\
+    & \scriptsize{(%(CPostd5)8.5f)} & \scriptsize{(%(CNBstd5)8.5f)} & \scriptsize{(%(RPostd5)8.5f)} & \scriptsize{(%(RNBstd5)8.5f)} \\
+    \textit{region ES/MG} & %(CPobeta6)8.5f & %(CNBbeta6)8.5f & %(RPobeta6)8.5f & %(RNBbeta6)8.5f \\
+    & \scriptsize{(%(CPostd6)8.5f)} & \scriptsize{(%(CNBstd6)8.5f)} & \scriptsize{(%(RPostd6)8.5f)} & \scriptsize{(%(RNBstd6)8.5f)} \\
+    \textit{region N/NE} & %(CPobeta7)8.5f & %(CNBbeta7)8.5f & %(RPobeta7)8.5f & %(RNBbeta7)8.5f \\
+    & \scriptsize{(%(CPostd7)8.5f)} & \scriptsize{(%(CNBstd7)8.5f)} & \scriptsize{(%(RPostd7)8.5f)} & \scriptsize{(%(RNBstd7)8.5f)} \\
+    \textit{region CW} & %(CPobeta8)8.5f & %(CNBbeta8)8.5f & %(RPobeta8)8.5f & %(RNBbeta8)8.5f \\
+    & \scriptsize{(%(CPostd8)8.5f)} & \scriptsize{(%(CNBstd8)8.5f)} & \scriptsize{(%(RPostd8)8.5f)} & \scriptsize{(%(RNBstd8)8.5f)} \\
+    \textit{gender female} & %(CPobeta9)8.5f & %(CNBbeta9)8.5f & %(RPobeta9)8.5f & %(RNBbeta9)8.5f \\
+    & \scriptsize{(%(CPostd9)8.5f)} & \scriptsize{(%(CNBstd9)8.5f)} & \scriptsize{(%(RPostd9)8.5f)} & \scriptsize{(%(RNBstd9)8.5f)} \\
+    \textit{bonus no} & %(CPobeta10)8.5f & %(CNBbeta10)8.5f & %(RPobeta10)8.5f & %(RNBbeta10)8.5f \\
+    & \scriptsize{(%(CPostd10)8.5f)} & \scriptsize{(%(CNBstd10)8.5f)} & \scriptsize{(%(RPostd10)8.5f)} & \scriptsize{(%(RNBstd10)8.5f)} \\
+    \textit{age 0-27} & %(CPobeta11)8.5f & %(CNBbeta11)8.5f & %(RPobeta11)8.5f & %(RNBbeta11)8.5f \\
+    & \scriptsize{(%(CPostd11)8.5f)} & \scriptsize{(%(CNBstd11)8.5f)} & \scriptsize{(%(RPostd11)8.5f)} & \scriptsize{(%(RNBstd11)8.5f)} \\
+    \textit{age 28-37} & %(CPobeta12)8.5f & %(CNBbeta12)8.5f & %(RPobeta12)8.5f & %(RNBbeta12)8.5f \\
+    & \scriptsize{(%(CPostd12)8.5f)} & \scriptsize{(%(CNBstd12)8.5f)} & \scriptsize{(%(RPostd12)8.5f)} & \scriptsize{(%(RNBstd12)8.5f)} \\
+    \textit{age 50-59} & %(CPobeta13)8.5f & %(CNBbeta13)8.5f & %(RPobeta13)8.5f & %(RNBbeta13)8.5f \\
+    & \scriptsize{(%(CPostd13)8.5f)} & \scriptsize{(%(CNBstd13)8.5f)} & \scriptsize{(%(RPostd13)8.5f)} & \scriptsize{(%(RNBstd13)8.5f)} \\
+    \textit{age 60+} & %(CPobeta14)8.5f & %(CNBbeta14)8.5f & %(RPobeta14)8.5f & %(RNBbeta14)8.5f \\
+    & \scriptsize{(%(CPostd14)8.5f)} & \scriptsize{(%(CNBstd14)8.5f)} & \scriptsize{(%(RPostd14)8.5f)} & \scriptsize{(%(RNBstd14)8.5f)} \\
+    \textit{cov\_veh 20-30} & %(CPobeta15)8.5f & %(CNBbeta15)8.5f & \textit{---} & \textit{---} \\
+    & \scriptsize{(%(CPostd15)8.5f)} & \scriptsize{(%(CNBstd15)8.5f)} & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} \\
+    \textit{cov\_veh 30-45} & %(CPobeta16)8.5f & %(CNBbeta16)8.5f & \textit{---} & \textit{---} \\
+    & \scriptsize{(%(CPostd16)8.5f)} & \scriptsize{(%(CNBstd16)8.5f)} & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} \\
+    \textit{cov\_veh 45+} & %(CPobeta17)8.5f & %(CNBbeta17)8.5f & \textit{---} & \textit{---} \\
+    & \scriptsize{(%(CPostd17)8.5f)} & \scriptsize{(%(CNBstd17)8.5f)} & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} \\
+    \textit{cov\_lia 60-79} & \textit{---} & \textit{---} & %(RPobeta15)8.5f & %(RNBbeta15)8.5f \\
+    & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} & \scriptsize{(%(RPostd15)8.5f)} & \scriptsize{(%(RNBstd15)8.5f)} \\
+    \textit{cov\_lia 80-119} & \textit{---} & \textit{---} & %(RPobeta16)8.5f & %(RNBbeta16)8.5f \\
+    & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} & \scriptsize{(%(RPostd16)8.5f)} & \scriptsize{(%(RNBstd16)8.5f)} \\
+    \textit{cov\_lia 120+} & \textit{---} & \textit{---} & %(RPobeta17)8.5f & %(RNBbeta17)8.5f \\
+    & \scriptsize{\textit{---}} & \scriptsize{\textit{---}} & \scriptsize{(%(RPostd17)8.5f)} & \scriptsize{(%(RNBstd17)8.5f)} \\
+    \textit{year 2008} & %(CPobeta18)8.5f & %(CNBbeta18)8.5f & %(RPobeta18)8.5f & %(RNBbeta18)8.5f \\
+    & \scriptsize{(%(CPostd18)8.5f)} & \scriptsize{(%(CNBstd18)8.5f)} & \scriptsize{(%(RPostd18)8.5f)} & \scriptsize{(%(RNBstd18)8.5f)} \\
+    \textit{year 2009} & %(CPobeta19)8.5f & %(CNBbeta19)8.5f & %(RPobeta19)8.5f & %(RNBbeta19)8.5f \\
+    & \scriptsize{(%(CPostd19)8.5f)} & \scriptsize{(%(CNBstd19)8.5f)} & \scriptsize{(%(RPostd19)8.5f)} & \scriptsize{(%(RNBstd19)8.5f)} \\
+    \textit{year 2010} & %(CPobeta20)8.5f & %(CNBbeta20)8.5f & %(RPobeta20)8.5f & %(RNBbeta20)8.5f \\
+    & \scriptsize{(%(CPostd20)8.5f)} & \scriptsize{(%(CNBstd20)8.5f)} & \scriptsize{(%(RPostd20)8.5f)} & \scriptsize{(%(RNBstd20)8.5f)} \\
+    $\alpha$ & \textit{---} & %(CNBbeta21)8.5f & \textit{---} & %(RNBbeta21)8.5f \\
+    & \scriptsize{\textit{---}} & \scriptsize{(%(CNBstd21)8.5f)} & \scriptsize{\textit{---}} & \scriptsize{(%(RNBstd21)8.5f)} \\
+    $-\ln L$ & %(CPoLL)8.2f & %(CNBLL)8.2f & %(RPoLL)8.2f & %(RNBLL)8.2f \\
+
+\end{longtable}
+\end{ThreePartTable}
+}

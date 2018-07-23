@@ -1,5 +1,5 @@
 *~
-*.tex
+*_table.tex
 *.log
 *.aux
 Python_old/
