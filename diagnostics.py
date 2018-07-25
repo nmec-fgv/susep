@@ -35,7 +35,7 @@ class Diagnostics:
         self.claim_type = claim_type
         if self.model in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog'}:
             self.model_type = 'freq'
-        elif self.model in {'Gamma', 'InvGaussian'}:
+        elif self.model in {'LNormal', 'Gamma', 'InvGaussian'}:
             self.model_type = 'sev'
 
         filename = 'grouped_results_' + model + '_' + claim_type + '.pkl'
@@ -54,8 +54,7 @@ class Diagnostics:
 
 
 if __name__ == '__main__':
-#    for model in ('Poisson', 'NB2', 'Gamma', 'InvGaussian'):
-    for model in ('Logit', 'Probit', 'C-loglog'):
+    for model in ('Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian'):
         for claim_type in ('casco', 'rcd'):
             x = Diagnostics(model, claim_type)
             x.plot01()

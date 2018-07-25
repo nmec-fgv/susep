@@ -1,6 +1,7 @@
-############################################################################
-## Captura e transformação de dados da base postgres para arquivos pickle ##
-############################################################################
+##################################################
+## Imports data from PostgreSQL database, makes ##
+## transformations and saves as pickle files    ## 
+##################################################
 
 import os
 import pickle
@@ -32,68 +33,68 @@ def data_transf(data0):
 
     Data encoding:
     exposure -> real, in years
-    pol_type=0 -> valor de mercado referenciado
-    pol_type=1 -> valor definido
+    pol_type=0 -> 'valor de mercado referenciado'
+    pol_type=1 -> 'valor definido'
     veh_age -> integer, beginning in zero
-    veh_type=0 -> passeio nacional
-    veh_type=1 -> passeio importado
-    veh_type=2 -> pick-up's leves nacionais - exceto Kombi e Saveiro
-    veh_type=3 -> pick-up's leves nacionais - somente Kombi
-    veh_type=4 -> pick-up's leves nacionais - somente Saveiro
-    veh_type=5 -> pick-up's leves importados
-    veh_type=6 -> modelos esportivos nacionais
-    veh_type=7 -> modelos esportivos importados
-    veh_type=8 -> modelos especiais (passeio) nacionais
-    veh_type=9 -> modelos especiais (passeio) importados
-    veh_type=10 -> pick-up's pesadas carga nacionais
-    veh_type=11 -> pick-up's pesadas carga importados
-    veh_type=12 -> pick-up's pesadas pessoas nacionais
-    veh_type=13 -> pick-up's pesadas pessoas importados
-    region=0 -> RS - Met. Porto Alegre e Caxias do Sul
-    region=1 -> RS - Demais regiões
-    region=2 -> SC - Met. Florianópolis e Sul
-    region=3 -> SC - Oeste
-    region=4 -> SC - Blumenau e demais regiões
-    region=5 -> PR - F.Iguaþu-Medianeira-Cascavel-Toledo
-    region=6 -> PR - Met. Curitiba
-    region=7 -> PR - Demais regiões
-    region=8 -> SP - Vale do Paraíba e Ribeira
-    region=9 -> SP - Litoral Norte e Baixada Santista
-    region=10 -> SP - Met. de São Paulo
-    region=11 -> SP - Grande Campinas
-    region=12 -> SP - Ribeirão Preto e Demais Mun. de Campinas
-    region=13 -> MG - Triângulo mineiro
-    region=14 -> MG - Sul
-    region=15 -> MG - Met.BH-Centro Oeste-Zona Mata-C. Vertentes
-    region=16 -> MG - Vale do Aço-Norte-Vale Jequitinhonha
-    region=17 -> RJ - Met. do Rio de Janeiro
-    region=18 -> RJ - Interior
-    region=19 -> ES - Espírito Santo
-    region=20 -> BA - Bahia
-    region=21 -> SE - Sergipe
-    region=22 -> PE - Pernambuco
-    region=23 -> PB - Paraíba
-    region=24 -> RN - Rio Grande do Norte
-    region=25 -> AL - Alagoas
-    region=26 -> CE - Ceará
-    region=27 -> PI - Piaui
-    region=28 -> MA - Maranhão
-    region=29 -> PA - Pará
-    region=30 -> AM - Amazonas
-    region=31 -> AP - Amapá
-    region=32 -> RO - Rondônia
-    region=33 -> RR - Roraima
-    region=34 -> AC - Acre
-    region=35 -> MT - Mato Grosso
-    region=36 -> MS - Mato Grosso do Sul
-    region=37 -> DF - Brasília
-    region=38 -> GO - Goiás
-    region=39 -> TO - Tocantins
-    region=40 -> GO - Sudeste de Goiás
+    veh_type=0 -> 'passeio nacional'
+    veh_type=1 -> 'passeio importado'
+    veh_type=2 -> 'pick-up's leves nacionais - exceto Kombi e Saveiro'
+    veh_type=3 -> 'pick-up's leves nacionais - somente Kombi'
+    veh_type=4 -> 'pick-up's leves nacionais - somente Saveiro'
+    veh_type=5 -> 'pick-up's leves importados'
+    veh_type=6 -> 'modelos esportivos nacionais'
+    veh_type=7 -> 'modelos esportivos importados'
+    veh_type=8 -> 'modelos especiais (passeio) nacionais'
+    veh_type=9 -> 'modelos especiais (passeio) importados'
+    veh_type=10 -> 'pick-up's pesadas carga nacionais'
+    veh_type=11 -> 'pick-up's pesadas carga importados'
+    veh_type=12 -> 'pick-up's pesadas pessoas nacionais'
+    veh_type=13 -> 'pick-up's pesadas pessoas importados'
+    region=0 -> RS - 'Met. Porto Alegre e Caxias do Sul'
+    region=1 -> RS - 'Demais regioes'
+    region=2 -> SC - 'Met. Florianopolis e Sul'
+    region=3 -> SC - 'Oeste'
+    region=4 -> SC - 'Blumenau e demais regioes'
+    region=5 -> PR - 'F.Iguacu-Medianeira-Cascavel-Toledo'
+    region=6 -> PR - 'Met. Curitiba'
+    region=7 -> PR - 'Demais regioes'
+    region=8 -> SP - 'Vale do Paraiba e Ribeira'
+    region=9 -> SP - 'Litoral Norte e Baixada Santista'
+    region=10 -> SP - 'Met. de Sao Paulo'
+    region=11 -> SP - 'Grande Campinas'
+    region=12 -> SP - 'Ribeirao Preto e Demais Mun. de Campinas'
+    region=13 -> MG - 'Triangulo mineiro'
+    region=14 -> MG - 'Sul'
+    region=15 -> MG - 'Met.BH-Centro Oeste-Zona Mata-C. Vertentes'
+    region=16 -> MG - 'Vale do Aco-Norte-Vale Jequitinhonha'
+    region=17 -> RJ - 'Met. do Rio de Janeiro'
+    region=18 -> RJ - 'Interior'
+    region=19 -> ES - 'Espirito Santo'
+    region=20 -> BA - 'Bahia'
+    region=21 -> SE - 'Sergipe'
+    region=22 -> PE - 'Pernambuco'
+    region=23 -> PB - 'Paraiba'
+    region=24 -> RN - 'Rio Grande do Norte'
+    region=25 -> AL - 'Alagoas'
+    region=26 -> CE - 'Ceara'
+    region=27 -> PI - 'Piaui'
+    region=28 -> MA - 'Maranhao'
+    region=29 -> PA - 'Para'
+    region=30 -> AM - 'Amazonas'
+    region=31 -> AP - 'Amapa'
+    region=32 -> RO - 'Rondonia'
+    region=33 -> RR - 'Roraima'
+    region=34 -> AC - 'Acre'
+    region=35 -> MT - 'Mato Grosso'
+    region=36 -> MS - 'Mato Grosso do Sul'
+    region=37 -> DF - 'Brasilia'
+    region=38 -> GO - 'Goias'
+    region=39 -> TO - 'Tocantins'
+    region=40 -> GO - 'Sudeste de Goias'
     sex=0 -> male
     sex=1 -> female
     age -> real, in years/100
-    bonus_c=0 -> bonus class '0' (sem bônus)
+    bonus_c=0 -> bonus class '0' (no bonus)
     bonus_c=1 -> bonus class '1'
     bonus_c=2 -> bonus class '2'
     bonus_c=3 -> bonus class '3'
@@ -104,27 +105,27 @@ def data_transf(data0):
     bonus_c=8 -> bonus class '8'
     bonus_c=9 -> bonus class '9'
     bonus_d -> integer, bonus discount in %
-    deduct_type=0 -> franquia reduzida
-    deduct_type=1 -> franquia normal
-    deduct_type=2 -> franquia majorada
-    deduct_type=3 -> franquia dedutível
-    deduct_type=4 -> sem franquia
-    deduct -> real, deductible, valor da franquia 
-    cov_casco -> real, coverage vehicle, cobertura casco
-    cov_rcdmat -> real, coverage liability, cobertura terceiros danos materiais
-    cov_rcdc -> real, coverage liability, cobertura terceiros danos corporais
-    cov_rcdmor -> real, coverage liability, cobertura terceiros danos morais
-    cov_app_ma -> real, coverage injury, cobertura acidente pessoal morte
-    cov_app_ipa -> real, coverage injury, cobertura acidente pessoal invalidez
-    cov_app_dmh -> real, coverage injury, cobertura acidente pessoal hospitalar
-    pre_casco -> real, premium vehicle, prêmio casco
-    pre_rcdmat -> real, premium liability, prêmio terceiros danos materiais
-    pre_rcdc -> real, premium liability, prêmio terceiros danos corporais
-    pre_rcdmor -> real, premium liability, prêmio terceiros danos morais
-    pre_app_ma -> real, premium injury, prêmio acidente pessoal morte
-    pre_app_ipa -> real, premium injury, prêmio acidente pessoal invalidez
-    pre_app_dmh -> real, premium injury, prêmio acidente pessoal hospitalar
-    pre_outros -> real, premium other, prêmio outros
+    deduct_type=0 -> 'franquia reduzida'
+    deduct_type=1 -> 'franquia normal'
+    deduct_type=2 -> 'franquia majorada'
+    deduct_type=3 -> 'franquia dedutivel'
+    deduct_type=4 -> 'sem franquia'
+    deduct -> real, deductible, 'valor da franquia' 
+    cov_casco -> real, coverage vehicle, 'cobertura casco'
+    cov_rcdmat -> real, coverage liability, 'cobertura terceiros danos materiais'
+    cov_rcdc -> real, coverage liability, 'cobertura terceiros danos corporais'
+    cov_rcdmor -> real, coverage liability, 'cobertura terceiros danos morais'
+    cov_app_ma -> real, coverage injury, 'cobertura acidente pessoal morte'
+    cov_app_ipa -> real, coverage injury, 'cobertura acidente pessoal invalidez'
+    cov_app_dmh -> real, coverage injury, 'cobertura acidente pessoal hospitalar'
+    pre_casco -> real, premium vehicle, 'premio casco'
+    pre_rcdmat -> real, premium liability, 'premio terceiros danos materiais'
+    pre_rcdc -> real, premium liability, 'premio terceiros danos corporais'
+    pre_rcdmor -> real, premium liability, 'premio terceiros danos morais'
+    pre_app_ma -> real, premium injury, 'premio acidente pessoal morte'
+    pre_app_ipa -> real, premium injury, 'premio acidente pessoal invalidez'
+    pre_app_dmh -> real, premium injury, 'premio acidente pessoal hospitalar'
+    pre_outros -> real, premium other, 'premio outros'
     freq_casco -> integer, claim frequency vehicle
     sev_casco -> real, claim severity vehicle (total)
     sev_cpi_casco -> real, claim severity vehicle (total) cpi adjusted

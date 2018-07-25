@@ -1,7 +1,7 @@
 *~
-*_table.tex
 *.log
 *.aux
+tables/*_table.tex
 Python_old/
 Python_oldest/
 old_data/

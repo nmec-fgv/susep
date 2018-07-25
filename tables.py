@@ -1,18 +1,26 @@
+##################################################################
 ## Generates latex code for table creation from regression data ##
+##################################################################
 
 import os
 import shelve
 import pdb
 import scipy.stats as st 
 
-db_file = 'persistent/overall_results_casco.db'
+# Data directory:
+data_dir = 'persistent/'
+
+# Tables directory:
+tables_dir = 'tables/'
+
+db_file = data_dir + 'overall_results_casco.db'
 db = shelve.open(db_file)
 casco_dict = {}
 for key in db.keys():
     casco_dict[key] = db[key]
 
 db.close()
-db_file = 'persistent/overall_results_rcd.db'
+db_file = data_dir + 'overall_results_rcd.db'
 db = shelve.open(db_file)
 rcd_dict = {}
 for key in db.keys():
@@ -20,7 +28,7 @@ for key in db.keys():
 
 db.close()
 aux_dict = {}
-for model in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog', 'Gamma', 'InvGaussian'}:
+for model in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian'}:
     for var in {'beta', 'std'}:
         for i, item in enumerate(casco_dict[model][var]):
             aux_dict['C' + model[:2] + var + str(i)] = item[0]
@@ -61,16 +69,16 @@ for model in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog', 'Gamma', 'InvGaus
 for aux in ('freq', 'sev', 'freq_bin'):
     for aux2 in ('coeffs', 'diags'):
         try:
-            with open(aux + '_' + aux2 + '_table_template.tex', 'r') as cfile:
+            with open(tables_dir + aux + '_' + aux2 + '_table_template.tex', 'r') as cfile:
                 template = cfile.read()
         except:
             print('Template file missing')
         
         table = template % aux_dict
         try:
-            os.remove(aux + '_' + aux2 + '_table.tex')
+            os.remove(tables_dir + aux + '_' + aux2 + '_table.tex')
         except OSError:
             pass
     
-        with open(aux + '_' + aux2 + '_table.tex', 'w') as cfile:
+        with open(tables_dir + aux + '_' + aux2 + '_table.tex', 'w') as cfile:
             cfile.write(table)
