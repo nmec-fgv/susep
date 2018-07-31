@@ -3,11 +3,13 @@
     \centering
     \begin{threeparttable}
     \caption{\large{Diagnostics for baseline models of frequency data}}
+    \label{tab:freqdiags}
     \begin{tabular}{lcccc} \toprule
     & \multicolumn{2}{c}{own vehicle damage} & \multicolumn{2}{c}{third party liability} \\
     \cmidrule(l{.75em}){2-3} \cmidrule(l{.75em}){4-5}
     Statistic & Poisson & NB2 & Poisson & NB2 \\ \midrule
-    \textbf{n - k} & %(CPon-k)8.2f & %(CNBn-k)8.2f & %(RPon-k)8.2f & %(RNBn-k)8.2f \\
+    \textbf{n} & %(CPon)8.0f & %(CNBn)8.0f & %(RPon)8.0f & %(RNBn)8.0f \\
+    \textbf{k} & %(CPok)8.0f & %(CNBk)8.0f & %(RPok)8.0f & %(RNBk)8.0f \\
     \textbf{Pearson} & %(CPoPearson)8.2f & %(CNBPearson)8.2f & %(RPoPearson)8.2f & %(RNBPearson)8.2f \\
     \textbf{Pearson/(n - k)} & %(CPoPearson/n-k)8.4f & %(CNBPearson/n-k)8.4f & %(RPoPearson/n-k)8.4f & %(RNBPearson/n-k)8.4f \\
     \textbf{Deviance} & %(CPoD)8.2f & %(CNBD)8.2f & %(RPoD)8.2f & %(RNBD)8.2f \\

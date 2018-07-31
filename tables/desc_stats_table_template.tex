@@ -1,0 +1,55 @@
+\begin{table}
+    \small
+    \centering
+    \begin{threeparttable}
+    \caption{\large{Descriptive statistics of response variables by levels of factors}\tnote{*}}
+    \label{tab:descstats}
+    \begin{tabular}{llcccccc} \toprule
+    & & \multicolumn{3}{c}{own vehicle damage} & \multicolumn{3}{c}{third party liability} \\
+    \cmidrule(l{.75em}){3-5} \cmidrule(l{.75em}){6-8}
+    \textbf{Factor} & \textbf{Levels} & \textbf{Freq} & \textbf{Sev Avg} & \textbf{SD} & \textbf{Freq} & \textbf{Sev Avg} & \textbf{SD} \\ \midrule
+    veh\_age & \textit{0-2} & %(Cb0f)4.2f & %(Cb0as)4.2f & %(Cb0ss)4.2f & %(Rb0f)4.2f & %(Rb0as)4.2f & %(Rb0ss)4.2f \\
+    & 3-5 & %(C0f)4.2f & %(C0as)4.2f & %(C0ss)4.2f & %(R0f)4.2f & %(R0as)4.2f & %(R0ss)4.2f \\
+    & 6-9 & %(C1f)4.2f & %(C1as)4.2f & %(C1ss)4.2f & %(R1f)4.2f & %(R1as)4.2f & %(R1ss)4.2f \\
+    & 10\texttt{+} & %(C2f)4.2f & %(C2as)4.2f & %(C2ss)4.2f & %(R2f)4.2f & %(R2as)4.2f & %(R2ss)4.2f \\
+    \hline
+    region & \textit{SP state} & %(Cb1f)4.2f & %(Cb1as)4.2f & %(Cb1ss)4.2f & %(Rb1f)4.2f & %(Rb1as)4.2f & %(Rb1ss)4.2f \\
+    & South & %(C3f)4.2f & %(C3as)4.2f & %(C3ss)4.2f & %(R3f)4.2f & %(R3as)4.2f & %(R3ss)4.2f \\
+    & RJ state & %(C4f)4.2f & %(C4as)4.2f & %(C4ss)4.2f & %(R4f)4.2f & %(R4as)4.2f & %(R4ss)4.2f \\
+    & ES/MG states & %(C5f)4.2f & %(C5as)4.2f & %(C5ss)4.2f & %(R5f)4.2f & %(R5as)4.2f & %(R5ss)4.2f \\
+    & North/Northeast & %(C6f)4.2f & %(C6as)4.2f & %(C6ss)4.2f & %(R6f)4.2f & %(R6as)4.2f & %(R6ss)4.2f \\
+    & Central-West & %(C7f)4.2f & %(C7as)4.2f & %(C7ss)4.2f & %(R7f)4.2f & %(R7as)4.2f & %(R7ss)4.2f \\
+    \hline
+    gender & \textit{male} & %(Cb2f)4.2f & %(Cb2as)4.2f & %(Cb2ss)4.2f & %(Rb2f)4.2f & %(Rb2as)4.2f & %(Rb2ss)4.2f \\ 
+    & female & %(C8f)4.2f & %(C8as)4.2f & %(C8ss)4.2f & %(R8f)4.2f & %(R8as)4.2f & %(R8ss)4.2f \\
+    \hline
+    bonus & \textit{yes} & %(Cb3f)4.2f & %(Cb3as)4.2f & %(Cb3ss)4.2f & %(Rb3f)4.2f & %(Rb3as)4.2f & %(Rb3ss)4.2f \\
+    & no & %(C9f)4.2f & %(C9as)4.2f & %(C9ss)4.2f & %(R9f)4.2f & %(R9as)4.2f & %(R9ss)4.2f \\
+    \hline
+    age & 0-27 & %(C10f)4.2f & %(C10as)4.2f & %(C10ss)4.2f & %(R10f)4.2f & %(R10as)4.2f & %(R10ss)4.2f \\
+    & 28-37 & %(C11f)4.2f & %(C11as)4.2f & %(C11ss)4.2f & %(R11f)4.2f & %(R11as)4.2f & %(R11ss)4.2f \\
+    & \textit{38-49} & %(Cb4f)4.2f & %(Cb4as)4.2f & %(Cb4ss)4.2f & %(Rb4f)4.2f & %(Rb4as)4.2f & %(Rb4ss)4.2f \\
+    & 50-59 & %(C12f)4.2f & %(C12as)4.2f & %(C12ss)4.2f & %(R12f)4.2f & %(R12as)4.2f & %(R12ss)4.2f \\
+    & 60\texttt{+} & %(C13f)4.2f & %(C13as)4.2f & %(C13ss)4.2f & %(R13f)4.2f & %(R13as)4.2f & %(R13ss)4.2f \\
+    \hline
+    cov\_veh & \textit{0-20} & %(Cb5f)4.2f & %(Cb5as)4.2f & %(Cb5ss)4.2f & na & na & na \\
+    & 20-30 & %(C14f)4.2f & %(C14as)4.2f & %(C14ss)4.2f & na & na & na \\
+    & 30-45 & %(C15f)4.2f & %(C15as)4.2f & %(C15ss)4.2f & na & na & na \\
+    & 45\texttt{+} &  %(C16f)4.2f & %(C16as)4.2f & %(C16ss)4.2f & na & na & na \\
+    \hline
+    cov\_lia & \textit{0-59} & na & na & na & %(Rb5f)4.2f & %(Rb5as)4.2f & %(Rb5ss)4.2f \\
+    & 60-79 & na & na & na & %(R14f)4.2f & %(R14as)4.2f & %(R14ss)4.2f \\
+    & 80-119 & na & na & na & %(R15f)4.2f & %(R15as)4.2f & %(R15ss)4.2f \\
+    & 120\texttt{+} & na & na & na & %(R16f)4.2f & %(R16as)4.2f & %(R16ss)4.2f \\
+    \hline
+    year & 2008 & %(C17f)4.2f & %(C17as)4.2f & %(C17ss)4.2f & %(R17f)4.2f & %(R17as)4.2f & %(R17ss)4.2f \\
+    & 2009 & %(C18f)4.2f & %(C18as)4.2f & %(C18ss)4.2f & %(R18f)4.2f & %(R18as)4.2f & %(R18ss)4.2f \\
+    & 2010 & %(C19f)4.2f & %(C19as)4.2f & %(C19ss)4.2f & %(R19f)4.2f & %(R19as)4.2f & %(R19ss)4.2f \\
+    & \textit{2011} & %(Cb6f)4.2f & %(Cb6as)4.2f & %(Cb6ss)4.2f & %(Rb6f)4.2f & %(Rb6as)4.2f & %(Rb6ss)4.2f \\ 
+    \bottomrule
+    \end{tabular}
+    \begin{tablenotes}
+    \item[*] \scriptsize{Notes: \nth{1} column displays frequency values in percentage points, \nth{2} column displays average size of severities in BR\$ thousands, CPI adjusted to january 2008 values, \nth{3} column shows standard deviation of severity values.}
+    \end{tablenotes}
+    \end{threeparttable}
+\end{table}

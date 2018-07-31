@@ -12,8 +12,9 @@ import scipy.stats as st
 import pdb
 import time
 
-# Lower bounds and precision parameters:
+# Raise exception on runtime warnings, lower bounds and precision parameters:
 
+np.seterr(all='raise')
 lb_log = 1e-323
 lb_ratio = 1e-308
 lb_alpha = 1e-77
@@ -383,7 +384,8 @@ class Stdout:
 
     Three persistent files w/ following statistics:
     individual_results_xxx.pkl: deviances and chis
-    cell_results_xxx.db: # obs, y_bar, mu_hat, D^L, exposure (freq only)
+    cell_results_xxx.db: 0)#obs, 1)y_bar, 2)mu_hat, 3)D^L, 4)Pearson^L
+    cell_results_xxx.db freq data only: 5)total exposure, 6)exposure sum of squared deviations  
     overall_results_xxx.db: LL, D, Pearson, Chi^2
     
     Standard outpu is different for models w/ Binomial distribution:
@@ -408,7 +410,7 @@ class Stdout:
         self.y_bar = res['y_bar']
         ind_res = {}
         if model_type == 'freq':
-            cell_res = np.empty([len(X_dict), 6])
+            cell_res = np.empty([len(X_dict), 7])
         elif model_type == 'sev':
             cell_res = np.empty([len(X_dict), 5])
 
@@ -505,9 +507,12 @@ class Stdout:
                 if y > 0:
                     dev_local = 2 * (y * np.log(y / mu) + (m - y) * np.log((m - y) / (m - mu)))
                     dev_y_bar_local = 2 * (y * np.log(y / y_bar) + (m - y) * np.log((m - y) / (m - y_bar)))
-
                 else:
-                    dev_local = 2 * (m * np.log(m / (m - mu)))
+                    try:
+                        dev_local = 2 * (m * np.log(m / (m - mu)))
+                    except:
+                        dev_local = 0
+
                     dev_y_bar_local = 0
 
                 if y >= mu:
@@ -665,6 +670,7 @@ class Stdout:
             cell_res[i, 4] = Pearson_local
             if model_type == 'freq':
                 cell_res[i, 5] = np.sum(X[:, [1]])
+                cell_res[i, 6] = np.sum((X[:, [1]] - (cell_res[i, 5] / cell_res[i, 0]))**2) 
 
             dev_stat_sum += dev_local
             dev_y_bar_stat_sum += dev_y_bar_local
@@ -681,12 +687,15 @@ class Stdout:
         self.Pearson = Pearson_stat_sum
         self.pseudo_R2 = 1 - self.D / dev_y_bar_stat_sum
         self.GF = np.sum((cell_res[:, [0]] * (cell_res[:, [1]] - cell_res[:, [2]])**2) / cell_res[:, [2]])
+        if model_type == 'freq':
+            self.exp_tot = np.sum(cell_res[:, [5]])
+            self.exp_avg = self.exp_tot / self.n
+            self.exp_std = (np.sum(cell_res[:, [6]])/self.n)**.5
 
     def save_stdout_results(self, keys=None):
         # Overall results:
-        if keys != None:
-            for key in keys:
-                res_dict[key] = self.key
+        if self.model_type == 'freq':
+            res_dict = {'p_value': self.p_value, 'n': self.n, 'exp_tot': self.exp_tot, 'exp_avg': self.exp_avg, 'exp_std': self.exp_std, 'k': self.k, 'J': self.J, 'LL': self.LL, 'D': self.D, 'Pearson': self.Pearson, 'pseudo_R2': self.pseudo_R2, 'GF': self.GF}
         else:
             res_dict = {'p_value': self.p_value, 'n': self.n, 'k': self.k, 'J': self.J, 'LL': self.LL, 'D': self.D, 'Pearson': self.Pearson, 'pseudo_R2': self.pseudo_R2, 'GF': self.GF}
 
@@ -704,7 +713,7 @@ class Stdout:
 
 
 if __name__ == '__main__':
-    for model in ('Poisson', 'Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian', 'NB2'):
+    for model in ('Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian', 'Poisson', 'NB2'):
         for claim_type in ('casco', 'rcd'):
             x = Estimation(model, claim_type)
             x.save_estimation_results()

@@ -50,7 +50,7 @@ sql_code2C = r'''
 '''
 
 if __name__ == '__main__':
-    years = ('08', '09', '10', '11')
+    years = ('12', '13', '14', '15', '16')
     months = ('jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez')
     for aa in years:
         for mmm in months:

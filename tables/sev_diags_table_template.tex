@@ -3,11 +3,13 @@
     \centering
     \begin{threeparttable}
     \caption{\large{Diagnostics for baseline models of severity data}}
+    \label{tab:sevdiags}
     \begin{tabular}{lcccccc} \toprule
     & \multicolumn{3}{c}{own vehicle damage} & \multicolumn{3}{c}{third party liability} \\
     \cmidrule(l{.75em}){2-4} \cmidrule(l{.75em}){5-7}
     Statistic & Log-normal & Gamma & Inv Gaussian & Log-normal & Gamma & Inv Gaussian \\ \midrule
-    \textbf{n - k} & %(CLNn-k)8.2f & %(CGan-k)8.2f & %(CInn-k)8.2f & %(RLNn-k)8.2f & %(RGan-k)8.2f & %(RInn-k)8.2f \\
+    \textbf{n} & %(CLNn)8.0f & %(CGan)8.0f & %(CInn)8.0f & %(RLNn)8.0f & %(RGan)8.0f & %(RInn)8.0f \\
+    \textbf{k} & %(CLNk)8.0f & %(CGak)8.0f & %(CInk)8.0f & %(RLNk)8.0f & %(RGak)8.0f & %(RInk)8.0f \\
     \textbf{Pearson} & %(CLNPearson)8.2f & %(CGaPearson)8.2f & %(CInPearson)8.2f & %(RLNPearson)8.2f & %(RGaPearson)8.2f & %(RInPearson)8.2f \\
     \textbf{Pearson/(n - k)} & %(CLNPearson/n-k)8.4f & %(CGaPearson/n-k)8.4f & %(CInPearson/n-k)8.4f & %(RLNPearson/n-k)8.4f & %(RGaPearson/n-k)8.4f & %(RInPearson/n-k)8.4f \\
     \textbf{Deviance} & %(CLND)8.2f & %(CGaD)8.2f & %(CInD)8.2f & %(RLND)8.2f & %(RGaD)8.2f & %(RInD)8.2f \\

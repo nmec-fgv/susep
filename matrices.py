@@ -139,8 +139,8 @@ def data(data_dict):
             if  mmm == 'dez':
                 aux_farr = np.zeros((len(freq_matrix[aa]), 3))
                 aux_sarr = np.zeros((len(sev_matrix[aa]), 3))
-                if aa != '08':
-                    period = int(aa) - 9
+                if aa != '11':
+                    period = int(aa) - 8
                     aux_farr[:, [period]] = np.ones(len(aux_farr))[:, np.newaxis]
                     aux_sarr[:, [period]] = np.ones(len(aux_sarr))[:, np.newaxis]
 
@@ -193,7 +193,8 @@ def data(data_dict):
 
 
 
-## Factors and levels determination:
+## Factors and levels determination
+## important note: code must be run on Python 3.6 or higher due to reliance on dictionary key order preserving feature
 
 # discrete levels
 pol_type_levels = [[i] for i in range(2) if i != 0]

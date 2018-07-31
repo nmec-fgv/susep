@@ -3,11 +3,13 @@
     \centering
     \begin{threeparttable}
     \caption{\large{Diagnostics for binomial models of frequency data}}
+    \label{tab:freqbindiags}
     \begin{tabular}{lcccccc} \toprule
     & \multicolumn{3}{c}{own vehicle damage} & \multicolumn{3}{c}{third party liability} \\
     \cmidrule(l{.75em}){2-4} \cmidrule(l{.75em}){5-7}
     Statistic & Logit & Probit & C-loglog & Logit & Probit & C-loglog \\ \midrule
-    \textbf{J - k} & %(CLoJ-k)8.2f & %(CPrJ-k)8.2f & %(CC-J-k)8.2f & %(RLoJ-k)8.2f & %(RPrJ-k)8.2f & %(RC-J-k)8.2f \\
+    \textbf{J} & %(CLoJ)8.0f & %(CPrJ)8.0f & %(CC-J)8.0f & %(RLoJ)8.0f & %(RPrJ)8.0f & %(RC-J)8.0f \\
+    \textbf{k} & %(CLok)8.0f & %(CPrk)8.0f & %(CC-k)8.0f & %(RLok)8.0f & %(RPrk)8.0f & %(RC-k)8.0f \\
     \textbf{Pearson} & %(CLoPearson)8.2f & %(CPrPearson)8.2f & %(CC-Pearson)8.2f & %(RLoPearson)8.2f & %(RPrPearson)8.2f & %(RC-Pearson)8.2f \\
     \textbf{Pearson/(J - k)} & %(CLoPearson/J-k)8.4f & %(CPrPearson/J-k)8.4f & %(CC-Pearson/J-k)8.4f & %(RLoPearson/J-k)8.4f & %(RPrPearson/J-k)8.4f & %(RC-Pearson/J-k)8.4f \\
     \textbf{Deviance} & %(CLoD)8.2f & %(CPrD)8.2f & %(CC-D)8.2f & %(RLoD)8.2f & %(RPrD)8.2f & %(RC-D)8.2f \\

@@ -1,0 +1,55 @@
+\begin{table}
+    \small
+    \centering
+    \begin{threeparttable}
+    \caption{\large{Selection of factors and levels and total exposure available}}
+    \label{tab:factors}
+    \begin{tabular}{lllc} \toprule
+    \textbf{Factor} & \textbf{Definition} & \textbf{Levels}\tnote{*} & \textbf{Total exposure}\tnote{**} \\ \midrule
+    veh\_age & vehicle age & \textit{0-2} & %(Cb0e)4.2e \\
+    & & 3-5 & %(C0e)4.2e \\
+    & & 6-9 & %(C1e)4.2e \\
+    & & 10\texttt{+} & %(C2e)4.2e \\
+    \hline
+    region & place of residence & \textit{SP state} & %(Cb1e)4.2e \\
+    & & South & %(C3e)4.2e \\
+    & & RJ state & %(C4e)4.2e \\
+    & & ES/MG states & %(C5e)4.2e \\
+    & & North/Northeast & %(C6e)4.2e \\
+    & & Central-West & %(C7e)4.2e \\
+    \hline
+    gender & insuree gender & \textit{male} & %(Cb2e)4.2e \\ 
+    & & female & %(C8e)4.2e \\
+    \hline
+    bonus & bonus granted & \textit{yes} & %(Cb3e)4.2e \\
+    & & no & %(C9e)4.2e \\
+    \hline
+    age & insuree age & 0-27 & %(C10e)4.2e \\
+    & & 28-37 & %(C11e)4.2e \\
+    & & \textit{38-49} & %(Cb4e)4.2e \\
+    & & 50-59 & %(C12e)4.2e \\
+    & & 60\texttt{+} & %(C13e)4.2e \\
+    \hline
+    cov\_veh & coverage of own vehicle damage \tnote{\dag} & \textit{0-20} & %(Cb5e)4.2e \\
+    & & 20-30 & %(C14e)4.2e \\
+    & & 30-45 & %(C15e)4.2e \\
+    & & 45\texttt{+} &  %(C16e)4.2e \\
+    \hline
+    cov\_lia & coverage of third party liability \tnote{\dag} & \textit{0-59} & %(Rb5e)4.2e \\
+    & & 60-79 & %(R14e)4.2e \\
+    & & 80-119 & %(R15e)4.2e \\
+    & & 120\texttt{+} & %(R16e)4.2e \\
+    \hline
+    year & year of start of coverage & 2008 & %(C17e)4.2e \\
+    & & 2009 & %(C18e)4.2e \\
+    & & 2010 & %(C19e)4.2e \\
+    & & \textit{2011} & %(Cb6e)4.2e \\ 
+    \bottomrule
+    \end{tabular}
+    \begin{tablenotes}
+    \item[*] \scriptsize{Base levels in italics.}
+    \item[**] \scriptsize{Total esposure in years.}
+    \item[\dag] \scriptsize{BR\$ in thousands, CPI adjusted to january 2008 values.}
+    \end{tablenotes}
+    \end{threeparttable}
+\end{table}
