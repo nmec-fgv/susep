@@ -43,9 +43,10 @@ class Diagnostics:
 
     def plot01(self):
         '''Plots raw residual of grouped data, defined as y_bar - mu, against mu'''
-        x = self.cell_res[:, [2]]
-        y = self.cell_res[:, [1]] - self.cell_res[:, [2]]
-        color = 1 - (self.cell_res[:, [0]] / np.amax(self.cell_res[:, [0]])) 
+        index = np.where(self.cell_res[:, [0]] > 0)[0]
+        x = self.cell_res[:, [2]][index]
+        y = self.cell_res[:, [1]][index] - self.cell_res[:, [2]][index]
+        color = 1 - (self.cell_res[:, [0]][index] / np.amax(self.cell_res[:, [0]][index])) 
         color = np.hstack((color, color, color))
         color = color**2 * .1
         plt.scatter(x, y, s=1, c=color, alpha=.3)
@@ -55,6 +56,6 @@ class Diagnostics:
 
 if __name__ == '__main__':
     for model in ('Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian'):
-        for claim_type in ('casco', 'rcd'):
+        for claim_type in ('casco', 'rcd',):
             x = Diagnostics(model, claim_type)
             x.plot01()

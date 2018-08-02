@@ -1,7 +1,6 @@
-###############################################################################
-## Loads from data.py and transforms data to make it suitable to frequency   ##
-## and severity models of categorical covariates, according to coverage type ##
-###############################################################################
+##############################################
+## Auxiliary code for counting observations ##
+##############################################
 
 
 import os

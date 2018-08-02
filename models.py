@@ -12,7 +12,7 @@ import scipy.stats as st
 import pdb
 import time
 
-# Raise exception on runtime warnings, lower bounds and precision parameters:
+# Raise exception on runtime warnings, plus lower bounds and precision parameters:
 
 np.seterr(all='raise')
 lb_log = 1e-323
@@ -81,7 +81,7 @@ def grab_results_db(prefix, model, claim_type, keys=None):
 
 class Estimation:
     '''
-    Provides estimated parameters of Poisson regression model.
+    Estimation of parameters of regression models.
 
     Parameters:
     -----------
@@ -662,6 +662,9 @@ class Stdout:
                     cell_res[i, 1] = np.average(X[:, [0]])
             else:
                 ind_res[key] = np.array([])
+                dev_local = 0
+                dev_y_bar_local = 0
+                Pearson_local = 0
                 cell_res[i, 1] = 0
 
             cell_res[i, 0] = len(X)
@@ -715,7 +718,7 @@ class Stdout:
 if __name__ == '__main__':
     for model in ('Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian', 'Poisson', 'NB2'):
         for claim_type in ('casco', 'rcd'):
-            x = Estimation(model, claim_type)
-            x.save_estimation_results()
+#            x = Estimation(model, claim_type)
+#            x.save_estimation_results()
             y = Stdout(model, claim_type)
             y.save_stdout_results()
