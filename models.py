@@ -226,7 +226,7 @@ class Estimation:
                 '''
                 Gradient of loglikelihood for Log-Normal regression model
                 [1/sigma^2 * (ln y_i - x_i'beta] * x_i
-                -1/2*sigma^2 + (y_i - x_i'beta)^2/2*sigma^4
+                -1/2*sigma^2 + (ln y_i - x_i'beta)^2/2*sigma^4
                 '''
 
                 aux_beta = beta[-1]**(-1) * (np.log(X[:, [0]]) - X[:, 1:] @ beta[:-1])
@@ -239,7 +239,7 @@ class Estimation:
                 '''
                 Inverse of negative Hessian of Log-Normal loglikelihood
                 inv 1/sigma^2 * x_i * x_i'
-                inv -(2*sigma^4)^(-1) + (y_i - x_i'beta)^2/sigma^6
+                inv -(2*sigma^4)^(-1) + (ln y_i - x_i'beta)^2/sigma^6
                 '''
     
                 aux_beta = np.linalg.inv(X[:, 1:].T @ (beta[-1]**(-1) * X[:, 1:]))
@@ -359,7 +359,10 @@ class Estimation:
         if dependent == 'freq':
             self.y_bar = np.sum(X[:, [0]]) / np.sum(X[:, [1]])
         elif dependent == 'sev':
-            self.y_bar = np.average(X[:, [0]])
+            if model != 'LNormal':
+                self.y_bar = np.average(X[:, [0]])
+            else:
+                self.y_bar = np.average(np.log(X[:, [0]]))
 
     def save_estimation_results(self, keys=None):
         if keys != None:
@@ -534,7 +537,7 @@ class Stdout:
         elif model == 'LNormal':
             def LL_func(X, mu, extra_param):
                 '''
-                loglikelihood: sum_i -ln 2pi/2 -ln sigma^2/2 + (y_i - mu_i)^2/2sigma^2
+                loglikelihood: sum_i -ln 2pi/2 -ln sigma^2/2 + (ln y_i - mu_i)^2/2sigma^2
                 '''
             
                 sigma2 = extra_param
@@ -543,7 +546,7 @@ class Stdout:
 
             def deviance(X, mu, extra_param, y_bar):
                 '''
-                deviance^2 = (y_i - mu_i)^2
+                deviance^2 = (ln y_i - mu_i)^2
                 '''
 
                 aux_dev = (np.log(X) - mu)**2
@@ -556,7 +559,7 @@ class Stdout:
                 return (dev_is, dev_local, dev_y_bar_local)
 
             def Pearson(X, mu, extra_param):
-                '''y_i-mu_i'''
+                '''ln y_i - mu_i'''
 
                 Pearson_is = np.log(X) - mu
                 Pearson_local = np.sum(Pearson_is**2)
@@ -659,7 +662,10 @@ class Stdout:
                 if model_type == 'freq':
                     cell_res[i, 1] = np.average(X[:, [0]] * X[:, [1]])
                 elif model_type == 'sev':
-                    cell_res[i, 1] = np.average(X[:, [0]])
+                    if model != 'LNormal':
+                        cell_res[i, 1] = np.average(X)
+                    else:
+                        cell_res[i, 1] = np.average(np.log(X))
             else:
                 ind_res[key] = np.array([])
                 dev_local = 0
@@ -716,7 +722,8 @@ class Stdout:
 
 
 if __name__ == '__main__':
-    for model in ('Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian', 'Poisson', 'NB2'):
+#    for model in ('Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian', 'Poisson', 'NB2'):
+    for model in ('LNormal',):
         for claim_type in ('casco', 'rcd'):
 #            x = Estimation(model, claim_type)
 #            x.save_estimation_results()
