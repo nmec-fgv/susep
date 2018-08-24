@@ -4,6 +4,7 @@
 
 import os
 import psycopg2
+import pdb
 
 conn = psycopg2.connect("dbname=susep user=ricardob")
 cur = conn.cursor()

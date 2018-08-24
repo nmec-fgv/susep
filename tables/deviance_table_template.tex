@@ -1,0 +1,46 @@
+{\small
+\begin{ThreePartTable}
+    \begin{TableNotes}
+    \item[\dag] $2[LL(F)-LL(R)]$, where LL(F) and LL(R) are the log-likelihood values of the full and restricted models.
+    \item[\dag\dag] Number of extra parameters, k being the number of parameters of main effects only (restricted) model, p of the full model.
+    \item[\ddag] All previous binary interactions are included.
+    \end{TableNotes}
+\begin{longtable}{lccc}
+    \caption{\large{Analysis of deviance, :::model model, :::claim_type}}
+    \label{tab:deviance:::model:::std_claim_type} \\
+    \toprule
+    Interactions & LL dist.\tnote{\dag} & $p-k$\tnote{\dag\dag} & LL dist./$\chi^{2}_{p-k}(5\@)$ \\ \midrule
+    \endfirsthead
+    
+    \multicolumn{4}{c}{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+    \toprule
+    Interactions & LL dist.\tnote{\dag} & $p-k$\tnote{\dag\dag} & LL dist./$\chi^{2}_{p-k}(5\@)$ \\ \midrule
+    \endhead
+
+    \midrule
+    \multicolumn{4}{r}{\textit{continued on next page}} \\
+    \endfoot
+    \bottomrule
+    \insertTableNotes
+    \endlastfoot
+
+    \textit{veh\_age} + \textit{region} & %((('veh_age', 'region'),)_2LLdiff)8.2f & %((('veh_age', 'region'),)_k+)8.0f & %((('veh_age', 'region'),)_chi2)8.2f \\
+    \textit{veh\_age} + \textit{sex} & %((('veh_age', 'sex'),)_2LLdiff)8.2f & %((('veh_age', 'sex'),)_k+)8.0f & %((('veh_age', 'sex'),)_chi2)8.2f \\
+    \textit{veh\_age} + \textit{bonus} & %((('veh_age', 'bonus'),)_2LLdiff)8.2f & %((('veh_age', 'bonus'),)_k+)8.0f & %((('veh_age', 'bonus'),)_chi2)8.2f \\
+    \textit{veh\_age} + \textit{age} & %((('veh_age', 'age'),)_2LLdiff)8.2f & %((('veh_age', 'age'),)_k+)8.0f & %((('veh_age', 'age'),)_chi2)8.2f \\
+    \textit{veh\_age} + \textit{cov} & %((('veh_age', 'cov'),)_2LLdiff)8.2f & %((('veh_age', 'cov'),)_k+)8.0f & %((('veh_age', 'cov'),)_chi2)8.2f \\
+    \textit{region} + \textit{sex} & %((('region', 'sex'),)_2LLdiff)8.2f & %((('region', 'sex'),)_k+)8.0f & %((('region', 'sex'),)_chi2)8.2f \\
+    \textit{region} + \textit{bonus} & %((('region', 'bonus'),)_2LLdiff)8.2f & %((('region', 'bonus'),)_k+)8.0f & %((('region', 'bonus'),)_chi2)8.2f \\
+    \textit{region} + \textit{age} & %((('region', 'age'),)_2LLdiff)8.2f & %((('region', 'age'),)_k+)8.0f & %((('region', 'age'),)_chi2)8.2f \\
+    \textit{region} + \textit{cov} & %((('region', 'cov'),)_2LLdiff)8.2f & %((('region', 'cov'),)_k+)8.0f & %((('region', 'cov'),)_chi2)8.2f \\
+    \textit{sex} + \textit{bonus} & %((('sex', 'bonus'),)_2LLdiff)8.2f & %((('sex', 'bonus'),)_k+)8.0f & %((('sex', 'bonus'),)_chi2)8.2f \\
+    \textit{sex} + \textit{age} & %((('sex', 'age'),)_2LLdiff)8.2f & %((('sex', 'age'),)_k+)8.0f & %((('sex', 'age'),)_chi2)8.2f \\
+    \textit{sex} + \textit{cov} & %((('sex', 'cov'),)_2LLdiff)8.2f & %((('sex', 'cov'),)_k+)8.0f & %((('sex', 'cov'),)_chi2)8.2f \\
+    \textit{bonus} + \textit{age} & %((('bonus', 'age'),)_2LLdiff)8.2f & %((('bonus', 'age'),)_k+)8.0f & %((('bonus', 'age'),)_chi2)8.2f \\
+    \textit{bonus} + \textit{cov} & %((('bonus', 'cov'),)_2LLdiff)8.2f & %((('bonus', 'cov'),)_k+)8.0f & %((('bonus', 'cov'),)_chi2)8.2f \\
+    \textit{age} + \textit{cov} & %((('age', 'cov'),)_2LLdiff)8.2f & %((('age', 'cov'),)_k+)8.0f & %((('age', 'cov'),)_chi2)8.2f \\
+    \textit{all}\tnote{\ddag} & %(all_2LLdiff)8.2f & %(all_k+)8.0f & %(all_chi2)8.2f \\
+
+\end{longtable}
+\end{ThreePartTable}
+}

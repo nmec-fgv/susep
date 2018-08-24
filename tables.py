@@ -15,6 +15,11 @@ data_dir = 'persistent/'
 # Tables directory:
 tables_dir = 'tables/'
 
+
+## Functions for creation of tables:
+
+# Regression results
+
 def regression_tables():
     db_file = data_dir + 'overall_results_casco.db'
     db = shelve.open(db_file)
@@ -39,7 +44,7 @@ def regression_tables():
             for i, item in enumerate(rcd_dict[model][var]):
                 aux_dict['R' + model[:2] + var + str(i)] = item[0]
     
-        for var2 in {'n', 'k', 'J', 'LL', 'D', 'Pearson', 'pseudo_R2', 'GF'}:
+        for var2 in {'n', 'k', 'J', 'LL', 'D_scaled', 'Pearson', 'pseudo_R2', 'GF'}:
             if var2 == 'LL':
                 aux_dict['C' + model[:2] + var2] = - casco_dict[model][var2]
                 aux_dict['R' + model[:2] + var2] = - rcd_dict[model][var2]
@@ -54,10 +59,10 @@ def regression_tables():
             aux_dict['R' + model[:2] + 'k'] = rcd_dict[model]['k']
             aux_dict['C' + model[:2] + 'Pearson/n-k'] = casco_dict[model]['Pearson'] / (casco_dict[model]['n'] - casco_dict[model]['k'])
             aux_dict['R' + model[:2] + 'Pearson/n-k'] = rcd_dict[model]['Pearson'] / (rcd_dict[model]['n'] - rcd_dict[model]['k'])
-            aux_dict['C' + model[:2] + 'n-k_Chi2'] = st.chi2.isf(0.95, casco_dict[model]['n'] - casco_dict[model]['k'])
-            aux_dict['R' + model[:2] + 'n-k_Chi2'] = st.chi2.isf(0.95, rcd_dict[model]['n'] - rcd_dict[model]['k'])
-            aux_dict['C' + model[:2] + 'D/n-k_Chi2'] = casco_dict[model]['D'] / aux_dict['C' + model[:2] + 'n-k_Chi2']
-            aux_dict['R' + model[:2] + 'D/n-k_Chi2'] = rcd_dict[model]['D'] / aux_dict['R' + model[:2] + 'n-k_Chi2']
+            aux_dict['C' + model[:2] + 'n-k_Chi2'] = st.chi2.isf(0.05, casco_dict[model]['n'] - casco_dict[model]['k'])
+            aux_dict['R' + model[:2] + 'n-k_Chi2'] = st.chi2.isf(0.05, rcd_dict[model]['n'] - rcd_dict[model]['k'])
+            aux_dict['C' + model[:2] + 'D_scaled/n-k_Chi2'] = casco_dict[model]['D_scaled'] / aux_dict['C' + model[:2] + 'n-k_Chi2']
+            aux_dict['R' + model[:2] + 'D_scaled/n-k_Chi2'] = rcd_dict[model]['D_scaled'] / aux_dict['R' + model[:2] + 'n-k_Chi2']
         else:
             aux_dict['C' + model[:2] + 'J'] = casco_dict[model]['J']
             aux_dict['C' + model[:2] + 'k'] = casco_dict[model]['k']
@@ -65,13 +70,13 @@ def regression_tables():
             aux_dict['R' + model[:2] + 'k'] = rcd_dict[model]['k']
             aux_dict['C' + model[:2] + 'Pearson/J-k'] = casco_dict[model]['Pearson'] / (casco_dict[model]['J'] - casco_dict[model]['k'])
             aux_dict['R' + model[:2] + 'Pearson/J-k'] = rcd_dict[model]['Pearson'] / (rcd_dict[model]['J'] - rcd_dict[model]['k'])
-            aux_dict['C' + model[:2] + 'J-k_Chi2'] = st.chi2.isf(0.95, casco_dict[model]['J'] - casco_dict[model]['k'])
-            aux_dict['R' + model[:2] + 'J-k_Chi2'] = st.chi2.isf(0.95, rcd_dict[model]['J'] - rcd_dict[model]['k'])
-            aux_dict['C' + model[:2] + 'D/J-k_Chi2'] = casco_dict[model]['D'] / aux_dict['C' + model[:2] + 'J-k_Chi2']
-            aux_dict['R' + model[:2] + 'D/J-k_Chi2'] = rcd_dict[model]['D'] / aux_dict['R' + model[:2] + 'J-k_Chi2']
+            aux_dict['C' + model[:2] + 'J-k_Chi2'] = st.chi2.isf(0.05, casco_dict[model]['J'] - casco_dict[model]['k'])
+            aux_dict['R' + model[:2] + 'J-k_Chi2'] = st.chi2.isf(0.05, rcd_dict[model]['J'] - rcd_dict[model]['k'])
+            aux_dict['C' + model[:2] + 'D_scaled/J-k_Chi2'] = casco_dict[model]['D_scaled'] / aux_dict['C' + model[:2] + 'J-k_Chi2']
+            aux_dict['R' + model[:2] + 'D_scaled/J-k_Chi2'] = rcd_dict[model]['D_scaled'] / aux_dict['R' + model[:2] + 'J-k_Chi2']
     
-        aux_dict['C' + model[:2] + 'J-1_Chi2'] = st.chi2.isf(0.95, casco_dict[model]['J'] - 1)
-        aux_dict['R' + model[:2] + 'J-1_Chi2'] = st.chi2.isf(0.95, rcd_dict[model]['J'] - 1)
+        aux_dict['C' + model[:2] + 'J-1_Chi2'] = st.chi2.isf(0.05, casco_dict[model]['J'] - 1)
+        aux_dict['R' + model[:2] + 'J-1_Chi2'] = st.chi2.isf(0.05, rcd_dict[model]['J'] - 1)
     
     for aux in ('freq', 'sev', 'freq_bin'):
         for aux2 in ('coeffs', 'diags'):
@@ -90,6 +95,9 @@ def regression_tables():
         
             with open(tables_dir + aux + '_' + aux2 + '_table.tex', 'w') as cfile:
                 cfile.write(table)
+
+
+# Display of factors and levels
 
 def factors_table():
     levels_structure = [(0, 1, 2), (3, 4, 5, 6, 7), (8,), (9,), (10, 11, 12, 13), (14, 15, 16), (17, 18, 19)]
@@ -145,6 +153,56 @@ def factors_table():
         cfile.write(table)
 
 
+# Analysis of deviance
+
+def deviance_tables(model, claim_type):
+    db_file = data_dir + 'overall_results_' + claim_type + '.db'
+    db = shelve.open(db_file)
+    aux_dict = {}
+    if model == 'LNormal':
+        aux_dict['model'] = 'Log-normal'
+    elif model == 'InvGaussian':
+        aux_dict['model'] = 'Inverse Gaussian'
+    else:
+        aux_dict['model'] = model
+
+    if claim_type == 'casco':
+        aux_dict['claim_type'] = 'own vehicle damage'
+    elif claim_type == 'rcd':
+        aux_dict['claim_type'] = 'third party liability'
+
+    for int_list in [(('veh_age', 'region'),), (('veh_age', 'sex'),), (('veh_age', 'bonus'),), (('veh_age', 'age'),), (('veh_age', 'cov'),), (('region', 'sex'),), (('region', 'bonus'),), (('region', 'age'),), (('region', 'cov'),), (('sex', 'bonus'),), (('sex', 'age'),), (('sex', 'cov'),), (('bonus', 'age'),), (('bonus', 'cov'),), (('age', 'cov'),), (('veh_age', 'region'), ('veh_age', 'sex'), ('veh_age', 'bonus'), ('veh_age', 'age'), ('veh_age', 'cov'), ('region', 'sex'), ('region', 'bonus'), ('region', 'age'), ('region', 'cov'), ('sex', 'bonus'), ('sex', 'age'), ('sex', 'cov'), ('bonus', 'age'), ('bonus', 'cov'), ('age', 'cov'))]:
+        aux_dict[str(int_list) + '_2LLdiff'] = 2 * (db[model + str(int_list)]['LL'] - db[model]['LL'])
+        aux_dict[str(int_list) + '_k+'] = db[model + str(int_list)]['k'] - db[model]['k']
+        aux_dict[str(int_list) + '_chi2'] = aux_dict[str(int_list) + '_2LLdiff'] / st.chi2.isf(0.05, db[model + str(int_list)]['k'] - db[model]['k'])
+        if len(int_list) > 1:
+            aux_dict['all_2LLdiff'] = aux_dict.pop(str(int_list) + '_2LLdiff')
+            aux_dict['all_k+'] = aux_dict.pop(str(int_list) + '_k+')
+            aux_dict['all_chi2'] = aux_dict.pop(str(int_list) + '_chi2')
+    
+    db.close()
+    try:
+        with open(tables_dir + 'deviance_table_template.tex', 'r') as cfile:
+            template = cfile.read()
+    except:
+        print('Template file missing')
+    
+    table = template % aux_dict
+    table = table.replace('@', '%')
+    table = table.replace(':::model', aux_dict['model'])
+    table = table.replace(':::claim_type', aux_dict['claim_type'])
+    table = table.replace(':::std_claim_type', claim_type)
+    try:
+        os.remove(tables_dir + 'deviance_table_' + model + '_' + claim_type + '.tex')
+    except OSError:
+        pass
+
+    with open(tables_dir + 'deviance_table_' + model + '_' + claim_type + '.tex', 'w') as cfile:
+        cfile.write(table)
+
 if __name__ == '__main__':
-    regression_tables()
-    factors_table()
+#    regression_tables()
+#    factors_table()
+    for model in ('Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian', 'Poisson'):#, 'NB2'):
+        for claim_type in ('casco', 'rcd'):
+            deviance_tables(model, claim_type)

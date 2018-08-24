@@ -1,0 +1,46 @@
+{\small
+\begin{ThreePartTable}
+    \begin{TableNotes}
+    \item[\dag] $2[LL(F)-LL(R)]$, where LL(F) and LL(R) are the log-likelihood values of the full and restricted models.
+    \item[\dag\dag] Number of extra parameters, k being the number of parameters of main effects only (restricted) model, p of the full model.
+    \item[\ddag] All previous binary interactions are included.
+    \end{TableNotes}
+\begin{longtable}{lccc}
+    \caption{\large{Analysis of deviance, Gamma model, own vehicle damage}}
+    \label{tab:devianceGammacasco} \\
+    \toprule
+    Interactions & LL dist.\tnote{\dag} & $p-k$\tnote{\dag\dag} & LL dist./$\chi^{2}_{p-k}(5\%)$ \\ \midrule
+    \endfirsthead
+    
+    \multicolumn{4}{c}{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+    \toprule
+    Interactions & LL dist.\tnote{\dag} & $p-k$\tnote{\dag\dag} & LL dist./$\chi^{2}_{p-k}(5\%)$ \\ \midrule
+    \endhead
+
+    \midrule
+    \multicolumn{4}{r}{\textit{continued on next page}} \\
+    \endfoot
+    \bottomrule
+    \insertTableNotes
+    \endlastfoot
+
+    \textit{veh\_age} + \textit{region} &  1460.79 &       15 &    58.44 \\
+    \textit{veh\_age} + \textit{sex} &     5.68 &        3 &     0.73 \\
+    \textit{veh\_age} + \textit{bonus} &   370.88 &        3 &    47.46 \\
+    \textit{veh\_age} + \textit{age} &   461.85 &       12 &    21.97 \\
+    \textit{veh\_age} + \textit{cov} &  7482.41 &        9 &   442.25 \\
+    \textit{region} + \textit{sex} &   423.66 &        5 &    38.27 \\
+    \textit{region} + \textit{bonus} &  1146.35 &        5 &   103.55 \\
+    \textit{region} + \textit{age} &   616.08 &       20 &    19.61 \\
+    \textit{region} + \textit{cov} &  4572.56 &       15 &   182.93 \\
+    \textit{sex} + \textit{bonus} &   249.77 &        1 &    65.02 \\
+    \textit{sex} + \textit{age} &   514.16 &        4 &    54.19 \\
+    \textit{sex} + \textit{cov} &   500.14 &        3 &    64.00 \\
+    \textit{bonus} + \textit{age} &    62.92 &        4 &     6.63 \\
+    \textit{bonus} + \textit{cov} &   705.68 &        3 &    90.30 \\
+    \textit{age} + \textit{cov} &   534.34 &       12 &    25.41 \\
+    \textit{all}\tnote{\ddag} & 18877.03 &      114 &   134.91 \\
+
+\end{longtable}
+\end{ThreePartTable}
+}

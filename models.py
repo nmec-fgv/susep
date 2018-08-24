@@ -21,9 +21,14 @@ lb_alpha = 1e-77
 lb_sigma2 = 1e-102
 prec_param = 1e-8
 
+
 # Data directory:
 
 data_dir = 'persistent/'
+
+# List of factors, should match data_dict in matrices.py, used for interactions
+
+factors_list = {'veh_age': (0, 2), 'region': (3, 7), 'sex': (8,), 'bonus': (9,), 'age': (10, 13), 'cov': (14, 16), 'year': (17, 19)} 
 
 # Auxiliary functions:
 
@@ -76,6 +81,59 @@ def grab_results_db(prefix, model, claim_type, keys=None):
     db.close()
     return res
     
+def interactions(X, dependent, interactions_list):
+    if dependent == 'freq':
+        aux_disp = 3
+    elif dependent == 'sev':
+        aux_disp = 2
+
+    for item in interactions_list:
+        item0f = factors_list[item[0]][0]
+        item0l = factors_list[item[0]][-1]
+        item0_size = item0l - item0f + 2
+        item1f = factors_list[item[1]][0]
+        item1l = factors_list[item[1]][-1]
+        item1_size = item1l - item1f + 2
+        item_size = (item0_size - 1) * (item1_size - 1)
+        X_add = np.zeros((np.shape(X)[0], item_size))
+        aux_pos = -1
+        for i in range(item0_size - 1):
+            level_i = item0f + aux_disp + i
+            for j in range(item1_size - 1):
+                aux_pos += 1
+                level_j = item1f + aux_disp + j
+                index = np.where((X[:, [level_i, level_j]] == [1, 1]).all(-1))[0] 
+                X_add[index, aux_pos] = 1 
+
+        X = np.hstack((X, X_add))
+
+    return X
+
+def interactions_new_key(interactions_list, key):
+    key = [int(j) for j in list(key)]
+    for item in interactions_list:
+        item0f = factors_list[item[0]][0]
+        item0l = factors_list[item[0]][-1]
+        item0_size = item0l - item0f + 2
+        item1f = factors_list[item[1]][0]
+        item1l = factors_list[item[1]][-1]
+        item1_size = item1l - item1f + 2
+        item_size = (item0_size - 1) * (item1_size - 1)
+        key_add = [0] * item_size
+        aux_pos = -1
+        for i in range(item0_size - 1):
+            level_i = item0f + i
+            for j in range(item1_size - 1):
+                aux_pos += 1
+                level_j = item1f + j
+                if key[level_i] == 1 and key[level_j] == 1:
+                    key_add[aux_pos] = 1
+
+        key = key + key_add
+
+    key = ''.join([str(i) for i in key])
+    return key
+
 
 # Classes:
 
@@ -92,7 +150,7 @@ class Estimation:
     --------
     save_results
     '''
-    def __init__(self, model, claim_type):
+    def __init__(self, model, claim_type, interactions_list=None):
         if claim_type not in {'casco', 'rcd'} or model not in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian'}:
             raise Exception('Model or claim_type provided not in permissible set')
 
@@ -102,6 +160,9 @@ class Estimation:
             dependent = 'sev'
 
         X = file_load(dependent + '_' + claim_type + '_matrix.pkl')
+        if interactions_list != None:
+            X = interactions(X, dependent, interactions_list)
+
         if model == 'Poisson':
             def grad_func(X, beta):
                 '''
@@ -351,6 +412,9 @@ class Estimation:
             sys.stdout.flush()
 
         self.model = model
+        if interactions_list != None:
+            self.extended_model = model + str(interactions_list)
+
         self.claim_type = claim_type
         self.beta = beta
         self.var = A
@@ -372,7 +436,10 @@ class Estimation:
             res_dict = {'beta': self.beta, 'var': self.var, 'std': self.std, 'z_stat': self.z_stat, 'y_bar': self.y_bar}
 
         prefix = 'overall'
-        save_results_db(res_dict, prefix, self.model, self.claim_type)
+        try:
+            save_results_db(res_dict, prefix, self.extended_model, self.claim_type)
+        except:
+            save_results_db(res_dict, prefix, self.model, self.claim_type)
 
 
 class Stdout:
@@ -395,7 +462,7 @@ class Stdout:
     counts and exposure are aggregated within cells before computation of likelihood and residuals
     '''
 
-    def __init__(self, model, claim_type):
+    def __init__(self, model, claim_type, interactions_list=None):
         self.model = model
         self.claim_type = claim_type
         if model in {'Poisson', 'NB2', 'Logit', 'Probit', 'C-loglog'}:
@@ -405,7 +472,12 @@ class Stdout:
 
         self.model_type = model_type
         X_dict = file_load(model_type + '_' + claim_type + '_dict.pkl')
-        res = grab_results_db('overall', model, claim_type)
+        if interactions_list == None:
+            res = grab_results_db('overall', model, claim_type)
+        else:
+            res = grab_results_db('overall', model + str(interactions_list), claim_type)
+            self.extended_model = model + str(interactions_list)
+
         self.beta = res['beta']
         self.var = res['var']
         self.std = res['std']
@@ -424,6 +496,17 @@ class Stdout:
                 '''
 
                 res = np.sum(- X[:, [1]] * mu + X[:, [0]] * np.log(X[:, [1]] * mu) - np.log(sp.factorial(X[:, [0]])))
+                return res
+
+            def LL_saturated(X, extra_param):
+                '''
+                loglikelihood of saturated model
+                '''
+
+                aux_res = np.zeros(np.shape(X[:, [0]]))
+                index = np.where(X[:, [0]] > 0)[0]
+                aux_res[index] = - X[:, [0]][index] + X[:, [0]][index] * np.log(X[:, [0]][index]) - np.log(sp.factorial(X[:, [0]][index]))
+                res = np.sum(aux_res)
                 return res
 
             def deviance(X, mu, extra_param, y_bar):
@@ -460,6 +543,18 @@ class Stdout:
             
                 inv_alpha = extra_param**(-1)
                 res = np.sum(np.log(sp.gamma(X[:, [0]] + inv_alpha) / sp.gamma(inv_alpha)) - np.log(sp.factorial(X[:, [0]])) - (X[:, [0]] + inv_alpha) * np.log(inv_alpha + X[:, [1]] * mu) + inv_alpha * np.log(inv_alpha) + X[:, [0]] * np.log(X[:, [1]] * mu))
+                return res
+
+            def LL_saturated(X, extra_param):
+                '''
+                loglikelihood of saturated model
+                '''
+            
+                inv_alpha = extra_param**(-1)
+                aux_res = np.log(sp.gamma(X[:, [0]] + inv_alpha) / sp.gamma(inv_alpha)) - np.log(sp.factorial(X[:, [0]])) - (X[:, [0]] + inv_alpha) * np.log(inv_alpha + X[:, [0]]) + inv_alpha * np.log(inv_alpha)
+                index = np.where(X[:, [0]] > 0)[0]
+                aux_res[index] = aux_res[index] + X[:, [0]][index] * np.log(X[:, [0]][index])
+                res = np.sum(aux_res)
                 return res
 
             def deviance(X, mu, extra_param, y_bar):
@@ -500,6 +595,20 @@ class Stdout:
                 res = np.sum(y * np.log(mu / (1 - mu)) + m * np.log(1 - mu))
                 return res
 
+            def LL_saturated(X, extra_param):
+                '''
+                loglikelihood of saturated model
+                '''
+            
+                y = np.sum(X[:, [0]])
+                m = np.sum(X[:, [1]])
+                if y > 0:
+                    res = np.sum(y * np.log((y / m) / (1 - (y / m))) + m * np.log(1 - (y / m)))
+                else:
+                    res = 0
+
+                return res
+
             def deviance(X, mu, extra_param, y_bar):
                 '''
                 deviance^2 = y_i * ln(y_i/mu_i) + (m_i - y_i) * ln((m_i - y_i)/(m_i-mu_i))
@@ -526,22 +635,31 @@ class Stdout:
                 return (dev_is, dev_local, dev_y_bar_local)
 
             def Pearson(X, mu, extra_param):
-                '''(y_i/m_i - mu_i)^2 / mu_i*(1-mu_i)'''
+                '''(y_i - m_i*mu_i)^2 / m_i*mu_i*(1-mu_i)'''
 
                 y = np.sum(X[:, [0]])
                 m = np.sum(X[:, [1]])
-                Pearson_is = (y / m - mu) / (mu * (1 - mu))**.5
+                Pearson_is = (y - m * mu) / (m * mu * (1 - mu))**.5
                 Pearson_local = Pearson_is**2
                 return (Pearson_is, Pearson_local)
 
         elif model == 'LNormal':
             def LL_func(X, mu, extra_param):
                 '''
-                loglikelihood: sum_i -ln 2pi/2 -ln sigma^2/2 + (ln y_i - mu_i)^2/2sigma^2
+                loglikelihood: sum_i -ln 2pi/2 -ln sigma^2/2 - (ln y_i - mu_i)^2/2sigma^2
                 '''
             
                 sigma2 = extra_param
                 res = np.sum(- np.log(2 * np.pi) / 2 - np.log(sigma2) / 2 - (np.log(X) - mu)**2 / 2 * sigma2)
+                return res
+
+            def LL_saturated(X, extra_param):
+                '''
+                loglikelihood of saturated model
+                '''
+            
+                sigma2 = extra_param
+                res = np.sum(- np.log(2 * np.pi) / 2 - np.log(sigma2) / 2)
                 return res
 
             def deviance(X, mu, extra_param, y_bar):
@@ -575,6 +693,15 @@ class Stdout:
                 res = np.sum(- nu * (X / mu) - nu * np.log(mu) + nu * np.log(X) + nu * np.log(nu) - np.log(X) - np.log(sp.gamma(nu)))
                 return res
 
+            def LL_saturated(X, extra_param):
+                '''
+                loglikelihood of saturated model
+                '''
+            
+                nu = extra_param
+                res = np.sum(- nu - nu * np.log(X) + nu * np.log(X) + nu * np.log(nu) - np.log(X) - np.log(sp.gamma(nu)))
+                return res
+
             def deviance(X, mu, extra_param, y_bar):
                 '''
                 deviance^2 = -ln(y_i/mu_i) + (y_i - mu_i) / mu_i
@@ -606,6 +733,15 @@ class Stdout:
                 res = np.sum(- .5 * np.log(2 * np.pi * sigma2) - .5 * np.log(X**3) - X / (2 * sigma2 * mu**2) + (sigma2 * mu)**(-1) - (2 * sigma2 * X)**(-1))
                 return res
             
+            def LL_saturated(X, extra_param):
+                '''
+                loglikelihood of saturated model
+                '''
+            
+                sigma2 = extra_param
+                res = np.sum(- .5 * np.log(2 * np.pi * sigma2) - .5 * np.log(X**3))
+                return res
+
             def deviance(X, mu, extra_param, y_bar):
                 '''
                 deviance^2 = (y_i-mu_i)^2/(mu_i^2*y_i)
@@ -628,11 +764,19 @@ class Stdout:
                 return (Pearson_is, Pearson_local)
 
         LL_sum = 0
+        if interactions_list == None:
+            LL_saturated_sum = 0
+
         dev_stat_sum = 0
         dev_y_bar_stat_sum = 0
         Pearson_stat_sum = 0
         for i, key in enumerate(X_dict.keys()):
             X = X_dict[key]
+            if interactions_list == None:
+                pass
+            else:
+                key = interactions_new_key(interactions_list, key)
+
             if model == 'Poisson':
                 mu = np.exp(np.array([1] + [float(j) for j in list(key)]) @ self.beta)
                 extra_param = None
@@ -656,6 +800,9 @@ class Stdout:
 
             if np.shape(X)[0] > 0:
                 LL_sum += LL_func(X, mu, extra_param)
+                if interactions_list == None:
+                    LL_saturated_sum += LL_saturated(X, extra_param)
+
                 (dev_is, dev_local, dev_y_bar_local) = deviance(X, mu, extra_param, self.y_bar)
                 (Pearson_is, Pearson_local) = Pearson(X, mu, extra_param)
                 ind_res[key] = np.hstack((dev_is, Pearson_is))
@@ -693,6 +840,10 @@ class Stdout:
         self.J = len(self.cell_res)
         self.LL = LL_sum
         self.D = dev_stat_sum
+        if interactions_list == None:
+            self.LL_saturated = LL_saturated_sum
+            self.D_scaled = 2 * (LL_saturated_sum - LL_sum)
+
         self.Pearson = Pearson_stat_sum
         self.pseudo_R2 = 1 - self.D / dev_y_bar_stat_sum
         self.GF = np.sum((cell_res[:, [0]] * (cell_res[:, [1]] - cell_res[:, [2]])**2) / cell_res[:, [2]])
@@ -701,31 +852,48 @@ class Stdout:
             self.exp_avg = self.exp_tot / self.n
             self.exp_std = (np.sum(cell_res[:, [6]])/self.n)**.5
 
-    def save_stdout_results(self, keys=None):
-        # Overall results:
+    def save_stdout_results(self, grouped='no', individual='no'):
+        '''
+        Saves main or overall results on shelve database.
+        In addition specify grouped = 'yes' or individual = 'yes' for cell_res or ind_res persistency as pickle file.
+        '''
+
         if self.model_type == 'freq':
             res_dict = {'p_value': self.p_value, 'n': self.n, 'exp_tot': self.exp_tot, 'exp_avg': self.exp_avg, 'exp_std': self.exp_std, 'k': self.k, 'J': self.J, 'LL': self.LL, 'D': self.D, 'Pearson': self.Pearson, 'pseudo_R2': self.pseudo_R2, 'GF': self.GF}
         else:
             res_dict = {'p_value': self.p_value, 'n': self.n, 'k': self.k, 'J': self.J, 'LL': self.LL, 'D': self.D, 'Pearson': self.Pearson, 'pseudo_R2': self.pseudo_R2, 'GF': self.GF}
 
+        if hasattr(self, 'LL_saturated'):
+            res_dict['LL_saturated'] = self.LL_saturated
+            res_dict['D_scaled'] = self.D_scaled
+
         prefix = 'overall'
-        save_results_db(res_dict, prefix, self.model, self.claim_type)
+        try:
+            save_results_db(res_dict, prefix, self.extended_model, self.claim_type)
+        except:
+            save_results_db(res_dict, prefix, self.model, self.claim_type)
 
-        # Cell results:
-        prefix = 'grouped'
-        save_results_pkl(self.cell_res, prefix, self.model, self.claim_type)
+        if grouped == 'yes':
+            prefix = 'grouped'
+            try:
+                save_results_pkl(self.cell_res, prefix, self.extended_model, self.claim_type)
+            except:
+                save_results_pkl(self.cell_res, prefix, self.model, self.claim_type)
 
-        # Individual results:
-        prefix = 'individual'
-        save_results_pkl(self.ind_res, prefix, self.model, self.claim_type)
+        if individual == 'yes':
+            prefix = 'individual'
+            try:
+                save_results_pkl(self.ind_res, prefix, self.extended_model, self.claim_type)
+            except:
+                save_results_pkl(self.ind_res, prefix, self.model, self.claim_type)
 
 
 
 if __name__ == '__main__':
-#    for model in ('Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian', 'Poisson', 'NB2'):
-    for model in ('LNormal',):
+    for model in ('Logit', 'Probit', 'C-loglog', 'LNormal', 'Gamma', 'InvGaussian', 'Poisson', 'NB2'):
         for claim_type in ('casco', 'rcd'):
-#            x = Estimation(model, claim_type)
-#            x.save_estimation_results()
-            y = Stdout(model, claim_type)
-            y.save_stdout_results()
+            for int_list in [(('veh_age', 'region'),), (('veh_age', 'sex'),), (('veh_age', 'bonus'),), (('veh_age', 'age'),), (('veh_age', 'cov'),), (('region', 'sex'),), (('region', 'bonus'),), (('region', 'age'),), (('region', 'cov'),), (('sex', 'bonus'),), (('sex', 'age'),), (('sex', 'cov'),), (('bonus', 'age'),), (('bonus', 'cov'),), (('age', 'cov'),), (('veh_age', 'region'), ('veh_age', 'sex'), ('veh_age', 'bonus'), ('veh_age', 'age'), ('veh_age', 'cov'), ('region', 'sex'), ('region', 'bonus'), ('region', 'age'), ('region', 'cov'), ('sex', 'bonus'), ('sex', 'age'), ('sex', 'cov'), ('bonus', 'age'), ('bonus', 'cov'), ('age', 'cov'))]:
+                x = Estimation(model, claim_type, interactions_list=int_list)
+                x.save_estimation_results()
+                y = Stdout(model, claim_type, interactions_list=int_list)
+                y.save_stdout_results()
