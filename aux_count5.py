@@ -2,7 +2,6 @@
 ## Auxiliary code for counting observations ##
 ##############################################
 
-
 import os
 import pickle
 import numpy as np
