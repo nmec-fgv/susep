@@ -8,7 +8,7 @@ import psycopg2
 conn = psycopg2.connect("dbname=susep user=ricardob")
 cur = conn.cursor()
 
-tables = ('14A', '14B', '15A', '15B', '16A', '16B')
+tables = ('08B', '09A', '09B', '10A', '10B', '11A', '11B', '12A', '12B', '13A', '13B', '14A', '14B', '15A', '15B', '16A', '16B')
 
 sql_code = r'''
 DROP TABLE IF EXISTS s_auto_:xxx;
