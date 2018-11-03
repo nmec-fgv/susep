@@ -895,6 +895,6 @@ if __name__ == '__main__':
             for claim_type in ('casco',):
                 for int_list in [(('veh_age', 'region'),), (('veh_age', 'sex'),), (('veh_age', 'bonus'),), (('veh_age', 'age'),), (('veh_age', 'cov'),), (('region', 'sex'),), (('region', 'bonus'),), (('region', 'age'),), (('region', 'cov'),), (('sex', 'bonus'),), (('sex', 'age'),), (('sex', 'cov'),), (('bonus', 'age'),), (('bonus', 'cov'),), (('age', 'cov'),), (('veh_age', 'region'), ('veh_age', 'sex'), ('veh_age', 'bonus'), ('veh_age', 'age'), ('veh_age', 'cov'), ('region', 'sex'), ('region', 'bonus'), ('region', 'age'), ('region', 'cov'), ('sex', 'bonus'), ('sex', 'age'), ('sex', 'cov'), ('bonus', 'age'), ('bonus', 'cov'), ('age', 'cov'))]:
                     x = Estimation(model, claim_type, interactions_list=int_list)
-                    #x.save_estimation_results()
+                    x.save_estimation_results()
                     y = Stdout(model, claim_type, interactions_list=int_list)
-                    #y.save_stdout_results()
+                    y.save_stdout_results()
